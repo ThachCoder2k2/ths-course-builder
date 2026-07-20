@@ -8,7 +8,7 @@ const LEVELS: Level[] = ['beginner', 'intermediate', 'advanced'];
 export default function LevelTabs() {
   return (
     <section>
-      <h2 className="mb-4 text-h2 text-primary">Khoá học theo cấp độ</h2>
+      <h2 className="mb-4 text-display-xs text-primary">Khoá học theo cấp độ</h2>
       <Tabs
         items={LEVELS.map((level) => ({
           id: level,

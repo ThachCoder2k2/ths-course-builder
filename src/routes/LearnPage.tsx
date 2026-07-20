@@ -59,7 +59,7 @@ export default function LearnPage() {
 
           <div className="mx-auto max-w-3xl px-4 py-6">
             <p className="text-sm text-tertiary">{currentLesson.section.title}</p>
-            <h1 className="mt-1 text-h2 text-primary">{currentLesson.lesson.title}</h1>
+            <h1 className="mt-1 text-display-xs text-primary">{currentLesson.lesson.title}</h1>
 
             <div className="mt-5 flex flex-wrap gap-3">
               <Button

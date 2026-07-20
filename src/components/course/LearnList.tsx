@@ -3,7 +3,7 @@ import { Check } from 'lucide-react';
 export default function LearnList({ points }: { points: string[] }) {
   return (
     <section>
-      <h2 className="mb-4 text-h2 text-primary">Bạn sẽ học được gì?</h2>
+      <h2 className="mb-4 text-display-xs text-primary">Bạn sẽ học được gì?</h2>
       <ul className="grid gap-3 sm:grid-cols-2">
         {points.map((point) => (
           <li key={point} className="flex gap-3">

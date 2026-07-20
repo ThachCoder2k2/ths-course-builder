@@ -5,7 +5,7 @@ import type { Instructor } from '../../mock/types';
 export default function InstructorCard({ instructor }: { instructor: Instructor }) {
   return (
     <Card className="p-6">
-      <h2 className="text-h3 text-primary">Giảng viên</h2>
+      <h2 className="text-lg font-semibold text-primary">Giảng viên</h2>
       <div className="mt-4 flex items-center gap-3">
         <Avatar name={instructor.name} src={instructor.avatar} size="lg" />
         <div>

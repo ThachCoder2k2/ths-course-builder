@@ -17,7 +17,7 @@ export default function CourseHero({ course }: { course: Course }) {
   return (
     <section className="overflow-hidden rounded-card bg-gradient-to-br from-canvas-dark via-canvas-deep to-brand-900 px-6 py-10 sm:px-10">
       <p className="text-sm font-semibold uppercase tracking-wider text-white/60">Khoá học</p>
-      <h1 className="mt-3 max-w-3xl text-h1 text-white">{course.title}</h1>
+      <h1 className="mt-3 max-w-3xl text-display-sm text-white">{course.title}</h1>
       <p className="mt-3 max-w-2xl text-white/70">{course.subtitle}</p>
 
       <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white/70">

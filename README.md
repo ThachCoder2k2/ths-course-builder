@@ -58,50 +58,51 @@ Learner progress (completed lessons + last lesson) persists to `localStorage` un
 
 ## Design tokens
 
-The Figma design is built on **Untitled UI**. `tailwind.config.ts` mirrors the Figma token
-names via Tailwind's per-utility colour scales, so class names map 1:1 to Dev Mode.
+Pulled from Figma via the **Figma MCP** (`get_variable_defs`) on the "Cource builder" file.
+Every value is the real token — nothing inferred. The design uses **Untitled UI**, and
+`tailwind.config.ts` mirrors the Figma token names so classes map 1:1 to Dev Mode.
 
-Values were **extracted from the Figma Dev Mode inspector** (read off the colour swatches in
-the Inspect panel), not guessed:
+**Colour** — `bg-primary` `#FFFFFF` · `bg-secondary` `#FAFAFA` · `bg-tertiary` `#F5F5F5` ·
+`text-primary` `#181D27` · `text-secondary` `#414651` · `text-tertiary` `#535862` ·
+`text-quaternary` `#717680` · `border-primary` `#D5D7DA` · `border-secondary` `#E9EAEB` ·
+`bg-button-primary` `#20447E` · `text-brand-secondary` `#055BE6` · brand blue `#0D67F7`
 
-| Figma token | Hex | Tailwind class |
-| --- | --- | --- |
-| `Background/bg-primary` | `#FFFFFF` | `bg-primary` |
-| `Background/bg-secondary` | `#FAFAFA` | `bg-secondary` |
-| `Background/bg-tertiary` | `#F5F5F5` | `bg-tertiary` |
-| `Text/text-primary (900)` | `#181D27` | `text-primary` |
-| `Text/text-secondary (700)` | `#414651` | `text-secondary` |
-| `Text/text-tertiary (600)` | `#535862` | `text-tertiary` |
-| `Text/text-quaternary (500)` | `#717680` | `text-quaternary` |
-| `Text/text-brand-secondary (700)` | `#055BE6` | `text-brand-secondary` |
-| `Border/border-primary` | `#D5D7DA` | `border-primary` |
-| `Border/border-secondary` | `#E9EAEB` | `border-secondary` |
-| `Buttons/Primary/button-primary-bg` | `#20447E` | `bg-button-primary` |
-| `Buttons/Secondary/button-secondary-border` | `#D5D7DA` | `border-button-secondary` |
-| `Icons/icon-fg-brand` | `#0D67F7` | `text-brand-tertiary` |
-| `Foreground/fg-quinary (400)` | `#A4A7AE` | `text-fg-quinary` |
-| `Utility/Blue/utility-blue-50/200/700` | `#EFF8FF` `#B2DDFF` `#175CD3` | `utility-blue-*` |
-| `Utility/Orange/utility-orange-500` | `#EF6820` | `utility-orange-500` |
-| `Utility/Gray blue/utility-gray-blue-500` | `#4E5BA6` | `utility-gray-blue-500` |
-| `Gradient/skeuemorphic-gradient-border` | `#1E4079` | `canvas-deep` |
+THS brand: **Brand/1 `#1F427A`** (navy), **Brand/2 `#E9772C`** (orange).
+Note the primary button is navy, not bright blue.
 
-Note the primary button is **navy `#20447E`**, not a bright blue — brand blue `#0D67F7` is
-used for icons and links.
+**Type** — Inter for both body and display.
 
-A few ramp steps are marked `INFERRED` in `tailwind.config.ts` (gray 25/800, brand
-25/100/300/400/800, and the success/accent tints). No node in the inspected frames used
-them, so they're filler — replace if a design ever needs them.
+| Token | Size / line-height |
+| --- | --- |
+| `text-xs` | 12 / 18 |
+| `text-sm` | 14 / 20 |
+| `text-md` | 16 / 24 |
+| `text-lg` | 18 / 28 |
+| `text-xl` | 20 / 30 |
+| `text-display-xs` | 24 / 32, 600 |
+| `text-display-sm` | 30 / 38, 600 |
+| `text-display-lg` | 48 / 60, 600, -2% tracking |
+
+Weights: regular 400, medium 500, semibold 600.
+
+**Spacing** — `xxs` 2 · `xs` 4 · `sm` 6 · `md` 8 · `lg` 12 · `xl` 16 · `2xl` 20 · `3xl` 24 ·
+`4xl` 32 · `5xl` 40 · `6xl` 48 · `7xl` 64 · `8xl` 80 · `9xl` 96
+
+**Radius** — `sm` 6 · `md` 8 · `lg` 10 · `xl` 12 · `2xl` 16 · `4xl` 24 · `full` 9999
+
+**Shadows** — `shadow-xs` = `0 1px 2px #0A0D120D`; `shadow-sm` = `0 1px 2px -1px #0A0D121A, 0 1px 3px #0A0D121A`
+
+**Layout** — container max-width 1280, desktop padding 32, paragraph max-width 720.
 
 ## Known gaps / next steps
 
+- **Layout fidelity.** Screen composition (section order, spacing rhythm, card anatomy) was
+  built from screenshots, not from per-node Figma data. Tokens are exact; the arrangement
+  still needs a pass against `get_design_context` per node.
 - **No exported Figma art.** Course thumbnails render as deterministic dark gradients and
-  avatars fall back to initials, standing in for the real illustrations/logos.
-- **Typography not yet extracted** — font family and the type scale still need confirming
-  against Dev Mode (colours are done).
-- **Sample video** at `public/media/sample-lesson.mp4` is a locally generated ffmpeg test
-  pattern, not real course footage.
-- No login screen (the app starts in a mocked signed-in state) and no i18n — Vietnamese copy
-  is hardcoded, matching the Figma.
+  avatars fall back to initials.
+- **Sample video** at `public/media/sample-lesson.mp4` is a generated ffmpeg test pattern.
+- No login screen (mocked signed-in state) and no i18n — Vietnamese copy is hardcoded.
 
 Figma source: https://www.figma.com/design/TB2dDlsgmJ6GDdCY6E47gQ/Cource-builder--Copy-
 

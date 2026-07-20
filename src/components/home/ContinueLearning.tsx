@@ -12,7 +12,7 @@ export default function ContinueLearning() {
 
   return (
     <section>
-      <h2 className="mb-4 text-h2 text-primary">Đang học</h2>
+      <h2 className="mb-4 text-display-xs text-primary">Đang học</h2>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {list.map((course) => {

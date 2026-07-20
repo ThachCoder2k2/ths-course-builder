@@ -9,7 +9,7 @@ export default function CollectionGrid() {
 
   return (
     <section>
-      <h2 className="mb-4 text-h2 text-primary">Bộ sưu tập</h2>
+      <h2 className="mb-4 text-display-xs text-primary">Bộ sưu tập</h2>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {collections.map((collection, index) => {
@@ -20,7 +20,7 @@ export default function CollectionGrid() {
 
           return (
             <article key={collection.id} className={'rounded-card p-6 ' + TONES[index % TONES.length]}>
-              <h3 className="text-h3 text-primary">{collection.title}</h3>
+              <h3 className="text-lg font-semibold text-primary">{collection.title}</h3>
               <p className="mt-2 text-sm text-secondary">{collection.description}</p>
 
               <ul className="mt-4 space-y-1">
