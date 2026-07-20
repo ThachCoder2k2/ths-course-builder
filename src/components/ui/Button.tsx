@@ -5,8 +5,8 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'inverse';
 type Size = 'sm' | 'md' | 'lg';
 
 const VARIANT: Record<Variant, string> = {
-  primary: 'bg-brand-600 text-white hover:bg-brand-700',
-  secondary: 'bg-brand-50 text-brand-secondary hover:bg-brand-100',
+  primary: 'bg-button-primary text-white hover:opacity-90',
+  secondary: 'bg-brand-50 text-brand-secondary hover:bg-brand-200',
   ghost: 'bg-transparent text-secondary hover:bg-secondary',
   inverse: 'bg-white text-primary hover:bg-brand-50',
 };

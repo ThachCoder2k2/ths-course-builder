@@ -1,48 +1,40 @@
 import type { Config } from 'tailwindcss';
 
 /**
- * Design tokens mirroring the Figma file's system.
+ * Design tokens extracted from the Figma file's Dev Mode inspector.
  *
- * The Figma design is built on **Untitled UI**, consumed from an external library
- * (the tokens are not defined locally in the file, so they cannot be read from its
- * Variables panel). Token NAMES below are taken verbatim from Figma Dev Mode.
- *
- * VERIFIED from Dev Mode:
- *   - Colors/Background/bg-primary            #FFFFFF
- *   - Gradient/skeuemorphic-gradient-border   #1E4079
- *
- * UNVERIFIED (standard Untitled UI ramps, inferred because the design uses
- * unmodified Untitled UI token names). Confirm against Dev Mode and correct here —
- * every value lives in this file only, so fixing one is a one-line change.
+ * The design is built on Untitled UI. Token names match Figma exactly.
+ * Values marked VERIFIED were read directly from Dev Mode swatches.
+ * Values marked INFERRED fill gaps in a ramp where no node in the inspected
+ * frames used that step — correct them if a design ever needs them.
  */
 
 const gray = {
-  25: '#FCFCFD',
-  50: '#F9FAFB',
-  100: '#F2F4F7',
-  200: '#EAECF0',
-  300: '#D0D5DD',
-  400: '#98A2B3',
-  500: '#667085',
-  600: '#475467',
-  700: '#344054',
-  800: '#1D2939',
-  900: '#101828',
+  25: '#FDFDFD', // INFERRED
+  50: '#FAFAFA', // VERIFIED bg-secondary
+  100: '#F5F5F5', // VERIFIED bg-tertiary
+  200: '#E9EAEB', // VERIFIED border-secondary
+  300: '#D5D7DA', // VERIFIED border-primary
+  400: '#A4A7AE', // VERIFIED fg-quinary (400)
+  500: '#717680', // VERIFIED text-quaternary (500)
+  600: '#535862', // VERIFIED text-tertiary (600)
+  700: '#414651', // VERIFIED text-secondary (700)
+  800: '#252B37', // INFERRED
+  900: '#181D27', // VERIFIED text-primary (900)
 };
 
-// Brand ramp is blue in this design (primary buttons, links, active tabs).
 const brand = {
-  25: '#F5FAFF',
-  50: '#EFF8FF',
-  100: '#D1E9FF',
-  200: '#B2DDFF',
-  300: '#84CAFF',
-  400: '#53B1FD',
-  500: '#2E90FA',
-  600: '#1570EF',
-  700: '#175CD3',
-  800: '#1849A9',
-  900: '#194185',
+  25: '#F5FAFF', // INFERRED
+  50: '#EFF8FF', // VERIFIED utility-blue-50
+  100: '#D1E9FF', // INFERRED
+  200: '#B2DDFF', // VERIFIED utility-blue-200
+  300: '#84CAFF', // INFERRED
+  400: '#53B1FD', // INFERRED
+  500: '#0D67F7', // VERIFIED icon-fg-brand / text-brand-tertiary_alt
+  600: '#055BE6', // VERIFIED text-brand-secondary (700)
+  700: '#175CD3', // VERIFIED utility-blue-700
+  800: '#1849A9', // INFERRED
+  900: '#20447E', // VERIFIED button-primary-bg
 };
 
 export default {
@@ -52,62 +44,61 @@ export default {
       colors: {
         gray,
         brand,
-        // Untitled UI utility colours referenced by the design
         utility: {
-          'blue-50': '#EFF8FF',
-          'blue-200': '#B2DDFF',
-          'blue-700': '#175CD3',
-          'gray-blue-500': '#4E5BA6',
-          'orange-500': '#EF6820',
+          'blue-50': '#EFF8FF', // VERIFIED
+          'blue-200': '#B2DDFF', // VERIFIED
+          'blue-700': '#175CD3', // VERIFIED
+          'gray-blue-500': '#4E5BA6', // VERIFIED
+          'orange-500': '#EF6820', // VERIFIED
         },
+        // INFERRED - no success/green token appeared in the inspected frames
         success: { 50: '#ECFDF3', 200: '#ABEFC6', 600: '#079455', 700: '#067647' },
-        // Dark surface used by course-card artwork and the course hero
-        canvas: { dark: '#101828', deep: '#1E4079' },
-        // Soft accent cards (collections / feature tiles)
+        canvas: {
+          dark: '#181D27', // VERIFIED (gray-900), used for dark card artwork
+          deep: '#1E4079', // VERIFIED skeuemorphic-gradient-border
+        },
+        // INFERRED soft tints for collection / feature tiles
         accent: { blue: '#EFF8FF', peach: '#FEF6EE', lavender: '#F4F3FF', mint: '#ECFDF3' },
       },
 
-      // Semantic tokens, named to match Figma exactly (bg-primary, text-tertiary, ...)
       backgroundColor: {
-        primary: '#FFFFFF',
-        'primary-alt': '#FFFFFF',
-        secondary: gray[50],
-        'secondary-alt': gray[50],
-        tertiary: gray[100],
-        'brand-solid': brand[600],
-        'button-primary': brand[600],
-        'button-primary-hover': brand[700],
-        'button-secondary': '#FFFFFF',
+        primary: '#FFFFFF', // VERIFIED bg-primary
+        'primary-alt': '#FFFFFF', // VERIFIED bg-primary_alt
+        secondary: '#FAFAFA', // VERIFIED bg-secondary
+        'secondary-alt': '#FAFAFA', // VERIFIED bg-secondary_alt
+        tertiary: '#F5F5F5', // VERIFIED bg-tertiary
+        'button-primary': '#20447E', // VERIFIED button-primary-bg
+        'button-secondary': '#FFFFFF', // VERIFIED button-secondary-bg
       },
       textColor: {
-        primary: gray[900],
-        secondary: gray[700],
-        tertiary: gray[600],
-        quaternary: gray[500],
-        placeholder: gray[500],
-        'brand-secondary': brand[700],
-        'brand-tertiary': brand[600],
-        'button-primary-fg': '#FFFFFF',
-        'button-secondary-fg': gray[700],
+        primary: '#181D27', // VERIFIED
+        secondary: '#414651', // VERIFIED
+        tertiary: '#535862', // VERIFIED
+        quaternary: '#717680', // VERIFIED
+        placeholder: '#717680', // VERIFIED
+        'brand-secondary': '#055BE6', // VERIFIED
+        'brand-tertiary': '#0D67F7', // VERIFIED text-brand-tertiary_alt
+        'button-primary-fg': '#FFFFFF', // VERIFIED
+        'button-secondary-fg': '#414651', // VERIFIED
+        'button-tertiary-fg': '#535862', // VERIFIED
+        'fg-quaternary': '#717680', // VERIFIED
+        'fg-quinary': '#A4A7AE', // VERIFIED
       },
       borderColor: {
-        primary: gray[300],
-        secondary: gray[200],
-        brand: brand[600],
-        'button-secondary': gray[300],
+        primary: '#D5D7DA', // VERIFIED border-primary
+        secondary: '#E9EAEB', // VERIFIED border-secondary
+        'button-secondary': '#D5D7DA', // VERIFIED button-secondary-border
+        brand: '#055BE6', // VERIFIED
       },
       divideColor: {
-        primary: gray[300],
-        secondary: gray[200],
-      },
-      ringColor: {
-        brand: brand[600],
+        primary: '#D5D7DA',
+        secondary: '#E9EAEB',
       },
 
       borderRadius: { card: '16px', pill: '999px', btn: '8px' },
       boxShadow: {
-        card: '0 1px 2px rgba(16,24,40,0.06), 0 8px 24px rgba(16,24,40,0.06)',
-        pop: '0 12px 32px rgba(16,24,40,0.12)',
+        card: '0 1px 2px rgba(24,29,39,0.06), 0 8px 24px rgba(24,29,39,0.06)',
+        pop: '0 12px 32px rgba(24,29,39,0.12)',
       },
       maxWidth: { content: '1280px' },
       fontSize: {

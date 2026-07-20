@@ -58,40 +58,50 @@ Learner progress (completed lessons + last lesson) persists to `localStorage` un
 
 ## Design tokens
 
-The Figma design is built on **Untitled UI**, using unmodified token names. `tailwind.config.ts`
-mirrors those names via Tailwind's per-utility colour scales, so class names match Figma directly:
+The Figma design is built on **Untitled UI**. `tailwind.config.ts` mirrors the Figma token
+names via Tailwind's per-utility colour scales, so class names map 1:1 to Dev Mode.
 
-| Figma token | Tailwind class |
-| --- | --- |
-| `Colors/Background/bg-primary` | `bg-primary` |
-| `Colors/Background/bg-secondary` | `bg-secondary` |
-| `Colors/Text/text-primary (900)` | `text-primary` |
-| `Colors/Text/text-secondary (700)` | `text-secondary` |
-| `Colors/Text/text-tertiary (600)` | `text-tertiary` |
-| `Colors/Border/border-secondary` | `border-secondary` |
-| `Components/Buttons/Primary/button-primary-bg` | `bg-button-primary` |
+Values were **extracted from the Figma Dev Mode inspector** (read off the colour swatches in
+the Inspect panel), not guessed:
 
-**Verified against Figma Dev Mode:**
+| Figma token | Hex | Tailwind class |
+| --- | --- | --- |
+| `Background/bg-primary` | `#FFFFFF` | `bg-primary` |
+| `Background/bg-secondary` | `#FAFAFA` | `bg-secondary` |
+| `Background/bg-tertiary` | `#F5F5F5` | `bg-tertiary` |
+| `Text/text-primary (900)` | `#181D27` | `text-primary` |
+| `Text/text-secondary (700)` | `#414651` | `text-secondary` |
+| `Text/text-tertiary (600)` | `#535862` | `text-tertiary` |
+| `Text/text-quaternary (500)` | `#717680` | `text-quaternary` |
+| `Text/text-brand-secondary (700)` | `#055BE6` | `text-brand-secondary` |
+| `Border/border-primary` | `#D5D7DA` | `border-primary` |
+| `Border/border-secondary` | `#E9EAEB` | `border-secondary` |
+| `Buttons/Primary/button-primary-bg` | `#20447E` | `bg-button-primary` |
+| `Buttons/Secondary/button-secondary-border` | `#D5D7DA` | `border-button-secondary` |
+| `Icons/icon-fg-brand` | `#0D67F7` | `text-brand-tertiary` |
+| `Foreground/fg-quinary (400)` | `#A4A7AE` | `text-fg-quinary` |
+| `Utility/Blue/utility-blue-50/200/700` | `#EFF8FF` `#B2DDFF` `#175CD3` | `utility-blue-*` |
+| `Utility/Orange/utility-orange-500` | `#EF6820` | `utility-orange-500` |
+| `Utility/Gray blue/utility-gray-blue-500` | `#4E5BA6` | `utility-gray-blue-500` |
+| `Gradient/skeuemorphic-gradient-border` | `#1E4079` | `canvas-deep` |
 
-- `bg-primary` = `#FFFFFF`
-- `skeuemorphic-gradient-border` = `#1E4079`
+Note the primary button is **navy `#20447E`**, not a bright blue — brand blue `#0D67F7` is
+used for icons and links.
 
-**Not yet verified.** Every other value is the *standard Untitled UI ramp*, inferred because the
-design uses unmodified Untitled UI token names — it is not extracted from the file. The variables
-live in an external Untitled UI library, not in this Figma file or the team library, so they can't
-be read from either Variables panel. To confirm them, a Figma account with a **Dev or Full seat**
-can run the Figma MCP `get_variable_defs` and return all ~40 tokens in one call. Corrections go in
-`tailwind.config.ts` only — one line per token.
+A few ramp steps are marked `INFERRED` in `tailwind.config.ts` (gray 25/800, brand
+25/100/300/400/800, and the success/accent tints). No node in the inspected frames used
+them, so they're filler — replace if a design ever needs them.
 
 ## Known gaps / next steps
 
-- **Colour values need confirming** (see above). Structure and naming are correct; exact hexes are inferred.
-- **No exported Figma art.** Course thumbnails render as deterministic dark gradients and avatars
-  fall back to initials, standing in for the real illustrations/logos.
-- **Sample video** at `public/media/sample-lesson.mp4` is a locally generated ffmpeg test pattern,
-  not real course footage.
-- No login screen (the app starts in a mocked signed-in state) and no i18n — Vietnamese copy is
-  hardcoded, matching the Figma.
+- **No exported Figma art.** Course thumbnails render as deterministic dark gradients and
+  avatars fall back to initials, standing in for the real illustrations/logos.
+- **Typography not yet extracted** — font family and the type scale still need confirming
+  against Dev Mode (colours are done).
+- **Sample video** at `public/media/sample-lesson.mp4` is a locally generated ffmpeg test
+  pattern, not real course footage.
+- No login screen (the app starts in a mocked signed-in state) and no i18n — Vietnamese copy
+  is hardcoded, matching the Figma.
 
 Figma source: https://www.figma.com/design/TB2dDlsgmJ6GDdCY6E47gQ/Cource-builder--Copy-
 

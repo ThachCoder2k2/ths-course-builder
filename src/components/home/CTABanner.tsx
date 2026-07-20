@@ -4,7 +4,7 @@ import Button from '../ui/Button';
 
 export default function CTABanner() {
   return (
-    <section className="overflow-hidden rounded-card bg-gradient-to-r from-brand-600 to-brand-900 px-6 py-8 sm:px-10 sm:py-10">
+    <section className="overflow-hidden rounded-card bg-gradient-to-r from-brand-900 to-brand-700 px-6 py-8 sm:px-10 sm:py-10">
       <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
         <div className="flex-1">
           <h2 className="text-h2 text-white">Thiết kế lộ trình học của riêng bạn</h2>
