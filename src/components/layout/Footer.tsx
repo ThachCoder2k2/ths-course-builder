@@ -1,73 +1,113 @@
 import { Link } from 'react-router-dom';
+import Logo from './Logo';
 
-const COLUMNS = [
+/**
+ * Figma: `Footer` (node 83:19101 / 177:3230) — type "Large 01".
+ * gap-7xl between blocks, pt-7xl / pb-6xl, 1280 container with 32px padding.
+ * Six flex-1 columns (min-w-128, gap-xl); headings Text sm/Semibold in
+ * text-quaternary, links Text md/Semibold in button-tertiary-fg with gap-lg.
+ *
+ * Figma's link labels are unreplaced Untitled UI boilerplate (Dribbble,
+ * AngelList, "© 2077 Untitled UI") so the structure is matched exactly while
+ * the copy is real.
+ */
+const COLUMNS: { title: string; links: { label: string; to: string; badge?: string }[] }[] = [
   {
-    title: 'Khoá học',
+    title: 'Sản phẩm',
     links: [
-      { label: 'Trí tuệ nhân tạo', to: '/topics/tri-tue-nhan-tao' },
-      { label: 'Khoa học dữ liệu', to: '/topics/khoa-hoc-du-lieu' },
-      { label: 'Tất cả khoá học', to: '/' },
+      { label: 'Khoá học', to: '/' },
+      { label: 'Lộ trình học', to: '/', badge: 'Mới' },
+      { label: 'Chủ đề', to: '/topics/tri-tue-nhan-tao' },
+      { label: 'Bảng giá', to: '/' },
+      { label: 'Cập nhật', to: '/' },
     ],
   },
   {
-    title: 'Về chúng tôi',
+    title: 'Về THS',
     links: [
       { label: 'Giới thiệu', to: '/' },
-      { label: 'Đội ngũ giảng viên', to: '/' },
       { label: 'Tuyển dụng', to: '/' },
-    ],
-  },
-  {
-    title: 'Hỗ trợ',
-    links: [
-      { label: 'Trung tâm trợ giúp', to: '/' },
-      { label: 'Câu hỏi thường gặp', to: '/' },
+      { label: 'Báo chí', to: '/' },
+      { label: 'Tin tức', to: '/' },
       { label: 'Liên hệ', to: '/' },
     ],
   },
   {
-    title: 'Điều khoản',
+    title: 'Tài nguyên',
     links: [
-      { label: 'Điều khoản sử dụng', to: '/' },
-      { label: 'Chính sách bảo mật', to: '/' },
+      { label: 'Blog', to: '/' },
+      { label: 'Bản tin', to: '/' },
+      { label: 'Sự kiện', to: '/' },
+      { label: 'Trung tâm trợ giúp', to: '/' },
+      { label: 'Hướng dẫn', to: '/' },
+      { label: 'Hỗ trợ', to: '/' },
+    ],
+  },
+  {
+    title: 'Đối tượng',
+    links: [
+      { label: 'Cá nhân', to: '/' },
+      { label: 'Doanh nghiệp', to: '/' },
+      { label: 'Trường học', to: '/' },
+      { label: 'Tổ chức', to: '/' },
+    ],
+  },
+  {
+    title: 'Mạng xã hội',
+    links: [
+      { label: 'Facebook', to: '/' },
+      { label: 'LinkedIn', to: '/' },
+      { label: 'YouTube', to: '/' },
+      { label: 'TikTok', to: '/' },
+    ],
+  },
+  {
+    title: 'Pháp lý',
+    links: [
+      { label: 'Điều khoản', to: '/' },
+      { label: 'Bảo mật', to: '/' },
+      { label: 'Cookie', to: '/' },
+      { label: 'Giấy phép', to: '/' },
+      { label: 'Cài đặt', to: '/' },
     ],
   },
 ];
 
 export default function Footer() {
   return (
-    <footer className="mt-16 border-t border-secondary bg-primary">
-      <div className="mx-auto max-w-content px-4 py-12">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="lg:col-span-1">
-            <div className="flex items-center gap-2 font-extrabold text-primary">
-              <span className="grid h-8 w-8 place-items-center rounded-btn bg-brand-600 text-sm text-white">GK</span>
-              THS Learning
-            </div>
-            <p className="mt-3 text-sm text-tertiary">
-              Nền tảng học trực tuyến giúp bạn xây dựng lộ trình học phù hợp với mục tiêu nghề nghiệp.
-            </p>
-          </div>
-
+    <footer className="flex w-full flex-col items-center gap-7xl overflow-hidden bg-primary pb-6xl pt-7xl">
+      <div className="flex w-full max-w-content flex-col gap-6xl px-4 lg:px-4xl">
+        <div className="flex w-full flex-wrap items-start gap-4xl">
           {COLUMNS.map((column) => (
-            <div key={column.title}>
-              <h3 className="text-sm font-bold text-primary">{column.title}</h3>
-              <ul className="mt-3 space-y-2">
+            <div key={column.title} className="flex min-w-[128px] flex-1 flex-col gap-xl">
+              <p className="w-full text-sm font-semibold text-quaternary">{column.title}</p>
+              <div className="flex w-full flex-col gap-lg">
                 {column.links.map((link) => (
-                  <li key={link.label}>
-                    <Link to={link.to} className="text-sm text-tertiary hover:text-brand-secondary">
+                  <div key={link.label} className="flex items-center gap-md">
+                    <Link
+                      to={link.to}
+                      className="text-md font-semibold text-button-tertiary-fg hover:text-brand-secondary"
+                    >
                       {link.label}
                     </Link>
-                  </li>
+                    {link.badge ? (
+                      <span className="inline-flex items-center rounded-sm border border-primary bg-primary px-sm py-xxs text-xs font-medium text-secondary shadow-xs">
+                        {link.badge}
+                      </span>
+                    ) : null}
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           ))}
         </div>
+      </div>
 
-        <p className="mt-10 border-t border-secondary pt-6 text-sm text-quaternary">
-          © 2026 THS Learning. Bản quyền thuộc về Techainer.
-        </p>
+      <div className="flex w-full max-w-content flex-col gap-4xl px-4 lg:px-4xl">
+        <div className="flex w-full flex-wrap items-center justify-between gap-y-[24px] border-t border-secondary pt-4xl">
+          <Logo />
+          <p className="text-md text-quaternary">© 2026 THS Learning. Bản quyền thuộc về Techainer.</p>
+        </div>
       </div>
     </footer>
   );
