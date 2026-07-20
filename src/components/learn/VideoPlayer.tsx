@@ -63,7 +63,7 @@ export default function VideoPlayer({
   };
 
   return (
-    <div ref={shellRef} className="relative bg-surface-card">
+    <div ref={shellRef} className="relative bg-canvas-dark">
       <video
         ref={videoRef}
         src={src}
@@ -78,7 +78,7 @@ export default function VideoPlayer({
         onClick={togglePlay}
       />
 
-      <div className="flex items-center gap-3 bg-surface-card px-4 py-3 text-white">
+      <div className="flex items-center gap-3 bg-canvas-dark px-4 py-3 text-white">
         <button
           type="button"
           onClick={togglePlay}
@@ -119,7 +119,7 @@ export default function VideoPlayer({
           className="shrink-0 rounded-btn bg-white/10 px-2 py-1 text-xs text-white outline-none"
         >
           {RATES.map((value) => (
-            <option key={value} value={value} className="text-ink-900">
+            <option key={value} value={value} className="text-primary">
               {value}x
             </option>
           ))}

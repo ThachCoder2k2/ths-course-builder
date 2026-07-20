@@ -23,15 +23,15 @@ export default function CourseDetailPage() {
       <div className="grid gap-10 lg:grid-cols-3">
         <div className="space-y-10 lg:col-span-2">
           <section>
-            <h2 className="mb-4 text-h2 text-ink-900">Giới thiệu khoá học</h2>
-            <p className="text-ink-700">{course.description}</p>
+            <h2 className="mb-4 text-h2 text-primary">Giới thiệu khoá học</h2>
+            <p className="text-secondary">{course.description}</p>
           </section>
 
           <LearnList points={course.learnPoints} />
           <SkillsList skills={course.skills} />
 
           <section>
-            <h2 className="mb-4 text-h2 text-ink-900">Nội dung khoá học</h2>
+            <h2 className="mb-4 text-h2 text-primary">Nội dung khoá học</h2>
             <CurriculumAccordion course={course} />
           </section>
         </div>

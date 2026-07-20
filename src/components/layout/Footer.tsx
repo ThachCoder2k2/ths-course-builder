@@ -36,26 +36,26 @@ const COLUMNS = [
 
 export default function Footer() {
   return (
-    <footer className="mt-16 border-t border-line bg-surface">
+    <footer className="mt-16 border-t border-secondary bg-primary">
       <div className="mx-auto max-w-content px-4 py-12">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-1">
-            <div className="flex items-center gap-2 font-extrabold text-ink-900">
+            <div className="flex items-center gap-2 font-extrabold text-primary">
               <span className="grid h-8 w-8 place-items-center rounded-btn bg-brand-600 text-sm text-white">GK</span>
               THS Learning
             </div>
-            <p className="mt-3 text-sm text-ink-500">
+            <p className="mt-3 text-sm text-tertiary">
               Nền tảng học trực tuyến giúp bạn xây dựng lộ trình học phù hợp với mục tiêu nghề nghiệp.
             </p>
           </div>
 
           {COLUMNS.map((column) => (
             <div key={column.title}>
-              <h3 className="text-sm font-bold text-ink-900">{column.title}</h3>
+              <h3 className="text-sm font-bold text-primary">{column.title}</h3>
               <ul className="mt-3 space-y-2">
                 {column.links.map((link) => (
                   <li key={link.label}>
-                    <Link to={link.to} className="text-sm text-ink-500 hover:text-brand-700">
+                    <Link to={link.to} className="text-sm text-tertiary hover:text-brand-secondary">
                       {link.label}
                     </Link>
                   </li>
@@ -65,7 +65,7 @@ export default function Footer() {
           ))}
         </div>
 
-        <p className="mt-10 border-t border-line pt-6 text-sm text-ink-400">
+        <p className="mt-10 border-t border-secondary pt-6 text-sm text-quaternary">
           © 2026 THS Learning. Bản quyền thuộc về Techainer.
         </p>
       </div>

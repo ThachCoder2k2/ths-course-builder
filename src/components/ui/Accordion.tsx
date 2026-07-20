@@ -28,7 +28,7 @@ export default function Accordion({
     });
 
   return (
-    <div className={cn('divide-y divide-line overflow-hidden rounded-card border border-line bg-surface', className)}>
+    <div className={cn('divide-y divide-secondary overflow-hidden rounded-card border border-secondary bg-primary', className)}>
       {items.map((item) => {
         const isOpen = open.has(item.id);
         return (
@@ -37,11 +37,11 @@ export default function Accordion({
               type="button"
               onClick={() => toggle(item.id)}
               aria-expanded={isOpen}
-              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left hover:bg-surface-muted"
+              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left hover:bg-secondary"
             >
-              <span className="font-semibold text-ink-900">{item.header}</span>
+              <span className="font-semibold text-primary">{item.header}</span>
               <ChevronDown
-                className={cn('h-5 w-5 shrink-0 text-ink-500 transition-transform', isOpen && 'rotate-180')}
+                className={cn('h-5 w-5 shrink-0 text-tertiary transition-transform', isOpen && 'rotate-180')}
                 aria-hidden="true"
               />
             </button>

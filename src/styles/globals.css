@@ -16,6 +16,6 @@ body,
 }
 
 body {
-  @apply bg-surface-muted text-ink-900 antialiased;
+  @apply bg-secondary text-primary antialiased;
   font-family: 'Inter', system-ui, sans-serif;
 }

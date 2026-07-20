@@ -51,15 +51,15 @@ export default function LearnPage() {
           course={course}
           activeLessonId={currentLesson.lesson.id}
           progress={progress}
-          className="hidden w-80 shrink-0 overflow-y-auto border-r border-line lg:block"
+          className="hidden w-80 shrink-0 overflow-y-auto border-r border-secondary lg:block"
         />
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <VideoPlayer src={currentLesson.lesson.videoUrl} onEnded={handleEnded} />
 
           <div className="mx-auto max-w-3xl px-4 py-6">
-            <p className="text-sm text-ink-500">{currentLesson.section.title}</p>
-            <h1 className="mt-1 text-h2 text-ink-900">{currentLesson.lesson.title}</h1>
+            <p className="text-sm text-tertiary">{currentLesson.section.title}</p>
+            <h1 className="mt-1 text-h2 text-primary">{currentLesson.lesson.title}</h1>
 
             <div className="mt-5 flex flex-wrap gap-3">
               <Button
@@ -85,7 +85,7 @@ export default function LearnPage() {
 
         <LessonPanel
           lesson={currentLesson.lesson}
-          className="hidden w-96 shrink-0 overflow-y-auto border-l border-line xl:block"
+          className="hidden w-96 shrink-0 overflow-y-auto border-l border-secondary xl:block"
         />
       </div>
 

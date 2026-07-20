@@ -6,7 +6,7 @@ export default function IconButton({ className, ...props }: ButtonHTMLAttributes
     <button
       type="button"
       className={cn(
-        'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-btn text-ink-700 transition-colors hover:bg-surface-muted',
+        'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-btn text-secondary transition-colors hover:bg-secondary',
         className,
       )}
       {...props}

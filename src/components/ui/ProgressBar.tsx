@@ -8,7 +8,7 @@ export default function ProgressBar({ value, className }: { value: number; class
       aria-valuenow={safe}
       aria-valuemin={0}
       aria-valuemax={100}
-      className={cn('h-2 w-full overflow-hidden rounded-pill bg-line', className)}
+      className={cn('h-2 w-full overflow-hidden rounded-pill bg-gray-200', className)}
     >
       <div className="h-full rounded-pill bg-brand-600 transition-all" style={{ width: safe + '%' }} />
     </div>

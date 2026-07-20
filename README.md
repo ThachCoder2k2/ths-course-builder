@@ -56,17 +56,42 @@ directly, so replacing that one module with real API calls is the only change ne
 Learner progress (completed lessons + last lesson) persists to `localStorage` under
 `progress:<courseId>`, so the prototype keeps its state across reloads.
 
+## Design tokens
+
+The Figma design is built on **Untitled UI**, using unmodified token names. `tailwind.config.ts`
+mirrors those names via Tailwind's per-utility colour scales, so class names match Figma directly:
+
+| Figma token | Tailwind class |
+| --- | --- |
+| `Colors/Background/bg-primary` | `bg-primary` |
+| `Colors/Background/bg-secondary` | `bg-secondary` |
+| `Colors/Text/text-primary (900)` | `text-primary` |
+| `Colors/Text/text-secondary (700)` | `text-secondary` |
+| `Colors/Text/text-tertiary (600)` | `text-tertiary` |
+| `Colors/Border/border-secondary` | `border-secondary` |
+| `Components/Buttons/Primary/button-primary-bg` | `bg-button-primary` |
+
+**Verified against Figma Dev Mode:**
+
+- `bg-primary` = `#FFFFFF`
+- `skeuemorphic-gradient-border` = `#1E4079`
+
+**Not yet verified.** Every other value is the *standard Untitled UI ramp*, inferred because the
+design uses unmodified Untitled UI token names — it is not extracted from the file. The variables
+live in an external Untitled UI library, not in this Figma file or the team library, so they can't
+be read from either Variables panel. To confirm them, a Figma account with a **Dev or Full seat**
+can run the Figma MCP `get_variable_defs` and return all ~40 tokens in one call. Corrections go in
+`tailwind.config.ts` only — one line per token.
+
 ## Known gaps / next steps
 
-- **Design tokens are eyeballed.** `tailwind.config.ts` holds approximate colors, type
-  scale, radii and shadows taken from the Figma screenshots. They still need to be
-  refined against Figma Dev Mode for pixel accuracy.
-- **No exported Figma art.** Course thumbnails render as deterministic dark gradients and
-  avatars fall back to initials, standing in for the real illustrations/logos.
-- **Sample video** at `public/media/sample-lesson.mp4` is a locally generated ffmpeg test
-  pattern, not real course footage.
-- No login screen (the app starts in a mocked signed-in state) and no i18n — Vietnamese
-  copy is hardcoded, matching the Figma.
+- **Colour values need confirming** (see above). Structure and naming are correct; exact hexes are inferred.
+- **No exported Figma art.** Course thumbnails render as deterministic dark gradients and avatars
+  fall back to initials, standing in for the real illustrations/logos.
+- **Sample video** at `public/media/sample-lesson.mp4` is a locally generated ffmpeg test pattern,
+  not real course footage.
+- No login screen (the app starts in a mocked signed-in state) and no i18n — Vietnamese copy is
+  hardcoded, matching the Figma.
 
 Figma source: https://www.figma.com/design/TB2dDlsgmJ6GDdCY6E47gQ/Cource-builder--Copy-
 

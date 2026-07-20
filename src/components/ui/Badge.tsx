@@ -4,8 +4,8 @@ import { cn } from '../../lib/cn';
 type Tone = 'neutral' | 'brand' | 'success';
 
 const TONE: Record<Tone, string> = {
-  neutral: 'bg-surface-muted text-ink-700',
-  brand: 'bg-brand-50 text-brand-700',
+  neutral: 'bg-secondary text-secondary',
+  brand: 'bg-brand-50 text-brand-secondary',
   success: 'bg-success-50 text-success-600',
 };
 

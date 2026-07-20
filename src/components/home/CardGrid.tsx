@@ -15,9 +15,9 @@ export default function CardGrid({
     <section>
       {title ? (
         <div className="mb-4 flex items-end justify-between gap-4">
-          <h2 className="text-h2 text-ink-900">{title}</h2>
+          <h2 className="text-h2 text-primary">{title}</h2>
           {viewAllTo ? (
-            <Link to={viewAllTo} className="shrink-0 text-sm font-semibold text-brand-700 hover:underline">
+            <Link to={viewAllTo} className="shrink-0 text-sm font-semibold text-brand-secondary hover:underline">
               Xem tất cả
             </Link>
           ) : null}

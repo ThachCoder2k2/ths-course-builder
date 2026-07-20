@@ -21,7 +21,7 @@ export default function Tabs({
 
   return (
     <div className={className}>
-      <div role="tablist" className="flex gap-6 overflow-x-auto border-b border-line">
+      <div role="tablist" className="flex gap-6 overflow-x-auto border-b border-secondary">
         {items.map((tab) => (
           <button
             key={tab.id}
@@ -32,8 +32,8 @@ export default function Tabs({
             className={cn(
               '-mb-px whitespace-nowrap border-b-2 pb-3 text-sm font-semibold transition-colors',
               active === tab.id
-                ? 'border-brand-600 text-brand-700'
-                : 'border-transparent text-ink-500 hover:text-ink-700',
+                ? 'border-brand-600 text-brand-secondary'
+                : 'border-transparent text-tertiary hover:text-secondary',
             )}
           >
             {tab.label}

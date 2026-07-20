@@ -28,8 +28,8 @@ export default function MobileNavDrawer({ open, onClose }: { open: boolean; onCl
               end={link.to === '/'}
               className={({ isActive }) =>
                 cn(
-                  'rounded-btn px-3 py-2 text-sm font-semibold text-ink-700 hover:bg-surface-muted',
-                  isActive && 'bg-brand-50 text-brand-700',
+                  'rounded-btn px-3 py-2 text-sm font-semibold text-secondary hover:bg-secondary',
+                  isActive && 'bg-brand-50 text-brand-secondary',
                 )
               }
             >

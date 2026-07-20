@@ -12,7 +12,7 @@ export default function ContinueLearning() {
 
   return (
     <section>
-      <h2 className="mb-4 text-h2 text-ink-900">Đang học</h2>
+      <h2 className="mb-4 text-h2 text-primary">Đang học</h2>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {list.map((course) => {
@@ -24,7 +24,7 @@ export default function ContinueLearning() {
           return (
             <article
               key={course.id}
-              className="flex flex-col overflow-hidden rounded-card border border-line bg-surface shadow-card"
+              className="flex flex-col overflow-hidden rounded-card border border-secondary bg-primary shadow-card"
             >
               <div className={cn('aspect-[16/7] bg-gradient-to-br p-4', courseGradient(course.id))}>
                 <p className="line-clamp-2 text-sm font-bold text-white">{course.title}</p>
@@ -32,11 +32,11 @@ export default function ContinueLearning() {
 
               <div className="flex flex-1 flex-col gap-3 p-4">
                 <div>
-                  <div className="mb-2 flex items-center justify-between text-xs text-ink-500">
+                  <div className="mb-2 flex items-center justify-between text-xs text-tertiary">
                     <span>
                       {progress.completedLessonIds.length}/{lessons.length} bài học
                     </span>
-                    <span className="font-semibold text-brand-700">{percent}%</span>
+                    <span className="font-semibold text-brand-secondary">{percent}%</span>
                   </div>
                   <ProgressBar value={percent} />
                 </div>
