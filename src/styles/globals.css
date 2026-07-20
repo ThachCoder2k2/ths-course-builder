@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+/* NOTE: confirm exact family from Figma Dev Mode (candidate: Be Vietnam Pro). */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-surface-muted text-ink-900 antialiased;
+  font-family: 'Inter', system-ui, sans-serif;
+}
