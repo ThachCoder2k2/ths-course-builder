@@ -18,7 +18,7 @@ describe('DashboardPage', () => {
     renderDashboard();
     expect(screen.getByTestId('page-dashboard')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Đang học' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Khoá học theo cấp độ' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Học theo cấp độ' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Khoá học nổi bật' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Bộ sưu tập' })).toBeInTheDocument();
   });
