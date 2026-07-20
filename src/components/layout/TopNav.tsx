@@ -1,61 +1,92 @@
 import { Link, NavLink } from 'react-router-dom';
-import { Bell, Menu, Search } from 'lucide-react';
-import Input from '../ui/Input';
+import { Menu, Search } from 'lucide-react';
 import Avatar from '../ui/Avatar';
 import IconButton from '../ui/IconButton';
-import { getUser } from '../../mock';
+import NavDropdown from './NavDropdown';
+import { getTopics, getUser } from '../../mock';
 import { cn } from '../../lib/cn';
 
+// Used by MobileNavDrawer; desktop uses the dropdowns below.
 export const NAV_LINKS = [
   { to: '/', label: 'Trang chủ' },
   { to: '/topics/tri-tue-nhan-tao', label: 'Trí tuệ nhân tạo' },
   { to: '/topics/khoa-hoc-du-lieu', label: 'Khoa học dữ liệu' },
 ];
 
+/**
+ * Figma: `Dropdown header navigation` (node 182:11785), 76px tall.
+ * A floating nav card (radius-2xl, border-secondary, shadow-xs) inside a
+ * 1280 container with 32px padding and 12px top offset.
+ */
 export default function TopNav({ onOpenMenu }: { onOpenMenu?: () => void }) {
   const user = getUser();
+  const topics = getTopics();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-secondary bg-primary/95 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-content items-center gap-3 px-4">
-        <IconButton className="md:hidden" aria-label="Mở menu" onClick={onOpenMenu}>
-          <Menu className="h-5 w-5" />
-        </IconButton>
-
-        <Link to="/" className="flex items-center gap-2 font-extrabold text-primary">
-          <span className="grid h-8 w-8 place-items-center rounded-btn bg-brand-600 text-sm text-white">GK</span>
-          <span className="hidden sm:inline">THS Learning</span>
-        </Link>
-
-        <nav className="hidden items-center gap-1 md:flex">
-          {NAV_LINKS.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              end={link.to === '/'}
-              className={({ isActive }) =>
-                cn(
-                  'rounded-btn px-3 py-2 text-sm font-semibold text-secondary transition-colors hover:bg-secondary',
-                  isActive && 'text-brand-secondary',
-                )
-              }
-            >
-              {link.label}
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="ml-auto flex items-center gap-2">
-          <Input
-            className="hidden w-56 lg:flex xl:w-72"
-            placeholder="Tìm khoá học..."
-            aria-label="Tìm khoá học"
-            icon={<Search className="h-4 w-4" />}
-          />
-          <IconButton aria-label="Thông báo">
-            <Bell className="h-5 w-5" />
+    <header className="sticky top-0 z-40 pt-lg">
+      <div className="mx-auto flex w-full max-w-content items-center justify-center px-4 lg:px-4xl">
+        <div className="flex h-16 flex-1 items-center justify-between gap-xl rounded-2xl border border-secondary bg-primary pl-xl pr-lg shadow-xs">
+          {/* mobile trigger */}
+          <IconButton className="lg:hidden" aria-label="Mở menu" onClick={onOpenMenu}>
+            <Menu className="h-5 w-5" />
           </IconButton>
-          <Avatar name={user.name} src={user.avatar} size="sm" />
+
+          {/* Figma: Sub-menu — two dropdown triggers, gap 20px */}
+          <nav className="hidden items-center gap-[20px] lg:flex">
+            <NavDropdown label="Chủ đề">
+              <ul className="flex flex-col">
+                {topics.map((topic) => (
+                  <li key={topic.id}>
+                    <NavLink
+                      to={'/topics/' + topic.slug}
+                      className={({ isActive }) =>
+                        cn(
+                          'block rounded-md px-lg py-md text-md text-secondary hover:bg-secondary',
+                          isActive && 'text-brand-secondary',
+                        )
+                      }
+                    >
+                      {topic.title}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </NavDropdown>
+
+            <NavDropdown label="Học tập của tôi">
+              <ul className="flex flex-col">
+                <li>
+                  <Link to="/" className="block rounded-md px-lg py-md text-md text-secondary hover:bg-secondary">
+                    Khoá học của tôi
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/" className="block rounded-md px-lg py-md text-md text-secondary hover:bg-secondary">
+                    Tiến độ học tập
+                  </Link>
+                </li>
+              </ul>
+            </NavDropdown>
+          </nav>
+
+          {/* Figma: Input dropdown — 480px, radius-md, border-primary, shadow-xs */}
+          <label className="flex h-10 flex-1 items-center gap-md rounded-md border border-primary bg-primary px-lg shadow-xs lg:max-w-[480px]">
+            <Search className="h-5 w-5 shrink-0 text-quaternary" aria-hidden="true" />
+            <input
+              type="search"
+              aria-label="Tìm khoá học"
+              placeholder="Hôm nay bạn muốn tìm hiểu chủ đề gì?"
+              className="w-full bg-transparent text-md text-primary outline-none placeholder:text-placeholder"
+            />
+          </label>
+
+          {/* Figma: NavigationActions — 40px avatar with contrast border */}
+          <Avatar
+            name={user.name}
+            src={user.avatar}
+            size="lg"
+            className="h-10 w-10 shrink-0 border-[0.75px] border-[rgba(0,0,0,0.08)] text-sm"
+          />
         </div>
       </div>
     </header>

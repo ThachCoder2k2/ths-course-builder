@@ -143,12 +143,11 @@ to pull icons/illustrations into `src/assets/` permanently.
 
 ---
 
-## Open questions for the user
+## Decisions (confirmed)
 
-1. **Scope** — is Phase 5 in or out? The homepage and the extra Học variants were never in
-   the original brief ("4 screens"), and they roughly double the work.
-2. **Responsive** — Figma only defines 1920px desktop frames. Current build is responsive
-   down to 375px, which is invention. Keep the invented breakpoints, or desktop-only?
-3. **Assets** — OK to download Figma icons/illustrations into `src/assets/`?
-4. **Fidelity bar** — pixel-exact at 1920px, or structurally faithful with our tokens and
-   fluid widths?
+1. **Scope** — the **4 existing screens only**. Trang chủ, Desktop and the extra Học
+   variants are out of scope. Phase 5 is dropped.
+2. **Responsive** — **match Figma exactly at 1920px, and keep the responsive behaviour**
+   below it. Breakpoints under 1280px remain our invention (Figma defines none).
+3. **Assets** — **download** Figma icons/illustrations into `src/assets/` (approved).
+4. **Fidelity bar** — desktop-exact.
