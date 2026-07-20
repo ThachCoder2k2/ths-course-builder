@@ -94,3 +94,13 @@ export function sectionDurationMin(section: Section): number {
 }
 
 export type { Course, Level, Topic, Lesson, Section };
+
+/** Total runtime of a course, summed from its lessons. */
+export function courseMinutes(course: Course): number {
+  return flattenLessons(course).reduce((n, f) => n + f.lesson.durationMin, 0);
+}
+
+/** Mock experience points; Figma shows an "exp" badge but carries no such field. */
+export function courseExp(course: Course): number {
+  return course.lessonCount * 100;
+}

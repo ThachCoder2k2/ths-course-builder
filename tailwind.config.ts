@@ -94,6 +94,7 @@ export default {
         xl: ['20px', { lineHeight: '30px' }],
         'display-xs': ['24px', { lineHeight: '32px', fontWeight: '600' }],
         'display-sm': ['30px', { lineHeight: '38px', fontWeight: '600' }],
+        'display-md': ['36px', { lineHeight: '44px', letterSpacing: '-0.02em', fontWeight: '600' }],
         'display-lg': ['48px', { lineHeight: '60px', letterSpacing: '-0.02em', fontWeight: '600' }],
       },
 
