@@ -105,7 +105,7 @@ export default function ListingColumns({
                   </div>
 
                   <div className="flex items-center gap-md">
-                    <IconBadge icon={<Star className="h-3 w-3 fill-current" />}>{item.exp}</IconBadge>
+                    <IconBadge icon={<Star className="h-3 w-3 text-utility-orange-500" />}>{item.exp}</IconBadge>
                     <IconBadge icon={<Clock className="h-3 w-3" />}>{item.duration}</IconBadge>
                   </div>
 

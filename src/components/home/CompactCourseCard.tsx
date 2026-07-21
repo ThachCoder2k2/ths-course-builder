@@ -27,7 +27,7 @@ export default function CompactCourseCard({ course }: { course: Course }) {
                 {course.title}
               </h3>
               <div className="flex items-center gap-md">
-                <IconBadge icon={<Star className="h-3 w-3 fill-current" />}>
+                <IconBadge icon={<Star className="h-3 w-3 text-utility-orange-500" />}>
                   +{courseExp(course)} exp
                 </IconBadge>
                 <IconBadge icon={<Clock className="h-3 w-3" />}>
