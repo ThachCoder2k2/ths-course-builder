@@ -70,7 +70,7 @@ export default function VideoPlayer({
         ref={videoRef}
         src={src}
         poster={poster}
-        className="mx-auto min-h-0 w-full max-w-[1348px] flex-1 bg-black object-contain"
+        className="mx-auto min-h-0 w-full max-w-[1348px] flex-1 rounded-md bg-black object-contain"
         onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)}
         onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
         onEnded={() => {
