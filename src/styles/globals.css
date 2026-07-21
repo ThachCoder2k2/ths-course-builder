@@ -16,6 +16,7 @@ body,
 }
 
 body {
-  @apply bg-secondary text-primary antialiased;
+  /* Figma frames (177:2981 et al.) sit on bg-primary/white, not grey. */
+  @apply bg-primary text-primary antialiased;
   font-family: 'Inter', system-ui, sans-serif;
 }
