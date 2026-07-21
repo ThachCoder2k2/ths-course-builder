@@ -7,68 +7,75 @@ import Logo from './Logo';
  * Six flex-1 columns (min-w-128, gap-xl); headings Text sm/Semibold in
  * text-quaternary, links Text md/Semibold in button-tertiary-fg with gap-lg.
  *
- * Figma's link labels are unreplaced Untitled UI boilerplate (Dribbble,
- * AngelList, "© 2077 Untitled UI") so the structure is matched exactly while
- * the copy is real.
+ * Column labels, links and the copyright are reproduced verbatim from Figma
+ * (the unreplaced Untitled UI boilerplate). Only the logo stays the real THS
+ * mark — Figma's "GK Books" placeholder logo has no exportable asset.
  */
 const COLUMNS: { title: string; links: { label: string; to: string; badge?: string }[] }[] = [
   {
-    title: 'Sản phẩm',
+    title: 'Product',
     links: [
-      { label: 'Khoá học', to: '/' },
-      { label: 'Lộ trình học', to: '/', badge: 'Mới' },
-      { label: 'Chủ đề', to: '/topics/tri-tue-nhan-tao' },
-      { label: 'Bảng giá', to: '/' },
-      { label: 'Cập nhật', to: '/' },
+      { label: 'Overview', to: '/' },
+      { label: 'Features', to: '/' },
+      { label: 'Solutions', to: '/', badge: 'New' },
+      { label: 'Tutorials', to: '/' },
+      { label: 'Pricing', to: '/' },
+      { label: 'Releases', to: '/' },
     ],
   },
   {
-    title: 'Về THS',
+    title: 'Company',
     links: [
-      { label: 'Giới thiệu', to: '/' },
-      { label: 'Tuyển dụng', to: '/' },
-      { label: 'Báo chí', to: '/' },
-      { label: 'Tin tức', to: '/' },
-      { label: 'Liên hệ', to: '/' },
+      { label: 'About us', to: '/' },
+      { label: 'Careers', to: '/' },
+      { label: 'Press', to: '/' },
+      { label: 'News', to: '/' },
+      { label: 'Media kit', to: '/' },
+      { label: 'Contact', to: '/' },
     ],
   },
   {
-    title: 'Tài nguyên',
+    title: 'Resources',
     links: [
       { label: 'Blog', to: '/' },
-      { label: 'Bản tin', to: '/' },
-      { label: 'Sự kiện', to: '/' },
-      { label: 'Trung tâm trợ giúp', to: '/' },
-      { label: 'Hướng dẫn', to: '/' },
-      { label: 'Hỗ trợ', to: '/' },
+      { label: 'Newsletter', to: '/' },
+      { label: 'Events', to: '/' },
+      { label: 'Help centre', to: '/' },
+      { label: 'Tutorials', to: '/' },
+      { label: 'Support', to: '/' },
     ],
   },
   {
-    title: 'Đối tượng',
+    title: 'Use cases',
     links: [
-      { label: 'Cá nhân', to: '/' },
-      { label: 'Doanh nghiệp', to: '/' },
-      { label: 'Trường học', to: '/' },
-      { label: 'Tổ chức', to: '/' },
+      { label: 'Startups', to: '/' },
+      { label: 'Enterprise', to: '/' },
+      { label: 'Government', to: '/' },
+      { label: 'SaaS centre', to: '/' },
+      { label: 'Marketplaces', to: '/' },
+      { label: 'Ecommerce', to: '/' },
     ],
   },
   {
-    title: 'Mạng xã hội',
+    title: 'Social',
     links: [
-      { label: 'Facebook', to: '/' },
+      { label: 'Twitter', to: '/' },
       { label: 'LinkedIn', to: '/' },
-      { label: 'YouTube', to: '/' },
-      { label: 'TikTok', to: '/' },
+      { label: 'Facebook', to: '/' },
+      { label: 'GitHub', to: '/' },
+      { label: 'AngelList', to: '/' },
+      { label: 'Dribbble', to: '/' },
     ],
   },
   {
-    title: 'Pháp lý',
+    title: 'Legal',
     links: [
-      { label: 'Điều khoản', to: '/' },
-      { label: 'Bảo mật', to: '/' },
-      { label: 'Cookie', to: '/' },
-      { label: 'Giấy phép', to: '/' },
-      { label: 'Cài đặt', to: '/' },
+      { label: 'Terms', to: '/' },
+      { label: 'Privacy', to: '/' },
+      { label: 'Cookies', to: '/' },
+      { label: 'Licenses', to: '/' },
+      { label: 'Settings', to: '/' },
+      { label: 'Contact', to: '/' },
     ],
   },
 ];
@@ -106,7 +113,7 @@ export default function Footer() {
       <div className="flex w-full max-w-content flex-col gap-4xl px-4 lg:px-4xl">
         <div className="flex w-full flex-wrap items-center justify-between gap-y-[24px] border-t border-secondary pt-4xl">
           <Logo />
-          <p className="text-md text-quaternary">© 2026 THS Learning. Bản quyền thuộc về Techainer.</p>
+          <p className="w-[293px] text-md text-quaternary">© 2077 Untitled UI. All rights reserved.</p>
         </div>
       </div>
     </footer>
