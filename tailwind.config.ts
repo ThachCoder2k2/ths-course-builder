@@ -148,6 +148,8 @@ export default {
         sm: '0 1px 2px -1px #0A0D121A, 0 1px 3px 0 #0A0D121A',
         card: '0 1px 2px 0 #0A0D120D',
         pop: '0 1px 2px -1px #0A0D121A, 0 1px 3px 0 #0A0D121A',
+        // Shadows/shadow-lg — the floating chatbot FAB (node 211:9764).
+        lg: '0 12px 16px -4px #0A0D1214, 0 4px 6px -2px #0A0D1208, 0 2px 2px -1px #0A0D120A',
 
         // Figma draws frame strokes *inside* the frame, so a 1px stroke does not
         // grow the box. A CSS `border` does. These pair shadow-xs with an inset

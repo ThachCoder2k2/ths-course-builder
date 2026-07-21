@@ -1,16 +1,31 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { CheckCircle2, ChevronLeft, ChevronRight, ListVideo, MessageSquare } from 'lucide-react';
+import {
+  ArrowRight,
+  CheckCircle2,
+  ChevronLeft,
+  Flag,
+  ListVideo,
+  ThumbsDown,
+  ThumbsUp,
+} from 'lucide-react';
 import Button from '../components/ui/Button';
 import Drawer from '../components/ui/Drawer';
 import LearnTopBar from '../components/learn/LearnTopBar';
 import LessonSidebar from '../components/learn/LessonSidebar';
-import LessonPanel from '../components/learn/LessonPanel';
 import VideoPlayer from '../components/learn/VideoPlayer';
+import FloatingChatbot from '../components/learn/FloatingChatbot';
 import NotFound from './NotFound';
 import { flattenLessons, getCourseBySlug, getLesson } from '../mock';
 import { useProgress } from '../lib/useProgress';
 
+/**
+ * Figma: `Học` (node 204:4565).
+ * The 80px header (204:4566), a left lesson rail (204:4881), the video + info
+ * column (211:9739), and a floating chatbot button (211:9764). Figma shows no
+ * right-hand notes panel, so it is replaced by the chatbot FAB. The info block
+ * (204:4683) carries feedback icon buttons and the next-lesson button.
+ */
 export default function LearnPage() {
   const { courseSlug, lessonId } = useParams();
   const navigate = useNavigate();
@@ -22,7 +37,6 @@ export default function LearnPage() {
   const { setLast } = progress;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [panelOpen, setPanelOpen] = useState(false);
 
   const currentLessonId = currentLesson?.lesson.id;
   useEffect(() => {
@@ -57,13 +71,37 @@ export default function LearnPage() {
         <main className="min-w-0 flex-1 overflow-y-auto">
           <VideoPlayer src={currentLesson.lesson.videoUrl} onEnded={handleEnded} />
 
-          <div className="mx-auto max-w-3xl px-4 py-6">
+          <div className="mx-auto max-w-[1480px] px-4 py-6">
             <p className="text-sm text-tertiary">{currentLesson.section.title}</p>
             <h1 className="mt-1 text-display-xs text-primary">{currentLesson.lesson.title}</h1>
 
-            <div className="mt-5 flex flex-wrap gap-3">
+            {/* Figma actions (node 204:4686): feedback icons + progress controls. */}
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                aria-label="Hữu ích"
+                className="flex items-center justify-center rounded-md p-2.5 text-quaternary hover:bg-secondary"
+              >
+                <ThumbsUp className="h-5 w-5" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                aria-label="Không hữu ích"
+                className="flex items-center justify-center rounded-md p-2.5 text-quaternary hover:bg-secondary"
+              >
+                <ThumbsDown className="h-5 w-5" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                aria-label="Báo cáo"
+                className="flex items-center justify-center rounded-md p-2.5 text-quaternary hover:bg-secondary"
+              >
+                <Flag className="h-5 w-5" aria-hidden="true" />
+              </button>
+
               <Button
                 variant={done ? 'secondary' : 'primary'}
+                className="ml-auto"
                 onClick={() => progress.toggleComplete(currentLesson.lesson.id)}
               >
                 <CheckCircle2 className="h-4 w-4" />
@@ -74,42 +112,38 @@ export default function LearnPage() {
                 <ListVideo className="h-4 w-4" />
                 Danh sách bài
               </Button>
-
-              <Button variant="ghost" className="xl:hidden" onClick={() => setPanelOpen(true)}>
-                <MessageSquare className="h-4 w-4" />
-                Ghi chú &amp; bình luận
-              </Button>
             </div>
 
-            {/* Figma info nav (node 204:4690): previous/next lesson. */}
-            <div className="mt-6 flex flex-wrap justify-between gap-3 border-t border-secondary pt-6">
+            {/* Figma info nav (node 204:4690): previous / next lesson. */}
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-secondary pt-6">
               {previous ? (
-                <Link to={'/learn/' + course.slug + '/' + previous.lesson.id}>
-                  <Button variant="secondary" aria-label="Bài trước">
-                    <ChevronLeft className="h-4 w-4" />
-                    Bài trước
-                  </Button>
+                <Link
+                  to={'/learn/' + course.slug + '/' + previous.lesson.id}
+                  aria-label="Bài trước"
+                  className="inline-flex items-center gap-sm rounded-md border border-button-secondary bg-button-secondary px-xl py-[10px] text-md font-semibold text-button-secondary-fg shadow-xs"
+                >
+                  <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                  Bài trước
                 </Link>
               ) : (
                 <span />
               )}
               {next ? (
-                <Link to={'/learn/' + course.slug + '/' + next.lesson.id}>
-                  <Button aria-label="Bài tiếp theo">
-                    Bài tiếp theo
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
+                <Link
+                  to={'/learn/' + course.slug + '/' + next.lesson.id}
+                  aria-label="Bài tiếp theo"
+                  className="ml-auto inline-flex items-center gap-sm rounded-md border border-button-secondary bg-button-secondary px-xl py-[10px] text-md font-semibold text-button-secondary-fg shadow-xs"
+                >
+                  Chuyển sang bài tiếp theo
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
               ) : null}
             </div>
           </div>
         </main>
-
-        <LessonPanel
-          lesson={currentLesson.lesson}
-          className="hidden w-96 shrink-0 overflow-y-auto border-l border-secondary xl:block"
-        />
       </div>
+
+      <FloatingChatbot />
 
       <Drawer open={sidebarOpen} onClose={() => setSidebarOpen(false)} title="Danh sách bài học" side="left">
         <LessonSidebar
@@ -118,10 +152,6 @@ export default function LearnPage() {
           progress={progress}
           onNavigate={() => setSidebarOpen(false)}
         />
-      </Drawer>
-
-      <Drawer open={panelOpen} onClose={() => setPanelOpen(false)} title="Ghi chú và bình luận" side="right">
-        <LessonPanel lesson={currentLesson.lesson} />
       </Drawer>
     </div>
   );
