@@ -15,20 +15,20 @@ function renderAt(path: string) {
 beforeEach(() => localStorage.clear());
 
 describe('CourseDetailPage', () => {
-  it('renders hero, stats, learning outcomes and skills', () => {
+  it('renders hero, metrics, learning outcomes and skills', () => {
     renderAt('/courses/ai-co-ban-den-thuc-tien');
 
     expect(screen.getByTestId('page-course')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Trí tuệ nhân tạo (AI)');
-    expect(screen.getByText('11 bài học')).toBeInTheDocument();
-    expect(screen.getByText('12 giờ')).toBeInTheDocument();
+    expect(screen.getByText('12h')).toBeInTheDocument();
+    expect(screen.getByText('Trình độ của khoá học')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Bạn sẽ học được gì?' })).toBeInTheDocument();
     expect(screen.getByText('Prompt Engineering')).toBeInTheDocument();
   });
 
   it('links the primary CTA to the first lesson', () => {
     renderAt('/courses/ai-co-ban-den-thuc-tien');
-    const cta = screen.getByRole('link', { name: 'Vào học' });
+    const cta = screen.getByRole('link', { name: 'Bắt đầu học ngay' });
     expect(cta).toHaveAttribute('href', '/learn/ai-co-ban-den-thuc-tien/l1');
   });
 
@@ -51,12 +51,6 @@ describe('CourseDetailPage', () => {
   it('lists related courses excluding itself', () => {
     renderAt('/courses/ai-co-ban-den-thuc-tien');
     expect(screen.getByRole('heading', { name: 'Khoá học liên quan' })).toBeInTheDocument();
-  });
-
-  it('shows the instructor card', () => {
-    renderAt('/courses/ai-co-ban-den-thuc-tien');
-    expect(screen.getByRole('heading', { name: 'Giảng viên' })).toBeInTheDocument();
-    expect(screen.getAllByText('Nguyễn Minh Anh').length).toBeGreaterThan(0);
   });
 
   it('shows 404 for an unknown course slug', () => {
