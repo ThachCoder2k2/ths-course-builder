@@ -42,7 +42,7 @@ export default function DashboardPage() {
 
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-7xl px-4 pb-9xl pt-7xl lg:px-4xl">
         {/* Figma 179:5208 */}
-        <CourseSection title="Khoá học nổi bật" courses={getCourses().slice(3, 6)} />
+        <CourseSection title="Khoá học nổi bật" courses={getCourses().slice(3, 6)} showNext />
 
         {/* Figma 179:7785 */}
         <TopicPillGrid />

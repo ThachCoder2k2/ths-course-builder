@@ -23,7 +23,7 @@ export default function CourseCard({ course }: { course: Course }) {
         <div className="flex flex-1 flex-col gap-3xl px-xl pb-xl">
           <div className="flex flex-col gap-md">
             <div className="flex items-center gap-xl">
-              <h3 className="min-w-0 flex-1 text-xl font-semibold text-primary transition-colors group-hover:text-brand-secondary">
+              <h3 className="line-clamp-1 min-w-0 flex-1 text-xl font-semibold text-primary transition-colors group-hover:text-brand-secondary">
                 {course.title}
               </h3>
               <div className="flex shrink-0 items-center gap-md">
