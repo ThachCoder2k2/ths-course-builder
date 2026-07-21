@@ -15,6 +15,7 @@ import LearnTopBar from '../components/learn/LearnTopBar';
 import LessonSidebar from '../components/learn/LessonSidebar';
 import VideoPlayer from '../components/learn/VideoPlayer';
 import FloatingChatbot from '../components/learn/FloatingChatbot';
+import CourseAiPanel from '../components/learn/CourseAiPanel';
 import NotFound from './NotFound';
 import { flattenLessons, getCourseBySlug, getLesson } from '../mock';
 import { useProgress } from '../lib/useProgress';
@@ -37,6 +38,7 @@ export default function LearnPage() {
   const { setLast } = progress;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
 
   const currentLessonId = currentLesson?.lesson.id;
   useEffect(() => {
@@ -143,9 +145,12 @@ export default function LearnPage() {
             </div>
           </div>
         </main>
+
+        {/* Figma variant 211:10306 — the Course AI side panel. */}
+        {aiOpen ? <CourseAiPanel onClose={() => setAiOpen(false)} /> : null}
       </div>
 
-      <FloatingChatbot />
+      {aiOpen ? null : <FloatingChatbot onOpen={() => setAiOpen(true)} />}
 
       <Drawer open={sidebarOpen} onClose={() => setSidebarOpen(false)} title="Danh sách bài học" side="left">
         <LessonSidebar
