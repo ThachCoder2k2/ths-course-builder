@@ -37,6 +37,9 @@ export default {
           900: '#181D27', // text-primary (900)
         },
         utility: {
+          'brand-50': '#F0F6FE',
+          'brand-200': '#B4D0FE',
+          'brand-700': '#055BE6',
           'blue-50': '#EFF8FF',
           'blue-200': '#B2DDFF',
           'blue-700': '#175CD3',
@@ -54,6 +57,7 @@ export default {
         secondary: '#FAFAFA',
         'secondary-alt': '#FAFAFA',
         tertiary: '#F5F5F5',
+        quaternary: '#E9EAEB',
         'button-primary': '#20447E',
         'button-secondary': '#FFFFFF',
       },
@@ -65,6 +69,7 @@ export default {
         placeholder: '#717680',
         'brand-secondary': '#055BE6',
         'brand-tertiary': '#0D67F7',
+        'orange-dark-900': '#771A0D', // Orange dark/900 — banner slide 2 heading
         'button-primary-fg': '#FFFFFF',
         'button-secondary-fg': '#414651',
         'button-tertiary-fg': '#535862',
@@ -75,7 +80,9 @@ export default {
         primary: '#D5D7DA',
         secondary: '#E9EAEB',
         'button-secondary': '#D5D7DA',
+        'button-secondary-color': '#86B4FE', // button-secondary-color-border
         brand: '#055BE6',
+        'brand-alt': '#0D67F7', // fg-brand-primary_alt — active tab underline
       },
       divideColor: { primary: '#D5D7DA', secondary: '#E9EAEB' },
 
@@ -124,6 +131,7 @@ export default {
         lg: '10px',
         xl: '12px',
         '2xl': '16px',
+        '3xl': '20px',
         '4xl': '24px',
         full: '9999px',
         // aliases used across components
@@ -138,6 +146,13 @@ export default {
         sm: '0 1px 2px -1px #0A0D121A, 0 1px 3px 0 #0A0D121A',
         card: '0 1px 2px 0 #0A0D120D',
         pop: '0 1px 2px -1px #0A0D121A, 0 1px 3px 0 #0A0D121A',
+
+        // Figma draws frame strokes *inside* the frame, so a 1px stroke does not
+        // grow the box. A CSS `border` does. These pair shadow-xs with an inset
+        // ring so bordered auto-height elements match Figma's stated heights.
+        'xs-ring-primary': '0 1px 2px 0 #0A0D120D, inset 0 0 0 1px #D5D7DA',
+        'xs-ring-secondary': '0 1px 2px 0 #0A0D120D, inset 0 0 0 1px #E9EAEB',
+        'xs-ring-brand': '0 1px 2px 0 #0A0D120D, inset 0 0 0 1px #86B4FE',
       },
 
       maxWidth: {
