@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import NavWash from '../components/layout/NavWash';
 import CourseHero from '../components/course/CourseHero';
 import StatsRow from '../components/course/StatsRow';
 import CourseTabs from '../components/course/CourseTabs';
@@ -23,7 +24,10 @@ export default function CourseDetailPage() {
   if (!course) return <NotFound />;
 
   return (
-    <div data-testid="page-course" className="flex flex-col pb-9xl">
+    <div data-testid="page-course" className="relative flex flex-col pb-9xl">
+      {/* Figma 182:11924 — same hero wash + grid behind the nav band. */}
+      <NavWash />
+
       {/* Figma 182:12813: hero inset 48px from the header. */}
       <div className="px-4 pt-12 lg:px-12">
         <CourseHero course={course} />

@@ -5,8 +5,8 @@ import ListingColumns from '../components/home/ListingColumns';
 import CTABanner from '../components/home/CTABanner';
 import TopicPillGrid from '../components/home/TopicPillGrid';
 import DashboardBanner from '../components/home/DashboardBanner';
+import NavWash from '../components/layout/NavWash';
 import { getCourses, getFeaturedCourses } from '../mock';
-import heroWash from '../assets/heroes/topic-hero.png';
 
 /**
  * Figma: `Sau đăng nhập` (node 177:2981).
@@ -19,22 +19,8 @@ import heroWash from '../assets/heroes/topic-hero.png';
 export default function DashboardPage() {
   return (
     <div data-testid="page-dashboard" className="relative flex flex-col">
-      {/* Figma 177:2982 background — hero wash behind the transparent nav band
-          plus the masked grid bleeding into the content. */}
-      {/* Calibrated to the Figma render: wash starts ~50% white (232,238,248
-          at the top) and is fully white by the band's end; the #E9EAEB grid
-          lives only in the nav band. */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 -top-[76px] h-[76px] overflow-hidden">
-        <img src={heroWash} alt="" className="h-full w-full object-cover object-top" />
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.5) 0%, #FFFFFF 100%)' }}
-        />
-      </div>
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 -top-[76px] h-[100px] bg-[linear-gradient(to_right,#E9EAEB_1px,transparent_1px),linear-gradient(to_bottom,#E9EAEB_1px,transparent_1px)] bg-[size:96px_96px] [mask-image:linear-gradient(to_bottom,rgba(0,0,0,0.9),transparent)]"
-      />
+      {/* Figma 177:2982 — hero wash + grid behind the transparent nav band. */}
+      <NavWash />
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-7xl px-4 pt-7xl lg:px-4xl">
         {/* Figma 179:4442 — the render shows the circular next arrow here too. */}
         <CourseSection title="Khoá học nổi bật" courses={getFeaturedCourses(3)} showNext />
