@@ -70,7 +70,7 @@ export default function VideoPlayer({
         ref={videoRef}
         src={src}
         poster={poster}
-        className="mx-auto aspect-video max-h-[70vh] w-full max-w-[1348px] rounded-lg bg-black object-contain"
+        className="mx-auto aspect-video max-h-[70vh] w-full max-w-[1348px] bg-black object-contain"
         onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)}
         onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
         onEnded={() => {
@@ -80,7 +80,8 @@ export default function VideoPlayer({
         onClick={togglePlay}
       />
 
-      <div className="absolute inset-x-xl bottom-0 flex items-center gap-3 rounded-b-lg bg-gradient-to-t from-black/70 to-transparent px-4 py-3 text-white">
+      {/* Figma overlays bare white controls on the video — no dark strip. */}
+      <div className="absolute inset-x-xl bottom-0 flex items-center gap-3 px-4 py-3 text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
         <button
           type="button"
           onClick={togglePlay}

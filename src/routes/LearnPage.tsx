@@ -76,10 +76,10 @@ export default function LearnPage() {
           <VideoPlayer src={currentLesson.lesson.videoUrl} onEnded={handleEnded} />
 
           <div className="mx-auto max-w-[1480px] px-4 py-6">
-            <p className="text-sm text-tertiary">{currentLesson.section.title}</p>
-            <h1 className="mt-1 text-display-xs text-primary">{currentLesson.lesson.title}</h1>
+            {/* Figma info (204:4684): heading only — no section eyebrow. */}
+            <h1 className="text-display-xs text-primary">{currentLesson.lesson.title}</h1>
 
-            {/* Figma actions (node 204:4686): feedback icons + progress controls. */}
+            {/* Figma actions (node 204:4686): feedback icons only. */}
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <button
                 type="button"
@@ -103,23 +103,14 @@ export default function LearnPage() {
                 <Flag className="h-5 w-5" aria-hidden="true" />
               </button>
 
-              <Button
-                variant={done ? 'secondary' : 'primary'}
-                className="ml-auto"
-                onClick={() => progress.toggleComplete(currentLesson.lesson.id)}
-              >
-                <CheckCircle2 className="h-4 w-4" />
-                {done ? 'Đã hoàn thành' : 'Đánh dấu hoàn thành'}
-              </Button>
-
               <Button variant="ghost" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
                 <ListVideo className="h-4 w-4" />
                 Danh sách bài
               </Button>
             </div>
 
-            {/* Figma info nav (node 204:4690): previous / next lesson. */}
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-secondary pt-6">
+            {/* Figma info nav (node 204:4690): actions right-aligned, no divider. */}
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
               {previous ? (
                 <Link
                   to={'/learn/' + course.slug + '/' + previous.lesson.id}
@@ -132,16 +123,25 @@ export default function LearnPage() {
               ) : (
                 <span />
               )}
-              {next ? (
-                <Link
-                  to={'/learn/' + course.slug + '/' + next.lesson.id}
-                  aria-label="Bài tiếp theo"
-                  className="ml-auto inline-flex items-center gap-sm rounded-md border border-button-secondary bg-button-secondary px-xl py-[10px] text-md font-semibold text-button-secondary-fg shadow-xs"
+              <div className="ml-auto flex flex-wrap items-center gap-3">
+                <Button
+                  variant={done ? 'secondary' : 'primary'}
+                  onClick={() => progress.toggleComplete(currentLesson.lesson.id)}
                 >
-                  Chuyển sang bài tiếp theo
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
-              ) : null}
+                  <CheckCircle2 className="h-4 w-4" />
+                  {done ? 'Đã hoàn thành' : 'Đánh dấu hoàn thành'}
+                </Button>
+                {next ? (
+                  <Link
+                    to={'/learn/' + course.slug + '/' + next.lesson.id}
+                    aria-label="Bài tiếp theo"
+                    className="inline-flex items-center gap-sm rounded-md border border-button-secondary bg-button-secondary px-xl py-[10px] text-md font-semibold text-button-secondary-fg shadow-xs"
+                  >
+                    Chuyển sang bài tiếp theo
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </Link>
+                ) : null}
+              </div>
             </div>
           </div>
         </main>

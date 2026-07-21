@@ -21,7 +21,6 @@ describe('LearnPage', () => {
 
     expect(screen.getByTestId('page-learn')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 1, name: 'AI là gì?' })).toBeInTheDocument();
-    expect(screen.getAllByText('Giới thiệu về trí tuệ nhân tạo').length).toBeGreaterThan(0);
     expect(container.querySelector('video')).toHaveAttribute('src', '/media/sample-lesson.mp4');
   });
 
