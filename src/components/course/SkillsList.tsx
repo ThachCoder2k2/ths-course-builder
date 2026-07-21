@@ -13,7 +13,7 @@ import skillsImage from '../../assets/heroes/skills-image.jpg';
 export default function SkillsList({ course }: { course: Course }) {
   return (
     <section className="flex w-full flex-col gap-xl">
-      <div className="flex w-full flex-wrap items-start justify-center gap-7xl bg-primary">
+      <div className="flex w-full flex-wrap items-center justify-center gap-7xl bg-primary">
         <div className="flex min-w-[480px] max-w-paragraph flex-1 flex-col items-start gap-xl">
           <div className="flex w-full max-w-width-xl flex-col items-start gap-lg">
             <h2 className="w-full text-display-xs text-primary">Kỹ năng bạn sẽ đạt được</h2>
