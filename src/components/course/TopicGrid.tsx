@@ -13,7 +13,7 @@ const FILTERS = ['Tất cả mục đích', 'Tất cả cấp độ'];
 
 export default function TopicGrid({ courses }: { courses: Course[] }) {
   return (
-    <section className="flex w-full flex-col gap-6xl">
+    <section className="flex w-full flex-col gap-xl">
       <div className="flex w-full items-center justify-end gap-lg">
         {FILTERS.map((label) => (
           <button
