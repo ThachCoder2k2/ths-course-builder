@@ -15,7 +15,8 @@ export default function FloatingChatbot({ onOpen }: { onOpen: () => void }) {
         aria-label="Mở Course AI"
         className="flex h-16 w-16 items-center justify-center rounded-full border border-primary bg-white shadow-lg transition-transform hover:scale-105"
       >
-        <img src={botGlyph} alt="" className="h-[52px] w-[52px]" />
+        {/* Figma: 42px glyph inside the 64px circle. */}
+        <img src={botGlyph} alt="" className="h-[42px] w-[42px]" />
       </button>
       <span className="rounded-md px-md py-xs text-xs font-semibold text-white [background-color:#0A0D12]">
         Course AI
