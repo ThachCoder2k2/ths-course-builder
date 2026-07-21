@@ -1,16 +1,21 @@
 import type { Topic } from '../../mock/types';
+import heroBg from '../../assets/heroes/topic-hero.png';
 
 /**
  * Figma: `Hero header section` (node 181:7288) — 424px.
- * A soft top-to-white gradient wash over a faint grid, py-9xl, centred. The
- * heading (Display xl 60/72, tracking-tight) reads "Chủ đề " in secondary with
- * the topic name in a purple→blue gradient; a Text xl description sits below,
- * max-w-768. The nav that Figma nests here is our shared PageShell chrome and
- * is not re-rendered.
+ * A photographic soft-blue background (downloaded from the node) under a
+ * transparent→white gradient (from ~2.8%) and a faint grid, py-9xl, centred.
+ * The heading (Display xl 60/72, tracking-tight) reads "Chủ đề " in secondary
+ * with the topic name in a purple→blue gradient; a Text xl description sits
+ * below, max-w-768. The nav Figma nests here is our shared PageShell chrome.
  */
 export default function TopicHero({ topic }: { topic: Topic }) {
   return (
-    <section className="relative isolate flex w-full flex-col items-center overflow-hidden bg-gradient-to-b from-brand-50 to-white py-9xl">
+    <section className="relative isolate flex w-full flex-col items-center overflow-hidden py-9xl">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <img src={heroBg} alt="" className="h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/0 from-[2.768%] to-white" />
+      </div>
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(10,13,18,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(10,13,18,0.04)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(1000px_circle_at_center_top,black,transparent)]"

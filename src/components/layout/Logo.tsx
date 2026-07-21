@@ -6,8 +6,20 @@ import { cn } from '../../lib/cn';
 export default function Logo({ className }: { className?: string }) {
   return (
     <div className={cn('relative h-8 w-16 shrink-0', className)} aria-label="THS Learning">
-      <img src={mark} alt="" className="absolute" style={{ top: 0, right: '11.04%', bottom: '41.62%', left: '11.21%' }} />
-      <img src={word} alt="" className="absolute" style={{ top: '78.46%', right: '5.21%', bottom: '-0.1%', left: '4.4%' }} />
+      {/* Explicit sizes: Tailwind preflight (img height:auto) breaks the
+          inset-solved box, rendering the SVGs at intrinsic size. */}
+      <img
+        src={mark}
+        alt=""
+        className="absolute max-w-none"
+        style={{ top: 0, left: '11.21%', width: '77.75%', height: '58.38%' }}
+      />
+      <img
+        src={word}
+        alt=""
+        className="absolute max-w-none"
+        style={{ top: '78.46%', left: '4.4%', width: '90.39%', height: '21.64%' }}
+      />
     </div>
   );
 }

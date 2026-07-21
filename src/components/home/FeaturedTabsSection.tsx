@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Zap } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import zapFast from '../../assets/icons/zap-fast.svg';
 import CompactCourseCard from './CompactCourseCard';
 import { cn } from '../../lib/cn';
 import type { Course } from '../../mock/types';
@@ -43,9 +44,8 @@ export default function FeaturedTabsSection({ courses }: { courses: Course[] }) 
       <div className="flex w-full flex-col justify-center gap-5xl rounded-4xl bg-gradient-to-t from-[#c1dfc4] to-[#deecdd] py-3xl pl-6xl pr-3xl">
         <div className="flex w-full items-stretch gap-lg">
           <div className="flex w-[250px] shrink-0 flex-col justify-center gap-2xl">
-            <span className="grid h-14 w-14 place-items-center rounded-full bg-tertiary">
-              <Zap className="h-7 w-7 text-secondary" aria-hidden="true" />
-            </span>
+            {/* Figma `Featured icon` (182:14426) — downloaded verbatim. */}
+            <img src={zapFast} alt="" className="h-14 w-14 shrink-0" />
             <div className="flex flex-col gap-[2px]">
               <h2 className="text-xl font-semibold text-primary">Giáo trình theo cấp độ</h2>
               <p className="text-sm text-tertiary">{SUPPORTING}</p>
