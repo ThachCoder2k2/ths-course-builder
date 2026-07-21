@@ -7,29 +7,36 @@ import { courseImage } from './courseImage';
 
 /**
  * Figma: `Blog post card` inside `Card list` (node 179:4466).
- * 251.5 × 324.625 — image 188.625, content 120 with 16px left inset,
- * heading 30, badges 22, supporting text 40 (two lines).
+ * bg-primary, radius-2xl, gap-xl. A 4:3 image over Content (px-xl pb-xl): a
+ * heading block (gap-xs) with a Text xl/Semibold title and star/clock badges,
+ * then a two-line Text sm/Regular description.
  */
 export default function CompactCourseCard({ course }: { course: Course }) {
   return (
     <Link to={'/courses/' + course.slug} className="group block h-full min-w-0 flex-1">
-      <article className="flex h-full flex-col gap-xl">
+      <article className="flex h-full flex-col gap-xl rounded-2xl bg-primary">
         <img
           src={courseImage(course.id)}
           alt=""
-          className="aspect-[251.5/188.625] w-full rounded-2xl object-cover"
+          className="aspect-[4/3] w-full rounded-2xl object-cover"
         />
-        <div className="flex flex-col gap-xl pl-xl">
-          <div className="flex flex-col gap-xs">
-            <h3 className="line-clamp-1 text-xl font-semibold text-primary transition-colors group-hover:text-brand-secondary">
-              {course.title}
-            </h3>
-            <div className="flex items-center gap-md">
-              <IconBadge icon={<Star className="h-3 w-3 fill-current" />}>+{courseExp(course)} exp</IconBadge>
-              <IconBadge icon={<Clock className="h-3 w-3" />}>{courseMinutes(course)} phút</IconBadge>
+        <div className="flex flex-col gap-3xl px-xl pb-xl">
+          <div className="flex flex-col gap-md">
+            <div className="flex flex-col gap-xs">
+              <h3 className="line-clamp-1 text-xl font-semibold text-primary transition-colors group-hover:text-brand-secondary">
+                {course.title}
+              </h3>
+              <div className="flex items-center gap-md">
+                <IconBadge icon={<Star className="h-3 w-3 fill-current" />}>
+                  +{courseExp(course)} exp
+                </IconBadge>
+                <IconBadge icon={<Clock className="h-3 w-3" />}>
+                  {courseMinutes(course)} phút
+                </IconBadge>
+              </div>
             </div>
+            <p className="line-clamp-2 text-sm text-tertiary">{course.subtitle}</p>
           </div>
-          <p className="line-clamp-2 text-sm text-tertiary">{course.subtitle}</p>
         </div>
       </article>
     </Link>

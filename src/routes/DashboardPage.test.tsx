@@ -20,7 +20,7 @@ describe('DashboardPage', () => {
 
     // Nodes 179:4442 and 179:5208 carry the same heading in Figma.
     expect(screen.getAllByRole('heading', { name: 'Khoá học nổi bật' })).toHaveLength(2);
-    expect(screen.getByRole('heading', { name: 'Học theo cấp độ' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Giáo trình theo cấp độ' })).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: 'Những khoá học giúp bạn mở khoá kĩ năng mới' }),
     ).toBeInTheDocument();

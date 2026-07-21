@@ -23,10 +23,7 @@ export default function DashboardPage() {
         <CourseSection title="Khoá học nổi bật" courses={getFeaturedCourses(3)} />
 
         {/* Figma 179:4444 */}
-        <FeaturedTabsSection
-          title="Học theo cấp độ"
-          supportingText="Chọn cấp độ phù hợp với bạn và bắt đầu từ những khoá học nền tảng nhất."
-        />
+        <FeaturedTabsSection courses={getCourses()} />
 
         {/* Figma 179:4624 */}
         <TabbedCourseSection
