@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { CheckCircle2, ListVideo, MessageSquare } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { CheckCircle2, ChevronLeft, ChevronRight, ListVideo, MessageSquare } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Drawer from '../components/ui/Drawer';
 import LearnTopBar from '../components/learn/LearnTopBar';
@@ -44,7 +44,7 @@ export default function LearnPage() {
 
   return (
     <div data-testid="page-learn" className="flex h-screen flex-col">
-      <LearnTopBar course={course} percent={percent} previous={previous} next={next} />
+      <LearnTopBar course={course} percent={percent} />
 
       <div className="flex min-h-0 flex-1">
         <LessonSidebar
@@ -79,6 +79,28 @@ export default function LearnPage() {
                 <MessageSquare className="h-4 w-4" />
                 Ghi chú &amp; bình luận
               </Button>
+            </div>
+
+            {/* Figma info nav (node 204:4690): previous/next lesson. */}
+            <div className="mt-6 flex flex-wrap justify-between gap-3 border-t border-secondary pt-6">
+              {previous ? (
+                <Link to={'/learn/' + course.slug + '/' + previous.lesson.id}>
+                  <Button variant="secondary" aria-label="Bài trước">
+                    <ChevronLeft className="h-4 w-4" />
+                    Bài trước
+                  </Button>
+                </Link>
+              ) : (
+                <span />
+              )}
+              {next ? (
+                <Link to={'/learn/' + course.slug + '/' + next.lesson.id}>
+                  <Button aria-label="Bài tiếp theo">
+                    Bài tiếp theo
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              ) : null}
             </div>
           </div>
         </main>

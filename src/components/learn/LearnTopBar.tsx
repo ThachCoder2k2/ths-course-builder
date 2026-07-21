@@ -1,55 +1,37 @@
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import Button from '../ui/Button';
+import { ArrowLeft } from 'lucide-react';
 import ProgressBar from '../ui/ProgressBar';
 import type { Course } from '../../mock/types';
-import type { FlatLesson } from '../../mock';
 
-export default function LearnTopBar({
-  course,
-  percent,
-  previous,
-  next,
-}: {
-  course: Course;
-  percent: number;
-  previous?: FlatLesson;
-  next?: FlatLesson;
-}) {
+/**
+ * Figma: `Dropdown header navigation` (node 204:4566) — 80px.
+ * bg-primary, border-b border-primary, px-8xl. Left: a round arrow-left back
+ * button and the course title (Display xs). Right: a "Tiến độ hoàn thành"
+ * label (Text sm/Semibold) beside a 320px progress bar with a trailing "X%"
+ * (Text sm/Medium). Lesson navigation lives in the info area, not here.
+ */
+export default function LearnTopBar({ course, percent }: { course: Course; percent: number }) {
   return (
-    <header className="flex shrink-0 items-center gap-3 border-b border-secondary bg-primary px-4 py-3">
-      <Link
-        to={'/courses/' + course.slug}
-        aria-label="Quay lại trang khoá học"
-        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-btn text-secondary hover:bg-secondary"
-      >
-        <X className="h-5 w-5" />
-      </Link>
-
-      <p className="line-clamp-1 flex-1 font-bold text-primary">{course.title}</p>
-
-      <div className="hidden w-40 items-center gap-2 sm:flex">
-        <ProgressBar value={percent} />
-        <span className="shrink-0 text-xs font-semibold text-brand-secondary">{percent}%</span>
-      </div>
-
-      <div className="flex shrink-0 gap-2">
-        {previous ? (
-          <Link to={'/learn/' + course.slug + '/' + previous.lesson.id}>
-            <Button variant="ghost" size="sm" aria-label="Bài trước">
-              <ChevronLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Bài trước</span>
-            </Button>
+    <header className="flex h-20 shrink-0 items-center border-b border-primary bg-primary px-8">
+      <div className="flex min-w-px flex-1 items-center justify-between gap-8">
+        <div className="flex min-w-px items-center gap-md">
+          <Link
+            to={'/courses/' + course.slug}
+            aria-label="Quay lại trang khoá học"
+            className="flex shrink-0 items-center justify-center rounded-md p-md text-secondary hover:bg-secondary"
+          >
+            <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           </Link>
-        ) : null}
-        {next ? (
-          <Link to={'/learn/' + course.slug + '/' + next.lesson.id}>
-            <Button size="sm" aria-label="Bài tiếp theo">
-              <span className="hidden sm:inline">Bài tiếp</span>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        ) : null}
+          <p className="truncate text-display-xs text-primary">{course.title}</p>
+        </div>
+
+        <div className="hidden shrink-0 items-center gap-md sm:flex">
+          <p className="whitespace-nowrap text-sm font-semibold text-tertiary">Tiến độ hoàn thành</p>
+          <div className="flex w-[320px] items-center gap-lg">
+            <ProgressBar value={percent} />
+            <span className="shrink-0 text-sm font-medium text-secondary">{percent}%</span>
+          </div>
+        </div>
       </div>
     </header>
   );
