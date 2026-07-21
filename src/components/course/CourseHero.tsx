@@ -1,50 +1,67 @@
 import { Link } from 'react-router-dom';
-import Button from '../ui/Button';
-import Rating from '../ui/Rating';
-import StatsRow from './StatsRow';
-import { flattenLessons, getInstructor } from '../../mock';
+import { CirclePlay } from 'lucide-react';
+import { flattenLessons } from '../../mock';
 import type { Course } from '../../mock/types';
 import { hasStarted, readProgress } from '../../lib/progress';
+import heroBg from '../../assets/heroes/course-hero.png';
 
+/**
+ * Figma: `Header section` (node 183:6357) inside Frame 7 (182:12813).
+ * A photographic banner (radius-4xl, py-9xl) over a max-w-1280 container
+ * (px-8xl, gap-7xl). Content gap-4xl: a heading block (eyebrow Text md/Semibold
+ * brand-secondary, title Display lg/Semibold tracking-tight, Text xl body) and
+ * an Actions row (gap-xl) with a primary play button and the enrolled count.
+ *
+ * NOTE: the eyebrow reads "Our team" in Figma — an Untitled UI template
+ * leftover — reproduced verbatim per the exact-match brief.
+ */
 export default function CourseHero({ course }: { course: Course }) {
   const lessons = flattenLessons(course);
-  const instructor = getInstructor(course.instructorId);
   const progress = readProgress(course.id);
   const started = hasStarted(progress);
   const resumeId = progress.lastLessonId ?? lessons[0]?.lesson.id;
-  const previewLesson = lessons.find((item) => item.lesson.isPreview);
 
   return (
-    <section className="overflow-hidden rounded-card bg-gradient-to-br from-canvas-dark via-canvas-deep to-brand-900 px-6 py-10 sm:px-10">
-      <p className="text-sm font-semibold uppercase tracking-wider text-white/60">Khoá học</p>
-      <h1 className="mt-3 max-w-3xl text-display-sm text-white">{course.title}</h1>
-      <p className="mt-3 max-w-2xl text-white/70">{course.subtitle}</p>
+    <section className="relative flex flex-col items-start justify-center gap-7xl overflow-hidden rounded-4xl py-9xl">
+      <img src={heroBg} alt="" className="absolute inset-0 h-full w-full object-cover" />
 
-      <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white/70">
-        {instructor ? <span>Giảng viên: {instructor.name}</span> : null}
-        <span>{course.enrolledCount.toLocaleString('vi-VN')} học viên</span>
-        <Rating value={course.rating} className="text-white" />
-      </div>
+      <div className="relative flex w-full max-w-content flex-col items-center gap-4xl px-8xl">
+        <div className="flex w-full flex-col items-start gap-4xl">
+          <div className="flex w-full flex-col items-start gap-lg">
+            <div className="flex w-full flex-col items-start gap-lg">
+              <p className="w-full text-md font-semibold text-brand-secondary">Our team</p>
+              <h1 className="w-full text-display-lg tracking-[-0.96px] text-primary">
+                {course.title}
+              </h1>
+            </div>
+            <p className="w-full text-xl text-tertiary">{course.subtitle}</p>
+          </div>
 
-      <div className="mt-8">
-        <StatsRow course={course} />
-      </div>
-
-      <div className="mt-8 flex flex-wrap gap-3">
-        {resumeId ? (
-          <Link to={'/learn/' + course.slug + '/' + resumeId}>
-            <Button variant="inverse" size="lg">
-              {started ? 'Tiếp tục học' : 'Vào học'}
-            </Button>
-          </Link>
-        ) : null}
-        {previewLesson ? (
-          <Link to={'/learn/' + course.slug + '/' + previewLesson.lesson.id}>
-            <Button variant="ghost" size="lg" className="text-white hover:bg-white/10">
-              Xem trước
-            </Button>
-          </Link>
-        ) : null}
+          <div className="flex items-center gap-xl">
+            {resumeId ? (
+              <Link
+                to={'/learn/' + course.slug + '/' + resumeId}
+                className="relative flex shrink-0 items-center justify-center gap-md overflow-hidden rounded-lg border-2 border-white/[0.12] bg-button-primary px-[22px] py-xl text-lg font-semibold text-button-primary-fg shadow-xs"
+                aria-label={started ? 'Tiếp tục học' : 'Bắt đầu học ngay'}
+              >
+                <CirclePlay className="h-6 w-6 shrink-0" aria-hidden="true" />
+                <span className="flex items-center justify-center px-xxs">
+                  {started ? 'Tiếp tục học' : 'Bắt đầu học ngay'}
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_0_0_1px_rgba(10,13,18,0.18),inset_0_-2px_0_0_rgba(10,13,18,0.05)]"
+                />
+              </Link>
+            ) : null}
+            <p className="text-sm text-tertiary">
+              <span className="font-semibold">
+                {course.enrolledCount.toLocaleString('vi-VN')}
+              </span>{' '}
+              người đã học
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   );
