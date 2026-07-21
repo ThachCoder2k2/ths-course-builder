@@ -60,9 +60,9 @@ export default function LearnPage() {
     <div data-testid="page-learn" className="flex h-screen flex-col">
       <LearnTopBar course={course} percent={percent} />
 
-      {/* Figma `Frame 7` (204:4576): sidebar + main inset as panels, gap-6xl,
-          p-8 — sub nav 320, gap 24, main 1512 at 1920. */}
-      <div className="flex min-h-0 flex-1 gap-6 p-8">
+      {/* Figma `Frame 7` (204:4576): a grey frame holding white panels — sidebar
+          + main inset with gap-6xl and p-8 (sub nav 320, gap 24, main 1512). */}
+      <div className="flex min-h-0 flex-1 gap-6 bg-secondary p-8">
         <LessonSidebar
           course={course}
           activeLessonId={currentLesson.lesson.id}
@@ -70,7 +70,7 @@ export default function LearnPage() {
           className="hidden w-80 shrink-0 overflow-y-auto rounded-2xl border border-secondary lg:block"
         />
 
-        <main className="min-w-0 flex-1 overflow-y-auto rounded-2xl border border-secondary">
+        <main className="min-w-0 flex-1 overflow-y-auto rounded-2xl border border-secondary bg-primary">
           <VideoPlayer src={currentLesson.lesson.videoUrl} onEnded={handleEnded} />
 
           <div className="mx-auto max-w-[1480px] px-4 py-6">
