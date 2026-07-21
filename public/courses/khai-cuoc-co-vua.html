@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khóa Học Khai Cuộc Cờ Vua Tương Tác - Vững Bước Đầu Tiên</title>
+    
+    <!-- Google Fonts: Lora & Be Vietnam Pro -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* HỆ THỐNG THIẾT KẾ CỐT LÕI (DESIGN SYSTEM) - GIAO DIỆN SÁNG MÀU XANH LÁ THI ĐẤU */
+        :root {
+            --bg-primary: #F4F9F4;       /* Tông nền xanh lá mint nhạt dịu mắt */
+            --bg-secondary: #FFFFFF;     /* Trắng tinh khiết cho thẻ */
+            --bg-tertiary: #E8F2E8;      /* Màu nền xanh nhạt phụ */
+            --border-color: rgba(16, 185, 129, 0.12);
+            --border-hover: rgba(16, 185, 129, 0.25);
+            
+            --text-primary: #1A3022;     /* Xanh rừng đậm */
+            --text-secondary: #3D5947;   /* Xanh xám */
+            --text-muted: #6E8C77;       /* Xanh lá nhạt */
+            
+            --brand-600: #10B981;        /* Xanh lục bảo nhấn chính */
+            --brand-700: #047857;        /* Xanh lục bảo đậm */
+            --brand-glow: rgba(16, 185, 129, 0.08);
+            
+            --accent-solid: #D97706;     /* Cam hổ phách */
+            --accent-glow: rgba(217, 119, 6, 0.08);
+            
+            --success-solid: #059669;    /* Xanh ngọc lục bảo */
+            --success-glow: rgba(5, 150, 105, 0.08);
+            
+            --error-solid: #DC2626;      /* Đỏ đô */
+            --error-glow: rgba(220, 38, 38, 0.08);
+            
+            /* Màu sắc của bàn cờ thi đấu */
+            --board-light: #F0F4F1;      /* Ô cờ sáng màu kem nhạt */
+            --board-dark: #769656;       /* Ô cờ tối màu xanh lá chuẩn thi đấu */
+            --board-border: #047857;
+            
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-full: 9999px;
+            
+            --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-move: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), top 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            
+            --shadow-md: 0 4px 6px -1px rgba(16, 185, 129, 0.03), 0 2px 4px -2px rgba(16, 185, 129, 0.02);
+            --shadow-lg: 0 10px 25px -5px rgba(16, 185, 129, 0.06), 0 8px 10px -6px rgba(16, 185, 129, 0.03);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* KHUNG CHƯƠNG TRÌNH */
+        .app-container {
+            display: grid;
+            grid-template-rows: 70px 1fr;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* HEADER */
+        .header {
+            background-color: var(--bg-secondary);
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 10;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            font-family: 'Lora', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--brand-700);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.01em;
+        }
+
+        .logo i {
+            color: var(--brand-600);
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: var(--bg-tertiary);
+            padding: 6px 16px;
+            border-radius: var(--radius-full);
+            border: 1px solid var(--border-color);
+            margin-left: 20px;
+        }
+
+        .progress-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .progress-bar-track {
+            width: 120px;
+            height: 6px;
+            background-color: rgba(16, 185, 129, 0.08);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--brand-700), var(--brand-600));
+            width: 20%; /* 1/5 */
+            border-radius: var(--radius-full);
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .progress-percent {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--brand-600);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* NÚT BẤM */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            border: 1px solid transparent;
+            outline: none;
+            user-select: none;
+        }
+
+        .btn-outline {
+            background-color: #FFFFFF;
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.04);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--brand-600);
+            color: var(--text-primary);
+            background-color: var(--bg-tertiary);
+        }
+
+        .btn-primary {
+            background-color: var(--brand-700);
+            color: #FFFFFF;
+            box-shadow: 0 4px 10px rgba(4, 120, 87, 0.15);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--brand-600);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* PHẦN THÂN GIAO DIỆN CHÍNH */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* KHU VỰC BÀN CỜ (CỘT TRÁI) */
+        .board-workspace {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-primary);
+            padding: 30px;
+            position: relative;
+        }
+
+        .board-outer {
+            position: relative;
+            padding: 24px;
+            background-color: #D1E7D1; /* Viền bao ngoài màu xanh lá nhạt */
+            border: 3px solid var(--brand-700);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Khung chứa các toạ độ dọc */
+        .coords-y {
+            position: absolute;
+            left: 6px;
+            top: 24px;
+            bottom: 24px;
+            width: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--brand-700);
+        }
+
+        /* Khung chứa các toạ độ ngang */
+        .coords-x {
+            position: absolute;
+            bottom: 4px;
+            left: 24px;
+            right: 24px;
+            height: 16px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--brand-700);
+        }
+
+        .board-grid-wrapper {
+            position: relative;
+            width: min(520px, 70vh);
+            height: min(520px, 70vh);
+        }
+
+        .chessboard {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            box-shadow: inset 0 0 12px rgba(4, 120, 87, 0.2);
+            background-color: var(--board-light);
+        }
+
+        .square {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .square.light {
+            background-color: var(--board-light);
+        }
+
+        .square.dark {
+            background-color: var(--board-dark);
+        }
+
+        /* Lớp phát sáng vùng trung tâm */
+        .square.highlight-center::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(217, 119, 6, 0.25);
+            pointer-events: none;
+            box-shadow: inset 0 0 10px rgba(217, 119, 6, 0.4);
+            animation: pulse-center 1.5s infinite;
+        }
+
+        @keyframes pulse-center {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* Điểm phát sáng nước đi hợp lệ */
+        .square.highlight-dot::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 22%;
+            height: 22%;
+            border-radius: var(--radius-full);
+            background-color: rgba(16, 185, 129, 0.8);
+            pointer-events: none;
+            box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+        }
+
+        /* Nước ăn quân hợp lệ */
+        .square.highlight-dot.has-opponent::after {
+            width: 70%;
+            height: 70%;
+            border-radius: var(--radius-full);
+            background-color: transparent;
+            border: 4px solid rgba(16, 185, 129, 0.9);
+            box-shadow: none;
+        }
+
+        /* CÁC QUÂN CỜ VẼ BẰNG TUYỆT ĐỐI */
+        .pieces-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .chess-piece {
+            position: absolute;
+            width: 12.5%;
+            height: 12.5%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            pointer-events: auto;
+            user-select: none;
+            transition: var(--transition-move);
+            z-index: 10;
+        }
+
+        .chess-piece svg {
+            width: 82%;
+            height: 82%;
+            filter: drop-shadow(0 2px 4px rgba(4, 120, 87, 0.15));
+            transition: var(--transition-fast);
+        }
+
+        .chess-piece:hover svg {
+            transform: scale(1.1);
+        }
+
+        .chess-piece.selected {
+            z-index: 20;
+        }
+
+        .chess-piece.selected svg {
+            transform: scale(1.15) translateY(-4px);
+            filter: drop-shadow(0 8px 12px rgba(16, 185, 129, 0.35));
+        }
+
+        .chess-piece.fade-out {
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        /* Rung lắc khi di chuyển sai */
+        .chess-piece.shake {
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        /* BẢNG ĐIỀU KHIỂN & BÀI HỌC (CỘT PHẢI) */
+        .control-panel {
+            background-color: var(--bg-secondary);
+            border-left: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            box-shadow: -4px 0 15px rgba(16, 185, 129, 0.02);
+        }
+
+        /* Danh mục chọn nhanh khai cuộc */
+        .chapters-dropdown {
+            border-bottom: 2px solid var(--border-color);
+            padding: 16px 24px;
+            background-color: var(--bg-tertiary);
+        }
+
+        .chapters-selector {
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--border-color);
+            background-color: #FFFFFF;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--brand-700);
+            outline: none;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .chapters-selector:hover {
+            border-color: var(--brand-600);
+        }
+
+        /* Nội dung bài học */
+        .lesson-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .lesson-header {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .lesson-chapter-tag {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--brand-600);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .lesson-title {
+            font-family: 'Lora', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--brand-700);
+            line-height: 1.3;
+        }
+
+        .lesson-text {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .lesson-text p {
+            margin-bottom: 12px;
+        }
+
+        .lesson-text strong {
+            color: var(--brand-700);
+        }
+
+        /* Thẻ mục tiêu thử thách */
+        .objective-card {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.02);
+        }
+
+        .objective-header {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .objective-header i {
+            color: var(--accent-solid);
+        }
+
+        .objective-item {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .objective-status {
+            font-size: 0.9rem;
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-weight: 800;
+        }
+
+        .status-incomplete {
+            background-color: rgba(217, 119, 6, 0.08);
+            color: var(--accent-solid);
+        }
+
+        .status-complete {
+            background-color: rgba(5, 150, 105, 0.08);
+            color: var(--success-solid);
+            animation: bounce-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes bounce-in {
+            0% { transform: scale(0.6); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Hộp thoại chúc mừng */
+        .feedback-balloon {
+            background-color: rgba(5, 150, 105, 0.04);
+            border: 2px solid var(--success-solid);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: none;
+            align-items: flex-start;
+            gap: 16px;
+            animation: slide-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .feedback-balloon.active {
+            display: flex;
+        }
+
+        .feedback-icon {
+            font-size: 1.8rem;
+            color: var(--success-solid);
+        }
+
+        .feedback-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .feedback-title {
+            font-family: 'Lora', serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--success-solid);
+        }
+
+        .feedback-desc {
+            font-size: 0.85rem;
+            line-height: 1.55;
+            color: var(--text-secondary);
+        }
+
+        @keyframes slide-in {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* THANH ĐIỀU HƯỚNG DƯỚI */
+        .footer-nav {
+            height: 80px;
+            border-top: 2px solid var(--border-color);
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--bg-tertiary);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="logo"><i class="fa-solid fa-chess-board"></i> Khai Cuộc Cờ Vua</h1>
+                
+                <div class="progress-container">
+                    <span class="progress-label">Tiến trình</span>
+                    <div class="progress-bar-track">
+                        <div class="progress-bar-fill" id="progressBar"></div>
+                    </div>
+                    <span class="progress-percent" id="progressPercent">20%</span>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <button class="btn btn-outline" id="resetStepBtn">
+                    <i class="fa-solid fa-arrow-rotate-left"></i> Thiết lập lại khai cuộc
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="main-layout">
+            <!-- CỘT TRÁI - BÀN CỜ ĐỘNG -->
+            <section class="board-workspace">
+                <div class="board-outer">
+                    <!-- Tọa độ dọc -->
+                    <div class="coords-y">
+                        <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                    </div>
+                    
+                    <!-- Lưới bàn cờ -->
+                    <div class="board-grid-wrapper">
+                        <div class="chessboard" id="chessboardGrid">
+                            <!-- Sinh tự động bằng JS -->
+                        </div>
+                        
+                        <!-- Lớp quân cờ -->
+                        <div class="pieces-layer" id="piecesLayer">
+                            <!-- Các quân cờ render động -->
+                        </div>
+                    </div>
+                    
+                    <!-- Tọa độ ngang -->
+                    <div class="coords-x">
+                        <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CỘT PHẢI - NỘI DUNG KHAI CUỘC -->
+            <section class="control-panel">
+                <!-- Chọn chương nhanh -->
+                <div class="chapters-dropdown">
+                    <select class="chapters-selector" id="stepSelector">
+                        <!-- Tự động sinh -->
+                    </select>
+                </div>
+                
+                <!-- Nội dung thuyết minh -->
+                <div class="lesson-content">
+                    <div class="lesson-header">
+                        <span class="lesson-chapter-tag" id="lessonChapterTag">Chương 1</span>
+                        <h2 class="lesson-title" id="lessonTitle">Tên bài học</h2>
+                    </div>
+                    
+                    <div class="lesson-text" id="lessonText">
+                        <!-- Văn bản thuyết minh -->
+                    </div>
+                    
+                    <!-- Thử thách tương tác -->
+                    <div class="objective-card" id="objectiveCard">
+                        <span class="objective-header">
+                            <i class="fa-solid fa-location-crosshairs"></i> Nước đi khai cuộc
+                        </span>
+                        <div class="objective-item">
+                            <span id="objectiveText">Nhiệm vụ đi cờ</span>
+                            <span class="objective-status status-incomplete" id="objectiveStatus">Nước 1/3</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Bong bóng phản hồi chúc mừng -->
+                    <div class="feedback-balloon" id="feedbackBalloon">
+                        <div class="feedback-icon">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <div class="feedback-info">
+                            <span class="feedback-title" id="feedbackTitle">Khai cuộc chính xác!</span>
+                            <span class="feedback-desc" id="feedbackDesc">Phản hồi sư phạm</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Thanh điều hướng cuối -->
+                <footer class="footer-nav">
+                    <button class="btn btn-outline" id="prevBtn">
+                        <i class="fa-solid fa-chevron-left"></i> Quay lại
+                    </button>
+                    <button class="btn btn-primary" id="nextBtn" disabled>
+                        Tiếp tục <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </footer>
+            </section>
+        </main>
+    </div>
+
+    <!-- CODE LOGIC KHAI CUỘC CỜ VUA -->
+    <script>
+        // Vector quân cờ chuẩn Wikipedia
+        const PIECE_SVGS = {
+            'b': `<svg viewBox="0 0 45 45" width="100%" height="100%"><g fill="none" fill-rule="evenodd" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.354.49-2.323.47-3-.5 1.354-1.94 3-2 3-2zm6-4c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2zM25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z" fill="#000" stroke-linecap="butt"/><path d="M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5" stroke="#fff" stroke-linejoin="miter"/></g></svg>`,
+            'k': `<svg viewBox="0 0 45 45" width="100%" height="100%"><g fill="none" fill-rule="evenodd" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22.5 11.63V6" stroke-linejoin="miter"/><path d="M22.5 25s4.5-7.5 3-10.5c0 0-1-2.5-3-2.5s-3 2.5-3 2.5c-1.5 3 3 10.5 3 10.5" fill="#000" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-6.5-13.5-3.5-16 4V27v-3.5c-3.5-7.5-13-10.5-16-4-3 6 5 10 5 10V37z" fill="#000"/><path d="M20 8h5" stroke-linejoin="miter"/><path d="M32 29.5s8.5-4 6.03-9.65C34.15 14 25 18 22.5 24.5l.01 2.1-.01-2.1C20 18 9.906 14 6.997 19.85c-2.497 5.65 4.853 9 4.853 9M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0" stroke="#fff"/></g></svg>`,
+            'n': `<svg viewBox="0 0 45 45" width="100%" height="100%"><g fill="none" fill-rule="evenodd" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18" style="fill:#000000; stroke:#000000;"/><path d="M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26 C 6,24 12,14 12,14 C 12,14 13.89,12.1 14,10.5 C 13.27,9.506 13.5,8.5 13.5,7.5 C 14.5,6.5 16.5,10 16.5,10 L 18.5,10 C 18.5,10 19.28,8.008 21,7 C 22,7 22,10 22,10" style="fill:#000000; stroke:#000000;"/><path d="M 9.5 25.5 A 0.5 0.5 0 1 1 8.5,25.5 A 0.5 0.5 0 1 1 9.5 25.5 z" style="fill:#ececec; stroke:#ececec;"/><path d="M 15 15.5 A 0.5 1.5 0 1 1 14,15.5 A 0.5 1.5 0 1 1 15 15.5 z" transform="matrix(0.866,0.5,-0.5,0.866,9.693,-5.173)" style="fill:#ececec; stroke:#ececec;"/><path d="M 24.55,10.4 L 24.1,11.85 L 24.6,12 C 27.75,13 30.25,14.49 32.5,18.75 C 34.75,23.01 35.75,29.06 35.25,39 L 35.2,39.5 L 37.45,39.5 L 37.5,39 C 38,28.94 36.62,22.15 34.25,17.66 C 31.88,13.17 28.46,11.02 25.06,10.5 L 24.55,10.4 z " style="fill:#ececec; stroke:none;"/></g></svg>`,
+            'p': `<svg viewBox="0 0 45 45" width="100%" height="100%"><g fill="none" fill-rule="evenodd" stroke="#000" stroke-width="1.5" stroke-linecap="round"><path d="M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03-3 1.06-7.41 5.55-7.41 13.47h23c0-7.92-4.41-12.41-7.41-13.47 1.47-1.19 2.41-3 2.41-5.03 0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linecap="round"/></g></svg>`,
+            'q': `<svg viewBox="0 0 45 45" width="100%" height="100%"><g fill="#000" fill-rule="evenodd" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><g fill="#000" stroke="none"><circle cx="6" cy="12" r="2.75"/><circle cx="14" cy="9" r="2.75"/><circle cx="22.5" cy="8" r="2.75"/><circle cx="31" cy="9" r="2.75"/><circle cx="39" cy="12" r="2.75"/></g><path d="M9 26c8.5-1.5 21-1.5 27 0l2.5-12.5L31 25l-.3-14.1-5.2 13.6-3-14.5-3 14.5-5.2-13.6L14 25 6.5 13.5 9 26zM9 26c0 2 1.5 2 2.5 4 1 1.5 1 1 .5 3.5-1.5 1-1.5 2.5-1.5 2.5-1.5 1.5.5 2.5.5 2.5 6.5 1 16.5 1 23 0 0 0 1.5-1 0-2.5 0 0 .5-1.5-1-2.5-.5-2.5-.5-2 .5-3.5 1-2 2.5-2 2.5-4-8.5-1.5-18.5-1.5-27 0z" stroke-linecap="butt"/><path d="M11 38.5a35 35 1 0 0 23 0" fill="none" stroke-linecap="butt"/><path d="M11 29a35 35 1 0 1 23 0M12.5 31.5h20M11.5 34.5a35 35 1 0 0 22 0M10.5 37.5a35 35 1 0 0 24 0" fill="none" stroke="#fff"/></g></svg>`,
+            'r': `<svg viewBox="0 0 45 45" width="100%" height="100%"><g fill="#000" fill-rule="evenodd" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 39h27v-3H9v3zM12.5 32l1.5-2.5h17l1.5 2.5h-20zM12 36v-4h21v4H12z" stroke-linecap="butt"/><path d="M14 29.5v-13h17v13H14z" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M14 16.5L11 14h23l-3 2.5H14zM11 14V9h4v2h5V9h5v2h5V9h4v5H11z" stroke-linecap="butt"/><path d="M12 35.5h21M13 31.5h19M14 29.5h17M14 16.5h17M11 14h23" fill="none" stroke="#fff" stroke-width="1" stroke-linejoin="miter"/></g></svg>`,
+            
+            'B': `<svg viewBox="0 0 45 45" width="100%" height="100%"><g fill="none" fill-rule="evenodd" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><g fill="#fff" stroke-linecap="butt"><path d="M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.354.49-2.323.47-3-.5 1.354-1.94 3-2 3-2zM15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2zM25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z"/></g><path d="M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5" stroke-linejoin="miter"/></g></svg>`,
+            'K': `<svg viewBox="0 0 45 45" width="100%" height="100%"><g fill="none" fill-rule="evenodd" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22.5 11.63V6M20 8h5" stroke-linejoin="miter"/><path d="M22.5 25s4.5-7.5 3-10.5c0 0-1-2.5-3-2.5s-3 2.5-3 2.5c-1.5 3 3 10.5 3 10.5" fill="#fff" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-6.5-13.5-3.5-16 4V27v-3.5c-3.5-7.5-13-10.5-16-4-3 6 5 10 5 10V37z" fill="#fff"/><path d="M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0"/></g></svg>`,
+            'N': `<svg viewBox="0 0 45 45" width="100%" height="100%"><g fill="none" fill-rule="evenodd" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18" style="fill:#ffffff; stroke:#000000;"/><path d="M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26 C 6,24 12,14 12,14 C 12,14 13.89,12.1 14,10.5 C 13.27,9.506 13.5,8.5 13.5,7.5 C 14.5,6.5 16.5,10 16.5,10 L 18.5,10 C 18.5,10 19.28,8.008 21,7 C 22,7 22,10 22,10" style="fill:#ffffff; stroke:#000000;"/><path d="M 9.5 25.5 A 0.5 0.5 0 1 1 8.5,25.5 A 0.5 0.5 0 1 1 9.5 25.5 z" style="fill:#000000; stroke:#000000;"/><path d="M 15 15.5 A 0.5 1.5 0 1 1 14,15.5 A 0.5 1.5 0 1 1 15 15.5 z" transform="matrix(0.866,0.5,-0.5,0.866,9.693,-5.173)" style="fill:#000000; stroke:#000000;"/></g></svg>`,
+            'P': `<svg viewBox="0 0 45 45" width="100%" height="100%"><g fill="none" fill-rule="evenodd" stroke="#000" stroke-width="1.5" stroke-linecap="round"><path d="M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03-3 1.06-7.41 5.55-7.41 13.47h23c0-7.92-4.41-12.41-7.41-13.47 1.47-1.19 2.41-3 2.41-5.03 0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z" fill="#fff" stroke="#000" stroke-width="1.5" stroke-linecap="round"/></g></svg>`,
+            'Q': `<svg viewBox="0 0 45 45" width="100%" height="100%"><g fill="#fff" fill-rule="evenodd" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM24.5 7.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM41 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM16 8.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM33 9a2 2 0 1 1-4 0 2 2 0 1 1 4 0z"/><path d="M9 26c8.5-1.5 21-1.5 27 0l2-12-7 11V11l-5.5 13.5-3-15-3 15-5.5-14V25L7 14l2 12zM9 26c0 2 1.5 2 2.5 4 1 1.5 1 1 .5 3.5-1.5 1-1.5 2.5-1.5 2.5-1.5 1.5.5 2.5.5 2.5 6.5 1 16.5 1 23 0 0 0 1.5-1 0-2.5 0 0 .5-1.5-1-2.5-.5-2.5-.5-2 .5-3.5 1-2 2.5-2 2.5-4-8.5-1.5-18.5-1.5-27 0z" stroke-linecap="butt"/><path d="M11.5 30c3.5-1 18.5-1 22 0M12 33.5c6-1 15-1 21 0" fill="none"/></g></svg>`,
+            'R': `<svg viewBox="0 0 45 45" width="100%" height="100%"><g fill="#fff" fill-rule="evenodd" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 39h27v-3H9v3zM12 36v-4h21v4H12zM11 14V9h4v2h5V9h5v2h5V9h4v5" stroke-linecap="butt"/><path d="M34 14l-3 3H14l-3-3"/><path d="M31 17v12.5H14V17" stroke-linecap="butt" stroke-linejoin="miter"/><path d="M31 29.5l1.5 2.5h-20l1.5-2.5"/><path d="M11 14h23" fill="none" stroke-linejoin="miter"/></g></svg>`
+        };
+
+        // --- 2. TỔNG HỢP ÂM THANH GÕ CỜ GỖ (OFFLINE) ---
+        function playWoodTapSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                // Giả lập âm thanh gõ gỗ: tần số giảm nhanh cực ngắn
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(220, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.08);
+                
+                gain.gain.setValueAtTime(0.18, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+                
+                osc.start();
+                osc.stop(ctx.currentTime + 0.08);
+            } catch (e) {
+                console.log("Audio Error: ", e);
+            }
+        }
+
+        function playChimeSound(isSuccess) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                if (isSuccess) {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);  // E5
+                    osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);  // G5
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.4);
+                } else {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(150, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(90, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.2);
+                }
+            } catch (e) {
+                console.log("Audio Error: ", e);
+            }
+        }
+
+        // --- 3. DỮ LIỆU 5 BÀI HỌC KHAI CUỘC VÀ TRÌNH TỰ NƯỚC ĐI ---
+        const INITIAL_BOARD = {
+            // Đen
+            "a8": "r", "b8": "n", "c8": "b", "d8": "q", "e8": "k", "f8": "b", "g8": "n", "h8": "r",
+            "a7": "p", "b7": "p", "c7": "p", "d7": "p", "e7": "p", "f7": "p", "g7": "p", "h7": "p",
+            // Trắng
+            "a2": "P", "b2": "P", "c2": "P", "d2": "P", "e2": "P", "f2": "P", "g2": "P", "h2": "P",
+            "a1": "R", "b1": "N", "c1": "B", "d1": "Q", "e1": "K", "f1": "B", "g1": "N", "h1": "R"
+        };
+
+        const STEPS = [
+            {
+                chapter: "Chương 1: Khai Cuộc Ý",
+                title: "Khai cuộc Ý - Tấn công điểm yếu cánh Vua",
+                side: "white", // Người học chơi quân Trắng
+                text: `
+                    <p><strong>Khai cuộc Ý</strong> là một trong những hệ thống khai cuộc lâu đời và phổ biến nhất trong cờ vua, cực kỳ phù hợp cho người mới học.</p>
+                    <p>Mục tiêu chiến thuật của khai cuộc này bao gồm:</p>
+                    <ul>
+                        <li><strong>e2-e4:</strong> Chiếm lĩnh không gian trung tâm ngay lập tức.</li>
+                        <li><strong>Ng1-f3:</strong> Phát triển quân nhẹ (Mã) để kiểm soát trung tâm và chuẩn bị cho Vua nhập thành.</li>
+                        <li><strong>Bf1-c4:</strong> Phát triển quân Tượng lên ô c4, nhắm thẳng vào ô <strong>f7</strong> của bên Đen. Trong cờ vua, f7 là ô yếu nhất của Đen vì ban đầu nó chỉ được bảo vệ bởi một mình quân Vua.</li>
+                    </ul>
+                    <p><strong>Nhiệm vụ:</strong> Hãy đi các nước cờ khai cuộc Ý chuẩn xác theo hướng dẫn.</p>
+                `,
+                moves: [
+                    { from: "e2", to: "e4", reply: { from: "e7", to: "e5" }, instruction: "Bước 1: Hãy đẩy quân Tốt trước mặt Vua lên ô <strong>e4</strong>." },
+                    { from: "g1", to: "f3", reply: { from: "b8", to: "c6" }, instruction: "Bước 2: Phát triển quân Mã ở g1 lên ô <strong>f3</strong> để tấn công Tốt e5 của đối phương." },
+                    { from: "f1", to: "c4", reply: null, instruction: "Bước 3: Phát triển quân Tượng ở f1 lên ô <strong>c4</strong> để ngắm vào điểm yếu f7." }
+                ],
+                feedback: "Hoàn thành Khai cuộc Ý! Nước đi Bc4 thiết lập thế cờ kiểm soát trung tâm vững chắc và sẵn sàng tạo sức ép lớn lên cánh Vua của Đen."
+            },
+            {
+                chapter: "Chương 2: Khai Cuộc Tây Ban Nha",
+                title: "Khai cuộc Tây Ban Nha - Khóa quân phòng thủ",
+                side: "white",
+                text: `
+                    <p><strong>Khai cuộc Tây Ban Nha</strong> là sự lựa chọn hàng đầu của các kiện tướng thế giới. Khai cuộc này bắt đầu tương tự như khai cuộc Ý nhưng nước đi thứ ba của Trắng lại hướng tới mục tiêu khác.</p>
+                    <p>Thay vì đặt Tượng ở c4, Trắng đi <strong>Bb5</strong> nhằm đe dọa quân Mã ở c6 của Đen - quân cờ đang bảo vệ đắc lực cho Tốt e5 của bên Đen.</p>
+                    <p><strong>Nhiệm vụ:</strong> Hãy thực hiện chuỗi nước đi khai cuộc Tây Ban Nha để tạo sức ép gián tiếp vào trung tâm.</p>
+                `,
+                moves: [
+                    { from: "e2", to: "e4", reply: { from: "e7", to: "e5" }, instruction: "Bước 1: Đẩy Tốt trắng e2 lên <strong>e4</strong> chiếm trung tâm." },
+                    { from: "g1", to: "f3", reply: { from: "b8", to: "c6" }, instruction: "Bước 2: Phát triển Mã g1 lên <strong>f3</strong> tấn công Tốt e5." },
+                    { from: "f1", to: "b5", reply: null, instruction: "Bước 3: Di chuyển Tượng f1 lên ô <strong>b5</strong> để ghim và đe dọa quân Mã c6." }
+                ],
+                feedback: "Hoàn thành Khai cuộc Tây Ban Nha! Nước đi Bb5 ghim chặt quân Mã c6 của đối thủ, thiết lập quyền chủ động kiểm soát trung tâm dài hạn cho Trắng."
+            },
+            {
+                chapter: "Chương 3: Phòng Thủ Sicilian",
+                title: "Phòng thủ Sicilian - Phản công không đối xứng",
+                side: "black", // Người học chơi quân Đen!
+                text: `
+                    <p><strong>Phòng thủ Sicilian</strong> là đòn phản công mạnh mẽ và phổ biến nhất của bên Đen để chống lại nước đi e4 của Trắng. Đây là hệ thống khai cuộc không đối xứng dẫn đến những ván đấu gay cấn.</p>
+                    <p>Mục đích của Đen:</p>
+                    <ul>
+                        <li>Khi Trắng đi e4, Đen không đi e5 tương ứng mà đi <strong>c5</strong>.</li>
+                        <li>Nước đi c5 giúp Đen tranh đoạt quyền kiểm soát ô trung tâm d4 bằng một quân Tốt cánh (Tốt c), giữ nguyên quân Tốt trung tâm (Tốt d và e) cho các đợt phản công sau này.</li>
+                    </ul>
+                    <p><strong>Nhiệm vụ:</strong> Vào vai bên Đen, đối phó với các nước khai cuộc của Trắng để thiết lập thế trận phòng thủ Sicilian.</p>
+                `,
+                moves: [
+                    { from: "c7", to: "c5", reply: { from: "g1", to: "f3" }, instruction: "Bước 1: Trắng vừa đi e4. Hãy đáp trả bằng cách đẩy Tốt cánh Hậu lên ô <strong>c5</strong>." },
+                    { from: "d7", to: "d6", reply: { from: "d2", to: "d4" }, instruction: "Bước 2: Trắng vừa lên Mã f3. Hãy bảo vệ ô trung tâm bằng cách đẩy nhẹ Tốt d7 lên <strong>d6</strong>." },
+                    { from: "c5", to: "d4", reply: null, instruction: "Bước 3: Trắng đẩy Tốt d4 thách thức trung tâm. Hãy dùng Tốt c5 ăn Tốt d4 để hoàn thành thế phản công mở!" }
+                ],
+                feedback: "Hoàn thành Phòng thủ Sicilian! Đen đã đổi Tốt cánh c lấy Tốt trung tâm d của Trắng, tạo ra cột dọc c mở cho các đòn tấn công cánh Hậu đầy hứa hẹn."
+            },
+            {
+                chapter: "Chương 4: Gambit Hậu",
+                title: "Gambit Hậu - Chủ động thí quân giành trung tâm",
+                side: "white",
+                text: `
+                    <p><strong>Gambit Hậu</strong> bắt đầu bằng nước đi Tốt d4 của cả hai bên. Ở nước đi thứ hai, Trắng quyết định đi nước cờ đột phá <strong>c4</strong>.</p>
+                    <p>Nước đi này được gọi là "Gambit" (Thí quân): Trắng đưa quân Tốt c4 ra làm mồi nhử. Nếu Đen ăn Tốt c4 (Chấp nhận Gambit), Đen sẽ bị mất kiểm soát trung tâm. Trắng có thể dễ dàng chiếm trọn trung tâm bằng cách đẩy Tốt e4 và giành lại Tốt c4 sau đó.</p>
+                    <p><strong>Nhiệm vụ:</strong> Hãy thực hiện chuỗi nước đi Gambit Hậu và trừng phạt Đen nếu họ chấp nhận ăn quân Tốt thí.</p>
+                `,
+                moves: [
+                    { from: "d2", to: "d4", reply: { from: "d7", to: "d5" }, instruction: "Bước 1: Hãy mở màn bằng nước đẩy Tốt trước mặt Hậu lên ô <strong>d4</strong>." },
+                    { from: "c2", to: "c4", reply: { from: "d5", to: "c4" }, instruction: "Bước 2: Tiến hành đòn thí Tốt bằng cách đẩy Tốt c2 lên <strong>c4</strong> (Đen chấp nhận ăn Tốt)." },
+                    { from: "e2", to: "e4", reply: null, instruction: "Bước 3: Tận dụng cơ hội Đen rời bỏ trung tâm, hãy đẩy Tốt e2 lên <strong>e4</strong> để chiếm lĩnh hoàn toàn trung tâm bàn cờ." }
+                ],
+                feedback: "Hoàn thành Gambit Hậu! Cặp Tốt d4 và e4 của Trắng đang kiểm soát hoàn toàn trung tâm bàn cờ, trong khi Tượng trắng ở f1 đã sẵn sàng ăn lại quân Tốt c4 ở nước tiếp theo."
+            },
+            {
+                chapter: "Chương 5: Phòng Thủ French",
+                title: "Phòng thủ French - Bức tường thép kiên cố",
+                side: "black",
+                text: `
+                    <p><strong>Phòng thủ French</strong> là hệ thống phòng thủ kín kẽ giúp Đen thiết lập cấu trúc vững chắc để chống lại thế tấn công của Trắng ở cánh Vua.</p>
+                    <p>Mục đích của Đen:</p>
+                    <ul>
+                        <li>Đen đi <strong>e6</strong> để chuẩn bị đẩy d5 bảo vệ trung tâm mà không sợ bị Trắng ăn mất.</li>
+                        <li>Khi Trắng cố gắng đẩy Tốt e5 để khóa không gian, Đen sẽ tung đòn phản công trung tâm bằng cách đẩy <strong>c5</strong> để đánh vào gốc xích Tốt d4 của Trắng.</li>
+                    </ul>
+                    <p><strong>Nhiệm vụ:</strong> Vào vai bên Đen, dựng lên bức tường phòng ngự kiên cố trước đợt tấn công trung tâm của Trắng.</p>
+                `,
+                moves: [
+                    { from: "e7", to: "e6", reply: { from: "d2", to: "d4" }, instruction: "Bước 1: Trắng mở màn bằng nước e4. Hãy đẩy nhẹ Tốt e7 lên <strong>e6</strong> để chuẩn bị thế phòng thủ." },
+                    { from: "d7", to: "d5", reply: { from: "e4", to: "e5" }, instruction: "Bước 2: Trắng chiếm trung tâm d4. Hãy đẩy Tốt d7 lên <strong>d5</strong> để thách thức trực tiếp quân Tốt e4." },
+                    { from: "c7", to: "c5", reply: null, instruction: "Bước 3: Trắng đẩy Tốt tiến lên e5 để khóa vị trí. Hãy phản công gốc Tốt d4 của đối thủ bằng cách đẩy <strong>c5</strong>." }
+                ],
+                feedback: "Hoàn thành Phòng thủ French! Bên Đen đã thiết lập cấu trúc xích Tốt phòng ngự vững chắc và đang trực tiếp gây áp lực tấn công vào lá chắn trung tâm của Trắng."
+            }
+        ];
+
+        // Biến trạng thái
+        let currentStepIndex = 0;
+        let boardState = {};
+        let currentMoveIndex = 0;
+        let selectedSquare = null;
+        let isStepCompleted = false;
+
+        // DOM elements
+        const chessboardGrid = document.getElementById('chessboardGrid');
+        const piecesLayer = document.getElementById('piecesLayer');
+        const stepSelector = document.getElementById('stepSelector');
+        const lessonChapterTag = document.getElementById('lessonChapterTag');
+        const lessonTitle = document.getElementById('lessonTitle');
+        const lessonText = document.getElementById('lessonText');
+        const objectiveText = document.getElementById('objectiveText');
+        const objectiveStatus = document.getElementById('objectiveStatus');
+        const feedbackBalloon = document.getElementById('feedbackBalloon');
+        const feedbackDesc = document.getElementById('feedbackDesc');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const resetStepBtn = document.getElementById('resetStepBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+
+        const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+        // Khởi tạo lưới bàn cờ
+        function initChessboardUI() {
+            chessboardGrid.innerHTML = '';
+            for (let r = 7; r >= 0; r--) {
+                for (let c = 0; c < 8; c++) {
+                    const coord = cols[c] + (r + 1);
+                    const squareDiv = document.createElement('div');
+                    squareDiv.className = `square ${(c + r) % 2 === 0 ? 'dark' : 'light'}`;
+                    squareDiv.dataset.coord = coord;
+                    squareDiv.id = `square-${coord}`;
+                    squareDiv.addEventListener('click', () => handleSquareClick(coord));
+                    chessboardGrid.appendChild(squareDiv);
+                }
+            }
+        }
+
+        // Vẽ các quân cờ
+        function renderPieces() {
+            piecesLayer.innerHTML = '';
+            for (const [coord, piece] of Object.entries(boardState)) {
+                if (!piece) continue;
+                
+                const [c, r] = parseCoord(coord);
+                const left = c * 12.5;
+                const top = (7 - r) * 12.5;
+                
+                const pieceDiv = document.createElement('div');
+                pieceDiv.className = `chess-piece ${piece === piece.toUpperCase() ? 'white' : 'black'}`;
+                pieceDiv.dataset.coord = coord;
+                pieceDiv.dataset.piece = piece;
+                pieceDiv.style.left = `${left}%`;
+                pieceDiv.style.top = `${top}%`;
+                pieceDiv.innerHTML = PIECE_SVGS[piece];
+                
+                pieceDiv.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    handleSquareClick(coord);
+                });
+                
+                piecesLayer.appendChild(pieceDiv);
+            }
+        }
+
+        function parseCoord(coord) {
+            const col = cols.indexOf(coord[0]);
+            const row = parseInt(coord[1]) - 1;
+            return [col, row];
+        }
+
+        function getCoordString(c, r) {
+            if (c < 0 || c > 7 || r < 0 || r > 7) return null;
+            return cols[c] + (r + 1);
+        }
+
+        // Click tương tác
+        function handleSquareClick(coord) {
+            if (isStepCompleted) return;
+
+            const step = STEPS[currentStepIndex];
+            const currentMove = step.moves[currentMoveIndex];
+            const piece = boardState[coord];
+
+            // Xác định xem quân cờ được nhấp có đúng là quân cờ cần đi ở lượt này không
+            const expectedFrom = currentMove.from;
+            const isExpectedPiece = (coord === expectedFrom);
+
+            // Nếu người dùng chọn đúng quân cờ cần di chuyển
+            if (isExpectedPiece) {
+                clearHighlights();
+                selectedSquare = coord;
+                
+                const pieceEl = document.querySelector(`.chess-piece[data-coord="${coord}"]`);
+                if (pieceEl) pieceEl.classList.add('selected');
+
+                // Chỉ hiển thị DUY NHẤT một ô đích đúng của khai cuộc để dẫn dắt học sinh
+                highlightValidSquares([currentMove.to]);
+            } 
+            // Nếu người dùng chọn ô đích chuẩn để di chuyển
+            else if (selectedSquare && coord === currentMove.to) {
+                executeMove(selectedSquare, coord);
+            } 
+            // Nhấp sai quân cờ hoặc ô cờ
+            else {
+                clearHighlights();
+                if (piece) {
+                    // Rung lắc quân cờ đi sai và báo hiệu âm thanh lỗi
+                    const pieceEl = document.querySelector(`.chess-piece[data-coord="${coord}"]`);
+                    if (pieceEl) {
+                        pieceEl.classList.add('shake');
+                        playChimeSound(false);
+                        setTimeout(() => pieceEl.classList.remove('shake'), 400);
+                    }
+                }
+                selectedSquare = null;
+            }
+        }
+
+        // Thực thi di chuyển quân cờ
+        function executeMove(from, to) {
+            const step = STEPS[currentStepIndex];
+            const currentMove = step.moves[currentMoveIndex];
+            const piece = boardState[from];
+            const captured = boardState[to];
+
+            boardState[to] = piece;
+            delete boardState[from];
+
+            clearHighlights();
+
+            // Chạy hiệu ứng trượt quân cờ bằng CSS
+            const pieceEl = document.querySelector(`.chess-piece[data-coord="${from}"]`);
+            if (pieceEl) {
+                const [c, r] = parseCoord(to);
+                pieceEl.style.left = `${c * 12.5}%`;
+                pieceEl.style.top = `${(7 - r) * 12.5}%`;
+                pieceEl.dataset.coord = to;
+
+                if (captured) {
+                    const opponentEl = document.querySelector(`.chess-piece[data-coord="${to}"]:not(.selected)`);
+                    if (opponentEl) {
+                        opponentEl.style.transform = 'scale(0)';
+                        setTimeout(() => opponentEl.remove(), 300);
+                    }
+                }
+            }
+
+            playWoodTapSound();
+
+            selectedSquare = null;
+            currentMoveIndex++;
+
+            // Kiểm tra xem nước đi này có đi kèm nước phản hồi của đối thủ ảo không
+            if (currentMove.reply) {
+                objectiveStatus.innerText = "Đối thủ đang suy nghĩ...";
+                setTimeout(() => {
+                    // Thực hiện nước đi đáp trả của đối thủ ảo
+                    const reply = currentMove.reply;
+                    const replyPiece = boardState[reply.from];
+                    
+                    boardState[reply.to] = replyPiece;
+                    delete boardState[reply.from];
+                    
+                    const replyPieceEl = document.querySelector(`.chess-piece[data-coord="${reply.from}"]`);
+                    if (replyPieceEl) {
+                        const [rc, rr] = parseCoord(reply.to);
+                        replyPieceEl.style.left = `${rc * 12.5}%`;
+                        replyPieceEl.style.top = `${(7 - rr) * 12.5}%`;
+                        replyPieceEl.dataset.coord = reply.to;
+                    }
+                    
+                    playWoodTapSound();
+                    
+                    setTimeout(() => {
+                        renderPieces();
+                        updateObjectiveProgress();
+                    }, 300);
+                    
+                }, 600);
+            } else {
+                setTimeout(() => {
+                    renderPieces();
+                    updateObjectiveProgress();
+                }, 300);
+            }
+        }
+
+        function highlightValidSquares(moves) {
+            moves.forEach(m => {
+                const sq = document.getElementById(`square-${m}`);
+                if (sq) {
+                    sq.classList.add('highlight-dot');
+                    if (boardState[m]) {
+                        sq.classList.add('has-opponent');
+                    }
+                }
+            });
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.square').forEach(sq => {
+                sq.classList.remove('highlight-dot', 'has-opponent', 'highlight-center');
+            });
+            document.querySelectorAll('.chess-piece').forEach(pc => {
+                pc.classList.remove('selected');
+            });
+        }
+
+        // Cập nhật tiến độ của nhiệm vụ
+        function updateObjectiveProgress() {
+            const step = STEPS[currentStepIndex];
+            
+            if (currentMoveIndex < step.moves.length) {
+                // Tiếp tục hướng dẫn nước đi tiếp theo
+                const nextMove = step.moves[currentMoveIndex];
+                objectiveText.innerHTML = nextMove.instruction;
+                objectiveStatus.innerText = `Nước ${currentMoveIndex + 1}/${step.moves.length}`;
+                
+                // Highlight gợi ý vùng trung tâm nếu ở khai cuộc Bài 1, 2, 4
+                highlightStrategicSquares();
+            } else {
+                // Khai cuộc hoàn thành xuất sắc!
+                isStepCompleted = true;
+                playChimeSound(true);
+                
+                objectiveStatus.className = "objective-status status-complete";
+                objectiveStatus.innerHTML = `<i class="fa-solid fa-check"></i> Hoàn thành`;
+                nextBtn.disabled = false;
+                
+                feedbackBalloon.classList.add('active');
+                feedbackDesc.innerText = step.feedback;
+            }
+        }
+
+        // Phát sáng gợi ý các ô cờ chiến lược trung tâm (e4, d4, e5, d5)
+        function highlightStrategicSquares() {
+            clearHighlights();
+            // Highlight các ô cờ trung tâm cốt lõi để người học dễ liên tưởng lý thuyết
+            if (currentStepIndex === 0 || currentStepIndex === 1 || currentStepIndex === 3) {
+                const centerSquares = ["e4", "d4", "e5", "d5"];
+                centerSquares.forEach(c => {
+                    const sq = document.getElementById(`square-${c}`);
+                    if (sq) sq.classList.add('highlight-center');
+                });
+            }
+        }
+
+        // --- 5. TẢI BÀI HỌC VÀ KHỞI TẠO BÀN CỜ ---
+        function loadStep(index) {
+            currentStepIndex = index;
+            isStepCompleted = false;
+            currentMoveIndex = 0;
+            selectedSquare = null;
+            
+            const step = STEPS[index];
+
+            // Cập nhật thông tin lý thuyết
+            lessonChapterTag.innerText = step.chapter;
+            lessonTitle.innerText = step.title;
+            lessonText.innerHTML = step.text;
+            
+            // Thiết lập mục tiêu nước đi đầu tiên
+            objectiveText.innerHTML = step.moves[0].instruction;
+            objectiveStatus.className = "objective-status status-incomplete";
+            objectiveStatus.innerText = `Nước 1/${step.moves.length}`;
+            
+            feedbackBalloon.classList.remove('active');
+            nextBtn.disabled = true;
+            stepSelector.value = index;
+
+            // Khởi tạo bàn cờ về vị trí ban đầu
+            boardState = JSON.parse(JSON.stringify(INITIAL_BOARD));
+            clearHighlights();
+            renderPieces();
+
+            // Cập nhật thanh tiến trình
+            const progress = ((index + 1) / STEPS.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressPercent.innerText = `${Math.round(progress)}%`;
+
+            prevBtn.disabled = (index === 0);
+
+            // Chạy hiệu ứng xuất hiện các quân cờ ban đầu
+            runPieceTransitionEffects();
+
+            // Nếu người dùng chơi quân Đen (Sicilian, French), máy tính đi nước đầu tiên (1. e4)
+            if (step.side === "black") {
+                objectiveText.innerHTML = "Trắng đang đi cờ mở màn...";
+                objectiveStatus.innerText = "Chờ...";
+                setTimeout(() => {
+                    // Máy đi e2-e4
+                    boardState["e4"] = "P";
+                    delete boardState["e2"];
+                    
+                    const pawnEl = document.querySelector(`.chess-piece[data-coord="e2"]`);
+                    if (pawnEl) {
+                        const [c, r] = parseCoord("e4");
+                        pawnEl.style.left = `${c * 12.5}%`;
+                        pawnEl.style.top = `${(7 - r) * 12.5}%`;
+                        pawnEl.dataset.coord = "e4";
+                    }
+                    playWoodTapSound();
+                    
+                    setTimeout(() => {
+                        renderPieces();
+                        // Chuyển quyền cho người học đi cờ
+                        objectiveText.innerHTML = step.moves[0].instruction;
+                        objectiveStatus.innerText = `Nước 1/${step.moves.length}`;
+                        highlightStrategicSquares();
+                    }, 300);
+                }, 800);
+            } else {
+                highlightStrategicSquares();
+            }
+        }
+
+        function runPieceTransitionEffects() {
+            document.querySelectorAll('.chess-piece').forEach((el, i) => {
+                el.style.opacity = '0';
+                el.style.transform = 'scale(0.6) translateY(-20px)';
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'scale(1) translateY(0)';
+                }, i * 20);
+            });
+        }
+
+        // Khởi tạo danh mục dropdown
+        function initStepSelectorUI() {
+            stepSelector.innerHTML = '';
+            STEPS.forEach((step, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.innerText = `${idx + 1}. ${step.title}`;
+                stepSelector.appendChild(opt);
+            });
+            
+            stepSelector.addEventListener('change', function() {
+                loadStep(parseInt(this.value));
+            });
+        }
+
+        // Đăng ký các nút điều hướng
+        prevBtn.addEventListener('click', () => {
+            if (currentStepIndex > 0) loadStep(currentStepIndex - 1);
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentStepIndex < STEPS.length - 1) {
+                loadStep(currentStepIndex + 1);
+            } else {
+                alert("Chúc mừng bạn đã hoàn thành xuất sắc toàn bộ khóa học Khai cuộc Cờ vua!");
+            }
+        });
+
+        resetStepBtn.addEventListener('click', () => {
+            loadStep(currentStepIndex);
+        });
+
+        // Khởi chạy khi tải trang
+        window.addEventListener('DOMContentLoaded', () => {
+            initChessboardUI();
+            initStepSelectorUI();
+            loadStep(0);
+        });
+    </script>
+<script>
+  // Deep-link for embedding in the learn page: ?step=N opens lesson N (0-based).
+  // The module inits on window DOMContentLoaded and calls loadStep(0); defer to
+  // a macrotask so this runs AFTER that init and wins.
+  document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(function () {
+      try {
+        var n = parseInt(new URLSearchParams(location.search).get('step'), 10);
+        if (!isNaN(n) && n > 0 && typeof loadStep === 'function') loadStep(n);
+      } catch (e) {}
+    }, 0);
+  });
+</script>
+</body>
+</html>

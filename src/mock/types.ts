@@ -28,6 +28,12 @@ export interface Lesson {
   videoUrl: string;
   isPreview: boolean;
   resources: Resource[];
+  /**
+   * When set, the lesson is a self-contained interactive HTML module served
+   * from `public/` (its own board, chapters and progress). The learn page
+   * embeds it full-bleed in place of the video player.
+   */
+  contentUrl?: string;
 }
 
 export interface Section {

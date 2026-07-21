@@ -15,6 +15,7 @@ import Drawer from '../components/ui/Drawer';
 import LearnTopBar from '../components/learn/LearnTopBar';
 import LessonSidebar from '../components/learn/LessonSidebar';
 import VideoPlayer from '../components/learn/VideoPlayer';
+import CourseEmbed from '../components/learn/CourseEmbed';
 import FloatingChatbot from '../components/learn/FloatingChatbot';
 import CourseAiPanel from '../components/learn/CourseAiPanel';
 import NotFound from './NotFound';
@@ -50,6 +51,7 @@ export default function LearnPage() {
   if (!course || !currentLesson) return <NotFound />;
 
   const lessons = flattenLessons(course);
+  const embedUrl = currentLesson.lesson.contentUrl;
   const previous = lessons[currentLesson.index - 1];
   const next = lessons[currentLesson.index + 1];
   const percent = progress.percent(lessons.length);
@@ -89,6 +91,13 @@ export default function LearnPage() {
         )}
 
         <main className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-secondary bg-primary">
+          {embedUrl ? (
+            // Interactive HTML module (chess courses) — the module carries its
+            // own board, chapter nav, progress and feedback, so it fills the
+            // panel and the video info block below is skipped.
+            <CourseEmbed src={embedUrl} step={currentLesson.index} title={currentLesson.lesson.title} />
+          ) : (
+          <>
           <VideoPlayer src={currentLesson.lesson.videoUrl} onEnded={handleEnded} />
 
           <div className="mx-auto w-full max-w-[1480px] shrink-0 px-4 py-6">
@@ -160,6 +169,8 @@ export default function LearnPage() {
               </div>
             </div>
           </div>
+          </>
+          )}
         </main>
 
         {/* Figma variant 211:10306 — the Course AI side panel. */}

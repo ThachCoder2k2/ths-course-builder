@@ -10,3 +10,6 @@ dist-ssr
 .idea
 .DS_Store
 coverage
+
+# Source archive for chess course modules — not part of the app
+Downloads.zip
