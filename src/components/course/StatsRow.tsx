@@ -4,8 +4,8 @@ import { LEVEL_LABEL, type Course } from '../../mock/types';
  * Figma: `Container` (node 184:4582) — the floating metric card that overlaps
  * the hero's lower edge. bg-secondary, radius-2xl, px-7xl py-xl, wrapping with
  * 64px row / 32px column gaps. Three flex-1 metric items (a 4th is hidden in
- * Figma): a Display xl number in brand-tertiary_alt over a Text lg/Semibold
- * label. Container inset px-8 (container-padding-desktop).
+ * Figma): a Display sm number (30/38) in brand-tertiary_alt over a Text
+ * lg/Semibold label. Container inset px-8 (container-padding-desktop).
  */
 export default function StatsRow({ course }: { course: Course }) {
   const metrics = [
@@ -23,7 +23,7 @@ export default function StatsRow({ course }: { course: Course }) {
             className="flex min-w-[240px] flex-1 flex-col items-center gap-2xl"
           >
             <div className="flex w-full flex-col items-center gap-lg">
-              <dd className="w-full text-center text-display-xl text-brand-tertiary">
+              <dd className="w-full text-center text-display-sm text-brand-tertiary">
                 {metric.value}
               </dd>
               <dt className="w-full text-center text-lg font-semibold text-primary">
