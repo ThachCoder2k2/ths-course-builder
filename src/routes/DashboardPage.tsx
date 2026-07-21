@@ -1,38 +1,58 @@
-import ContinueLearning from '../components/home/ContinueLearning';
 import CourseSection from '../components/home/CourseSection';
 import FeaturedTabsSection from '../components/home/FeaturedTabsSection';
+import TabbedCourseSection from '../components/home/TabbedCourseSection';
+import ListingColumns from '../components/home/ListingColumns';
 import CTABanner from '../components/home/CTABanner';
-import CollectionGrid from '../components/home/CollectionGrid';
+import TopicPillGrid from '../components/home/TopicPillGrid';
+import DashboardBanner from '../components/home/DashboardBanner';
 import { getCourses, getFeaturedCourses } from '../mock';
 
 /**
  * Figma: `Sau đăng nhập` (node 177:2981).
- * Section order follows the frame: greeting, course sections, CTA, banner.
- * Sections still on the invented layout are marked below.
+ *
+ * Main content (node 177:3007) puts its sections in a 1440-wide container
+ * inset 32px — so 1376 content — separated by 64px. The CTA section
+ * (179:5458) and the Banner (177:2985) are full-bleed 1920 and therefore sit
+ * outside that container.
  */
 export default function DashboardPage() {
   return (
-    <div data-testid="page-dashboard" className="mx-auto flex max-w-content flex-col gap-6xl px-4 py-6xl lg:px-4xl">
-      {/* Figma 179:4442 — exact */}
-      <CourseSection title="Khoá học nổi bật" courses={getFeaturedCourses(3)} />
+    <div data-testid="page-dashboard" className="flex flex-col">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-7xl px-4 pt-7xl lg:px-4xl">
+        {/* Figma 179:4442 */}
+        <CourseSection title="Khoá học nổi bật" courses={getFeaturedCourses(3)} />
 
-      {/* Figma 179:4444 — exact */}
-      <FeaturedTabsSection
-        title="Học theo cấp độ"
-        supportingText="Chọn cấp độ phù hợp với bạn và bắt đầu từ những khoá học nền tảng nhất."
-      />
+        {/* Figma 179:4444 */}
+        <FeaturedTabsSection
+          title="Học theo cấp độ"
+          supportingText="Chọn cấp độ phù hợp với bạn và bắt đầu từ những khoá học nền tảng nhất."
+        />
 
-      {/* Figma 179:4624 — not yet rebuilt */}
-      <ContinueLearning />
+        {/* Figma 179:4624 */}
+        <TabbedCourseSection
+          title="Những khoá học giúp bạn mở khoá kĩ năng mới"
+          courses={getCourses()}
+        />
 
-      {/* Figma 179:5518 — not yet rebuilt */}
-      <CourseSection title="Khoá học mới" courses={getCourses().slice(3, 6)} />
+        {/* Figma 179:5518 */}
+        <ListingColumns />
+      </div>
 
-      {/* Figma 179:5459 CTA — not yet rebuilt */}
-      <CTABanner />
+      {/* Figma 179:5458 — full-bleed */}
+      <div className="pt-7xl">
+        <CTABanner />
+      </div>
 
-      {/* Figma 179:5208 / 179:7785 — not yet rebuilt */}
-      <CollectionGrid />
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-7xl px-4 pb-9xl pt-7xl lg:px-4xl">
+        {/* Figma 179:5208 */}
+        <CourseSection title="Khoá học nổi bật" courses={getCourses().slice(3, 6)} />
+
+        {/* Figma 179:7785 */}
+        <TopicPillGrid />
+      </div>
+
+      {/* Figma 177:2985 — full-bleed */}
+      <DashboardBanner />
     </div>
   );
 }

@@ -14,23 +14,47 @@ function renderDashboard() {
 beforeEach(() => localStorage.clear());
 
 describe('DashboardPage', () => {
-  it('renders all the main sections', () => {
+  it('renders every section of Figma node 177:2981', () => {
     renderDashboard();
     expect(screen.getByTestId('page-dashboard')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Đang học' })).toBeInTheDocument();
+
+    // Nodes 179:4442 and 179:5208 carry the same heading in Figma.
+    expect(screen.getAllByRole('heading', { name: 'Khoá học nổi bật' })).toHaveLength(2);
     expect(screen.getByRole('heading', { name: 'Học theo cấp độ' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Khoá học nổi bật' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Bộ sưu tập' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Những khoá học giúp bạn mở khoá kĩ năng mới' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Các tệp khoá học nổi bật xếp theo chủ đề' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Thiết kế lộ trình học cá nhân hoá dành cho bạn' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Kỹ năng phổ biến' })).toBeInTheDocument();
+  });
+
+  it('renders the banner carousel (node 177:2985) with three slides', () => {
+    renderDashboard();
+    expect(
+      screen.getAllByRole('heading', {
+        name: 'IEE: Đột phá vật liệu Graphene mở đường cho chip THz',
+      }),
+    ).toHaveLength(3);
+    expect(screen.getByRole('button', { name: 'Chuyển tới banner 1' })).toHaveAttribute(
+      'aria-current',
+      'true',
+    );
+  });
+
+  it('renders the skill pills from node 179:7785', () => {
+    renderDashboard();
+    expect(screen.getByRole('button', { name: 'Công nghệ và lập trình' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tranh biện' })).toBeInTheDocument();
   });
 
   it('links course cards to the course detail route', () => {
     renderDashboard();
     const links = screen.getAllByRole('link', { name: /Trí tuệ nhân tạo \(AI\) từ cơ bản/ });
     expect(links[0]).toHaveAttribute('href', '/courses/ai-co-ban-den-thuc-tien');
-  });
-
-  it('offers a start-learning action when no progress is stored', () => {
-    renderDashboard();
-    expect(screen.getAllByRole('button', { name: 'Bắt đầu học' }).length).toBeGreaterThan(0);
   });
 });
