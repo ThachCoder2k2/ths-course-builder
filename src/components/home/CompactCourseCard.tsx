@@ -35,7 +35,8 @@ export default function CompactCourseCard({ course }: { course: Course }) {
                 </IconBadge>
               </div>
             </div>
-            <p className="line-clamp-2 text-sm text-tertiary">{course.subtitle}</p>
+            {/* Figma reserves a fixed two-line supporting block (40px). */}
+            <p className="line-clamp-2 min-h-[40px] text-sm text-tertiary">{course.subtitle}</p>
           </div>
         </div>
       </article>

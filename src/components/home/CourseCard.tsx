@@ -33,7 +33,8 @@ export default function CourseCard({ course }: { course: Course }) {
                 <IconBadge icon={<Clock className="h-3 w-3" />}>{courseMinutes(course)} phút</IconBadge>
               </div>
             </div>
-            <p className="line-clamp-2 text-sm text-tertiary">{course.subtitle}</p>
+            {/* Figma reserves a fixed two-line supporting block (40px). */}
+            <p className="line-clamp-2 min-h-[40px] text-sm text-tertiary">{course.subtitle}</p>
           </div>
         </div>
       </article>
