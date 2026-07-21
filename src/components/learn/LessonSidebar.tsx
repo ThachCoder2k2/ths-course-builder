@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Check, CirclePlay, List } from 'lucide-react';
+import { Check, CirclePlay, ListCollapse } from 'lucide-react';
 import { flattenLessons } from '../../mock';
 import type { Course } from '../../mock/types';
 import type { useProgress } from '../../lib/useProgress';
@@ -24,23 +24,27 @@ export default function LessonSidebar({
   progress,
   className,
   onNavigate,
+  onToggle,
 }: {
   course: Course;
   activeLessonId: string;
   progress: ReturnType<typeof useProgress>;
   className?: string;
   onNavigate?: () => void;
+  onToggle?: () => void;
 }) {
   const lessons = flattenLessons(course);
 
   return (
     <aside className={cn('bg-primary', className)}>
       <div className="p-xl pb-0">
+        {/* Figma `Buttons/Button` (204:4882) — tertiary, brand-900, list-collapse. */}
         <button
           type="button"
-          className="flex h-9 items-center gap-sm rounded-md border border-primary bg-primary px-lg text-sm font-semibold text-secondary shadow-xs"
+          onClick={onToggle}
+          className="flex items-center justify-center gap-xs rounded-md px-lg py-md text-sm font-semibold text-brand-900 hover:bg-secondary"
         >
-          <List className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <ListCollapse className="h-5 w-5 shrink-0" aria-hidden="true" />
           Ẩn mục lục
         </button>
       </div>

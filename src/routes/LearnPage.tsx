@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   Flag,
+  ListCollapse,
   ListVideo,
   ThumbsDown,
   ThumbsUp,
@@ -39,6 +40,7 @@ export default function LearnPage() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
+  const [tocOpen, setTocOpen] = useState(true);
 
   const currentLessonId = currentLesson?.lesson.id;
   useEffect(() => {
@@ -65,12 +67,26 @@ export default function LearnPage() {
       {/* Figma `Frame 7` (204:4576): a grey frame holding white panels — sidebar
           + main inset with gap-6xl and p-8 (sub nav 320, gap 24, main 1512). */}
       <div className="flex min-h-0 flex-1 gap-6 bg-secondary p-8">
-        <LessonSidebar
-          course={course}
-          activeLessonId={currentLesson.lesson.id}
-          progress={progress}
-          className="hidden w-80 shrink-0 overflow-y-auto rounded-2xl border border-secondary lg:block"
-        />
+        {tocOpen ? (
+          <LessonSidebar
+            course={course}
+            activeLessonId={currentLesson.lesson.id}
+            progress={progress}
+            onToggle={() => setTocOpen(false)}
+            className="hidden w-80 shrink-0 overflow-y-auto rounded-2xl border border-secondary lg:block"
+          />
+        ) : (
+          <div className="hidden self-start lg:block">
+            <button
+              type="button"
+              onClick={() => setTocOpen(true)}
+              className="flex items-center justify-center gap-xs rounded-md border border-secondary bg-primary px-lg py-md text-sm font-semibold text-brand-900 shadow-xs"
+            >
+              <ListCollapse className="h-5 w-5 shrink-0" aria-hidden="true" />
+              Hiện mục lục
+            </button>
+          </div>
+        )}
 
         <main className="min-w-0 flex-1 overflow-y-auto rounded-2xl border border-secondary bg-primary">
           <VideoPlayer src={currentLesson.lesson.videoUrl} onEnded={handleEnded} />
