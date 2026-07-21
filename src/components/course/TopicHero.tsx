@@ -13,12 +13,17 @@ export default function TopicHero({ topic }: { topic: Topic }) {
   return (
     <section className="relative isolate flex w-full flex-col items-center overflow-hidden py-9xl">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <img src={heroBg} alt="" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/0 from-[2.768%] to-white" />
+        {/* The blue wash lives at the image top; crop from the top, not centre. */}
+        <img src={heroBg} alt="" className="h-full w-full object-cover object-top" />
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0) 2.77%, #FFFFFF 100%)' }}
+        />
       </div>
+      {/* Untitled UI grid pattern — 96px cells, masked to the top centre. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(10,13,18,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(10,13,18,0.04)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(1000px_circle_at_center_top,black,transparent)]"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(10,13,18,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(10,13,18,0.05)_1px,transparent_1px)] bg-[size:96px_96px] [mask-image:radial-gradient(1200px_circle_at_center_top,black,transparent)]"
       />
 
       <div className="relative flex w-full max-w-content flex-col items-center gap-4xl px-8">
