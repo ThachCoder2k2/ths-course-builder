@@ -109,7 +109,7 @@ export default function ListingColumns({
                     <IconBadge icon={<Clock className="h-3 w-3" />}>{item.duration}</IconBadge>
                   </div>
 
-                  <div className="flex w-full flex-wrap items-center justify-center gap-3xl">
+                  <div className="flex w-full flex-wrap items-center gap-3xl">
                     <div className="flex items-end gap-md">
                       <p className="text-xl font-semibold text-primary">{item.price}</p>
                       <div className="flex flex-col items-start pb-[2px]">

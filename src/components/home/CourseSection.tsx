@@ -45,7 +45,7 @@ export default function CourseSection({
             aria-label="Xem thêm"
             className="absolute right-0 top-[152px] hidden translate-x-1/2 items-center justify-center rounded-full bg-button-secondary p-xl shadow-xs-ring-primary xl:flex"
           >
-            <ArrowRight className="h-6 w-6 text-button-secondary-fg" aria-hidden="true" />
+            <ArrowRight className="h-6 w-6 text-black" aria-hidden="true" />
             <span
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_0_0_1px_rgba(10,13,18,0.18),inset_0_-2px_0_0_rgba(10,13,18,0.05)]"

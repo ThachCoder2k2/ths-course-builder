@@ -21,20 +21,23 @@ export default function DashboardPage() {
     <div data-testid="page-dashboard" className="relative flex flex-col">
       {/* Figma 177:2982 background — hero wash behind the transparent nav band
           plus the masked grid bleeding into the content. */}
+      {/* Calibrated to the Figma render: wash starts ~50% white (232,238,248
+          at the top) and is fully white by the band's end; the #E9EAEB grid
+          lives only in the nav band. */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 -top-[76px] h-[76px] overflow-hidden">
         <img src={heroWash} alt="" className="h-full w-full object-cover object-top" />
         <div
           className="absolute inset-0"
-          style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0) 2.77%, #FFFFFF 100%)' }}
+          style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.5) 0%, #FFFFFF 100%)' }}
         />
       </div>
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 -top-[76px] h-[500px] bg-[linear-gradient(to_right,rgba(10,13,18,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(10,13,18,0.05)_1px,transparent_1px)] bg-[size:96px_96px] [mask-image:radial-gradient(1200px_circle_at_center_top,black,transparent)]"
+        className="pointer-events-none absolute inset-x-0 -top-[76px] h-[100px] bg-[linear-gradient(to_right,#E9EAEB_1px,transparent_1px),linear-gradient(to_bottom,#E9EAEB_1px,transparent_1px)] bg-[size:96px_96px] [mask-image:linear-gradient(to_bottom,rgba(0,0,0,0.9),transparent)]"
       />
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-7xl px-4 pt-7xl lg:px-4xl">
-        {/* Figma 179:4442 */}
-        <CourseSection title="Khoá học nổi bật" courses={getFeaturedCourses(3)} />
+        {/* Figma 179:4442 — the render shows the circular next arrow here too. */}
+        <CourseSection title="Khoá học nổi bật" courses={getFeaturedCourses(3)} showNext />
 
         {/* Figma 179:4444 */}
         <FeaturedTabsSection courses={getCourses()} />

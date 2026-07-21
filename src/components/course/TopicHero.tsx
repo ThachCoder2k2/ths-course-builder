@@ -17,13 +17,13 @@ export default function TopicHero({ topic }: { topic: Topic }) {
         <img src={heroBg} alt="" className="h-full w-full object-cover object-top" />
         <div
           className="absolute inset-0"
-          style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0) 2.77%, #FFFFFF 100%)' }}
+          style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.4) 0%, #FFFFFF 92%)' }}
         />
       </div>
-      {/* Untitled UI grid pattern — 96px cells, masked to the top centre. */}
+      {/* Untitled UI grid pattern — 96px cells, #E9EAEB lines, fading down. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(10,13,18,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(10,13,18,0.05)_1px,transparent_1px)] bg-[size:96px_96px] [mask-image:radial-gradient(1200px_circle_at_center_top,black,transparent)]"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#E9EAEB_1px,transparent_1px),linear-gradient(to_bottom,#E9EAEB_1px,transparent_1px)] bg-[size:96px_96px] [mask-image:linear-gradient(to_bottom,rgba(0,0,0,0.8),transparent_85%)]"
       />
 
       <div className="relative flex w-full max-w-content flex-col items-center gap-4xl px-8">
