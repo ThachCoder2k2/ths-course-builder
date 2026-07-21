@@ -11,7 +11,7 @@ import heroBg from '../../assets/heroes/topic-hero.png';
  */
 export default function TopicHero({ topic }: { topic: Topic }) {
   return (
-    <section className="relative isolate flex w-full flex-col items-center overflow-hidden py-9xl">
+    <section className="relative isolate -mt-[76px] flex w-full flex-col items-center overflow-hidden pb-9xl pt-[172px]">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         {/* The blue wash lives at the image top; crop from the top, not centre. */}
         <img src={heroBg} alt="" className="h-full w-full object-cover object-top" />

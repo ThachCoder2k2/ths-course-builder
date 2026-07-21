@@ -6,6 +6,7 @@ import CTABanner from '../components/home/CTABanner';
 import TopicPillGrid from '../components/home/TopicPillGrid';
 import DashboardBanner from '../components/home/DashboardBanner';
 import { getCourses, getFeaturedCourses } from '../mock';
+import heroWash from '../assets/heroes/topic-hero.png';
 
 /**
  * Figma: `Sau đăng nhập` (node 177:2981).
@@ -17,7 +18,20 @@ import { getCourses, getFeaturedCourses } from '../mock';
  */
 export default function DashboardPage() {
   return (
-    <div data-testid="page-dashboard" className="flex flex-col">
+    <div data-testid="page-dashboard" className="relative flex flex-col">
+      {/* Figma 177:2982 background — hero wash behind the transparent nav band
+          plus the masked grid bleeding into the content. */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 -top-[76px] h-[76px] overflow-hidden">
+        <img src={heroWash} alt="" className="h-full w-full object-cover object-top" />
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0) 2.77%, #FFFFFF 100%)' }}
+        />
+      </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 -top-[76px] h-[500px] bg-[linear-gradient(to_right,rgba(10,13,18,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(10,13,18,0.05)_1px,transparent_1px)] bg-[size:96px_96px] [mask-image:radial-gradient(1200px_circle_at_center_top,black,transparent)]"
+      />
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-7xl px-4 pt-7xl lg:px-4xl">
         {/* Figma 179:4442 */}
         <CourseSection title="Khoá học nổi bật" courses={getFeaturedCourses(3)} />

@@ -25,7 +25,8 @@ export default function TopNav({ onOpenMenu }: { onOpenMenu?: () => void }) {
   const topics = getTopics();
 
   return (
-    <header className="relative z-40 h-[76px] bg-primary pt-lg">
+    // Transparent band — pages paint their own hero wash behind it (177:2982).
+    <header className="relative z-40 h-[76px] pt-lg">
       <div className="mx-auto flex w-full max-w-content items-center justify-center px-4 lg:px-4xl">
         <div className="flex h-16 flex-1 items-center justify-between gap-xl rounded-2xl border border-secondary bg-primary pl-xl pr-lg shadow-xs">
           {/* mobile trigger */}
