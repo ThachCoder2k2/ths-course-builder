@@ -22,7 +22,7 @@ export default function StatsRow({ course }: { course: Course }) {
             <dd className="w-full text-center text-display-sm text-brand-tertiary">
               {metric.value}
             </dd>
-            <dt className="w-full text-center text-lg font-semibold text-primary">{metric.label}</dt>
+            <dt className="w-full text-center text-md font-semibold text-primary">{metric.label}</dt>
           </div>
         </div>
       ))}

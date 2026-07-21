@@ -63,12 +63,14 @@ export default function VideoPlayer({
   };
 
   return (
-    <div ref={shellRef} className="relative bg-canvas-dark">
+    // Figma 204:4681: the player sits on the white panel with a 16px inset,
+    // controls overlaid on the video — no dark letterbox chrome.
+    <div ref={shellRef} className="relative bg-primary px-xl pt-xl">
       <video
         ref={videoRef}
         src={src}
         poster={poster}
-        className="mx-auto aspect-video w-full max-h-[70vh] bg-black object-contain"
+        className="mx-auto aspect-video max-h-[70vh] w-full max-w-[1348px] rounded-lg bg-black object-contain"
         onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)}
         onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
         onEnded={() => {
@@ -78,7 +80,7 @@ export default function VideoPlayer({
         onClick={togglePlay}
       />
 
-      <div className="flex items-center gap-3 bg-canvas-dark px-4 py-3 text-white">
+      <div className="absolute inset-x-xl bottom-0 flex items-center gap-3 rounded-b-lg bg-gradient-to-t from-black/70 to-transparent px-4 py-3 text-white">
         <button
           type="button"
           onClick={togglePlay}
