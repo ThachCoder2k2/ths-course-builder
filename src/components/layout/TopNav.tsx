@@ -15,15 +15,16 @@ export const NAV_LINKS = [
 
 /**
  * Figma: `Dropdown header navigation` (node 182:11785), 76px tall.
- * A floating nav card (radius-2xl, border-secondary, shadow-xs) inside a
- * 1280 container with 32px padding and 12px top offset.
+ * A fixed, solid-white 76px header band holding the nav card (radius-2xl,
+ * border-secondary, shadow-xs) inside a 1280 container with 32px padding and
+ * 12px top offset. PageShell offsets the page content by the same 76px.
  */
 export default function TopNav({ onOpenMenu }: { onOpenMenu?: () => void }) {
   const user = getUser();
   const topics = getTopics();
 
   return (
-    <header className="sticky top-0 z-40 pt-lg">
+    <header className="fixed inset-x-0 top-0 z-40 h-[76px] bg-primary pt-lg">
       <div className="mx-auto flex w-full max-w-content items-center justify-center px-4 lg:px-4xl">
         <div className="flex h-16 flex-1 items-center justify-between gap-xl rounded-2xl border border-secondary bg-primary pl-xl pr-lg shadow-xs">
           {/* mobile trigger */}

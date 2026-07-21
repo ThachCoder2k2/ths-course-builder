@@ -24,7 +24,8 @@ export default function CourseDetailPage() {
 
   return (
     <div data-testid="page-course" className="flex flex-col pb-9xl">
-      <div className="px-4 pt-6 lg:px-12">
+      {/* Figma 182:12813: hero inset 48px from the header. */}
+      <div className="px-4 pt-12 lg:px-12">
         <CourseHero course={course} />
       </div>
 
