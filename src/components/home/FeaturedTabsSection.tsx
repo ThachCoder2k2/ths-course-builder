@@ -41,8 +41,8 @@ export default function FeaturedTabsSection({ courses }: { courses: Course[] }) 
   return (
     <section className="flex w-full flex-col gap-xl">
       <div className="flex w-full flex-col justify-center gap-5xl rounded-4xl bg-gradient-to-t from-[#c1dfc4] to-[#deecdd] py-3xl pl-6xl pr-3xl">
-        <div className="flex w-full items-center gap-lg">
-          <div className="flex h-full w-[250px] shrink-0 flex-col justify-center gap-2xl self-stretch">
+        <div className="flex w-full items-stretch gap-lg">
+          <div className="flex w-[250px] shrink-0 flex-col justify-center gap-2xl">
             <span className="grid h-14 w-14 place-items-center rounded-full bg-tertiary">
               <Zap className="h-7 w-7 text-secondary" aria-hidden="true" />
             </span>
@@ -51,7 +51,7 @@ export default function FeaturedTabsSection({ courses }: { courses: Course[] }) 
               <p className="text-sm text-tertiary">{SUPPORTING}</p>
             </div>
             <Link to="/topics/tri-tue-nhan-tao" className="w-fit">
-              <span className="relative flex items-center justify-center gap-xs overflow-hidden rounded-md bg-button-secondary px-[14px] py-[10px] text-sm font-semibold text-button-secondary-fg shadow-xs-ring-primary">
+              <span className="relative flex w-[128px] items-center justify-center gap-xs overflow-hidden rounded-md bg-button-secondary px-[14px] py-[10px] text-sm font-semibold text-button-secondary-fg shadow-xs-ring-primary">
                 Xem tất cả
                 <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />
               </span>
