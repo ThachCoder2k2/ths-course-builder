@@ -88,10 +88,10 @@ export default function LearnPage() {
           </div>
         )}
 
-        <main className="min-w-0 flex-1 overflow-y-auto rounded-2xl border border-secondary bg-primary">
+        <main className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-secondary bg-primary">
           <VideoPlayer src={currentLesson.lesson.videoUrl} onEnded={handleEnded} />
 
-          <div className="mx-auto max-w-[1480px] px-4 py-6">
+          <div className="mx-auto w-full max-w-[1480px] shrink-0 px-4 py-6">
             {/* Figma info (204:4684): heading only — no section eyebrow. */}
             <h1 className="text-display-xs text-primary">{currentLesson.lesson.title}</h1>
 

@@ -65,12 +65,12 @@ export default function VideoPlayer({
   return (
     // Figma 204:4681: the player sits on the white panel with a 16px inset,
     // controls overlaid on the video — no dark letterbox chrome.
-    <div ref={shellRef} className="relative bg-primary px-xl pt-xl">
+    <div ref={shellRef} className="relative flex min-h-0 flex-1 flex-col bg-primary px-xl pt-xl">
       <video
         ref={videoRef}
         src={src}
         poster={poster}
-        className="mx-auto aspect-video max-h-[70vh] w-full max-w-[1348px] bg-black object-contain"
+        className="mx-auto min-h-0 w-full max-w-[1348px] flex-1 bg-black object-contain"
         onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)}
         onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
         onEnded={() => {
