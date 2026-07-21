@@ -28,7 +28,7 @@ export default function CourseDetailPage() {
         <CourseHero course={course} />
       </div>
 
-      <div className="relative z-10 mx-auto -mt-4xl w-full max-w-content px-4 lg:px-8">
+      <div className="relative z-10 mx-auto -mt-[58px] w-full max-w-content px-4 lg:px-8">
         <StatsRow course={course} />
       </div>
 

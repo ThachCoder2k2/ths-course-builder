@@ -15,24 +15,17 @@ export default function StatsRow({ course }: { course: Course }) {
   ];
 
   return (
-    <div className="px-4xl">
-      <dl className="flex w-full flex-wrap items-start justify-center gap-x-4xl gap-y-7xl rounded-2xl bg-secondary px-7xl py-xl">
-        {metrics.map((metric) => (
-          <div
-            key={metric.label}
-            className="flex min-w-[240px] flex-1 flex-col items-center gap-2xl"
-          >
-            <div className="flex w-full flex-col items-center gap-lg">
-              <dd className="w-full text-center text-display-sm text-brand-tertiary">
-                {metric.value}
-              </dd>
-              <dt className="w-full text-center text-lg font-semibold text-primary">
-                {metric.label}
-              </dt>
-            </div>
+    <dl className="flex w-full flex-wrap items-start justify-center gap-x-4xl gap-y-7xl rounded-2xl bg-secondary px-7xl py-xl">
+      {metrics.map((metric) => (
+        <div key={metric.label} className="flex min-w-[240px] flex-1 flex-col items-center gap-2xl">
+          <div className="flex w-full flex-col items-center gap-lg">
+            <dd className="w-full text-center text-display-sm text-brand-tertiary">
+              {metric.value}
+            </dd>
+            <dt className="w-full text-center text-lg font-semibold text-primary">{metric.label}</dt>
           </div>
-        ))}
-      </dl>
-    </div>
+        </div>
+      ))}
+    </dl>
   );
 }
