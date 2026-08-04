@@ -1,14 +1,14 @@
 import { niceMax, scaleLinear, ticks } from '../../../lib/svg';
-import { AXIS, GRID, INK, STATUS } from '../palette';
+import { AXIS, GRID, INK } from '../palette';
 
 export interface BarDatum {
   label: string;
-  values: number[]; // one per series (grouped)
+  values: number[]; // one per series (grouped or stacked)
 }
 
-/** Vertical (grouped) bars with subtle grid, optional goal line and direct value labels. */
 const fmtTick = (t: number): string => (Number.isInteger(t) ? String(t) : String(Math.round(t * 10) / 10));
 
+/** Vertical bars: grouped (default), stacked, or single-series with per-bar colours. Mobile-scrollable. */
 export function BarChart({
   data,
   colors,
@@ -19,6 +19,8 @@ export function BarChart({
   unit = '',
   goal,
   showValues = true,
+  stacked = false,
+  rotateLabels = false,
   ariaLabel,
 }: {
   data: BarDatum[];
@@ -30,69 +32,92 @@ export function BarChart({
   unit?: string;
   goal?: { value: number; label: string };
   showValues?: boolean;
+  stacked?: boolean;
+  rotateLabels?: boolean;
   ariaLabel: string;
 }) {
   const W = 540;
   const H = height;
-  const P = { l: 38, r: 16, t: 18, b: 30 };
+  const P = { l: 40, r: 16, t: 18, b: rotateLabels ? 52 : 30 };
   const groups = data.length;
   const seriesCount = data[0]?.values.length ?? 1;
-  const flat = data.flatMap((d) => d.values);
+  const groupTotals = data.map((d) => d.values.reduce((a, b) => a + b, 0));
+  const flat = stacked ? groupTotals : data.flatMap((d) => d.values);
   const top = max ?? niceMax(Math.max(1, ...flat, goal?.value ?? 0));
   const y = scaleLinear(0, top, H - P.b, P.t);
   const yt = ticks(top, yTicks);
   const band = (W - P.l - P.r) / groups;
   const gap = band * 0.24;
   const inner = band - gap;
-  const barW = inner / seriesCount;
+  const barW = stacked ? inner : inner / seriesCount;
+  const fillOf = (gi: number, si: number) => (seriesCount === 1 ? colors[gi % colors.length] : colors[si % colors.length]);
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} className="block h-auto w-full">
-      {yt.map((t) => (
-        <g key={t}>
-          <line x1={P.l} y1={y(t)} x2={W - P.r} y2={y(t)} stroke={GRID} strokeWidth={1} />
-          <text x={P.l - 8} y={y(t) + 4} textAnchor="end" fontSize={11} fill={INK.quaternary} className="tabular-nums">
-            {fmtTick(t)}
-          </text>
-        </g>
-      ))}
-      {goal ? (
-        <g>
-          <line x1={P.l} y1={y(goal.value)} x2={W - P.r} y2={y(goal.value)} stroke={STATUS.warning} strokeWidth={1.5} strokeDasharray="4 4" />
-          <text x={W - P.r} y={y(goal.value) - 6} textAnchor="end" fontSize={10} fontWeight={600} fill="#B54708">
-            {goal.label}
-          </text>
-        </g>
-      ) : null}
-      {data.map((d, gi) => {
-        const gx = P.l + gap / 2 + gi * band;
-        return (
-          <g key={d.label + gi}>
-            {d.values.map((v, si) => {
-              const bx = gx + si * barW + 2;
-              const bw = barW - 4;
-              const by = y(v);
-              const h = H - P.b - by;
-              return (
-                <g key={si}>
-                  <rect className="dv-grow" x={bx} y={by} width={Math.max(0, bw)} height={Math.max(0, h)} rx={4} fill={colors[si % colors.length]}>
-                    <title>{`${seriesNames?.[si] ? seriesNames[si] + ' · ' : ''}${d.label}: ${v}${unit}`}</title>
-                  </rect>
-                  {showValues && seriesCount <= 2 ? (
-                    <text x={bx + bw / 2} y={by - 5} textAnchor="middle" fontSize={10} fontWeight={600} fill={INK.secondary} className="tabular-nums">
-                      {v}
-                    </text>
-                  ) : null}
-                </g>
-              );
-            })}
-            <text x={gx + inner / 2} y={H - 10} textAnchor="middle" fontSize={11} fill={INK.quaternary}>
-              {d.label}
+    <div className="-mx-md overflow-x-auto px-md">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} className="block h-auto w-full min-w-[440px]">
+        {yt.map((t) => (
+          <g key={t}>
+            <line x1={P.l} y1={y(t)} x2={W - P.r} y2={y(t)} stroke={GRID} strokeWidth={1} />
+            <text x={P.l - 8} y={y(t) + 4} textAnchor="end" fontSize={11} fill={INK.quaternary} className="tabular-nums">
+              {fmtTick(t)}
             </text>
           </g>
-        );
-      })}
-      <line x1={P.l} y1={P.t} x2={P.l} y2={H - P.b} stroke={AXIS} strokeWidth={1} />
-    </svg>
+        ))}
+        {goal ? (
+          <g>
+            <line x1={P.l} y1={y(goal.value)} x2={W - P.r} y2={y(goal.value)} stroke="#DC6803" strokeWidth={1.5} strokeDasharray="4 4" />
+            <text x={W - P.r} y={y(goal.value) - 6} textAnchor="end" fontSize={10} fontWeight={600} fill="#B54708">
+              {goal.label}
+            </text>
+          </g>
+        ) : null}
+        {data.map((d, gi) => {
+          const gx = P.l + gap / 2 + gi * band;
+          let cursor = 0;
+          return (
+            <g key={d.label + gi}>
+              {stacked
+                ? d.values.map((v, si) => {
+                    const segTop = y(cursor + v);
+                    const segBot = y(cursor);
+                    cursor += v;
+                    return (
+                      <rect key={si} className="dv-grow" x={gx + 1} y={segTop} width={Math.max(0, inner - 2)} height={Math.max(0, segBot - segTop)} fill={colors[si % colors.length]}>
+                        <title>{`${seriesNames?.[si] ?? ''} · ${d.label}: ${v}${unit}`}</title>
+                      </rect>
+                    );
+                  })
+                : d.values.map((v, si) => {
+                    const bx = gx + si * barW + 2;
+                    const bw = barW - 4;
+                    const by = y(v);
+                    return (
+                      <g key={si}>
+                        <rect className="dv-grow" x={bx} y={by} width={Math.max(0, bw)} height={Math.max(0, H - P.b - by)} rx={4} fill={fillOf(gi, si)}>
+                          <title>{`${seriesNames?.[si] ? seriesNames[si] + ' · ' : ''}${d.label}: ${v}${unit}`}</title>
+                        </rect>
+                        {showValues && seriesCount === 1 ? (
+                          <text x={bx + bw / 2} y={by - 5} textAnchor="middle" fontSize={10} fontWeight={600} fill={INK.secondary} className="tabular-nums">
+                            {v}
+                          </text>
+                        ) : null}
+                      </g>
+                    );
+                  })}
+              {rotateLabels ? (
+                <text x={gx + inner / 2} y={H - P.b + 14} textAnchor="end" fontSize={10.5} fill={INK.quaternary} transform={`rotate(-22 ${gx + inner / 2} ${H - P.b + 14})`}>
+                  {d.label}
+                </text>
+              ) : (
+                <text x={gx + inner / 2} y={H - 10} textAnchor="middle" fontSize={11} fill={INK.quaternary}>
+                  {d.label}
+                </text>
+              )}
+            </g>
+          );
+        })}
+        <line x1={P.l} y1={P.t} x2={P.l} y2={H - P.b} stroke={AXIS} strokeWidth={1} />
+      </svg>
+    </div>
   );
 }

@@ -1,11 +1,13 @@
 import type { ReactNode } from 'react';
 import { cn } from '../../../lib/cn';
 import { useInView } from '../../../lib/useInView';
+import { InfoTip, type MetricInfo } from '../InfoTip';
 
 /** A titled surface that hosts one chart. Self-reveals + triggers chart draw-in when scrolled into view. */
 export function ChartCard({
   title,
   subtitle,
+  info,
   aside,
   children,
   note,
@@ -13,6 +15,7 @@ export function ChartCard({
 }: {
   title: string;
   subtitle?: string;
+  info?: MetricInfo;
   aside?: ReactNode;
   children: ReactNode;
   note?: ReactNode;
@@ -23,14 +26,17 @@ export function ChartCard({
     <section
       ref={ref}
       className={cn(
-        'dv-reveal flex min-w-0 flex-col gap-xl rounded-card border border-secondary bg-primary p-3xl shadow-card',
+        'dv-reveal flex min-w-0 flex-col gap-xl rounded-card border border-secondary bg-primary p-xl shadow-card sm:p-3xl',
         inView && 'dv-in',
         className,
       )}
     >
       <header className="flex items-start justify-between gap-lg">
-        <div className="flex flex-col gap-xxs">
-          <h3 className="text-md font-semibold text-primary">{title}</h3>
+        <div className="flex min-w-0 flex-col gap-xxs">
+          <div className="flex items-center gap-xs">
+            <h3 className="text-md font-semibold text-primary">{title}</h3>
+            {info ? <InfoTip info={info} label={title} /> : null}
+          </div>
           {subtitle ? <p className="text-sm text-tertiary">{subtitle}</p> : null}
         </div>
         {aside ? <div className="shrink-0">{aside}</div> : null}

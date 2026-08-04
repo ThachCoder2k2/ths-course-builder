@@ -59,7 +59,8 @@ export function LineChart({
   };
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} className="block h-auto w-full">
+    <div className="-mx-md overflow-x-auto px-md">
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} className="block h-auto w-full min-w-[440px]">
       {/* gridlines + y labels */}
       {yt.map((t) => (
         <g key={t}>
@@ -121,5 +122,6 @@ export function LineChart({
       )}
       <line x1={P.l} y1={P.t} x2={P.l} y2={H - P.b} stroke={AXIS} strokeWidth={1} />
     </svg>
+    </div>
   );
 }

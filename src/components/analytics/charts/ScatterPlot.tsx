@@ -62,7 +62,8 @@ export function ScatterPlot({
           ))}
         </ul>
       ) : null}
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} className="block h-auto w-full overflow-visible">
+      <div className="-mx-md overflow-x-auto px-md">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} className="block h-auto w-full min-w-[440px] overflow-visible">
       {[0, 0.25, 0.5, 0.75, 1].map((f) => (
         <line key={f} x1={P.l} y1={y(yMax * f)} x2={W - P.r} y2={y(yMax * f)} stroke={GRID} strokeWidth={1} />
       ))}
@@ -91,6 +92,7 @@ export function ScatterPlot({
         </text>
       ) : null}
       </svg>
+      </div>
     </div>
   );
 }

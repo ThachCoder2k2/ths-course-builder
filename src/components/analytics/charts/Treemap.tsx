@@ -56,7 +56,8 @@ export function Treemap({
   const rects = squarify(sorted, { x: 0, y: 0, w: W, h: H });
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={sorted.map((d) => `${d.label} ${Math.round((d.value / total) * 100)}%`).join(', ')} className="block h-auto w-full">
+    <div className="-mx-md overflow-x-auto px-md">
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={sorted.map((d) => `${d.label} ${Math.round((d.value / total) * 100)}%`).join(', ')} className="block h-auto w-full min-w-[360px]">
       {rects.map((r, i) => {
         const pct = Math.round((r.item.value / total) * 100);
         const showText = r.w > 68 && r.h > 34;
@@ -82,5 +83,6 @@ export function Treemap({
         );
       })}
     </svg>
+    </div>
   );
 }

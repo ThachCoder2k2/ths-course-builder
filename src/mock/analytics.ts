@@ -1,143 +1,128 @@
 /**
  * Mock learner-analytics data for the "Học tập của tôi" dashboard.
  *
- * SCOPE: everything here describes the learner WITHIN the course product
- * (courses / lessons / quizzes-of-a-course) — not a platform-wide journey.
- * Values are hand-tuned (not random) so every chart reads intentionally.
- * Learner: Lê Trung Hiếu. Anchored loosely on courses that exist in data.ts.
- *
- * Swap this module for a real API later; components only touch getLearnerAnalytics().
+ * SCOPE: within the course product (courses / lessons / quizzes), NOT platform-wide.
+ * MULTI-TOPIC: the learner studies several diverse topics; most metrics are derived
+ * per-topic from `topics[]` so charts stay meaningful across subjects.
+ * Values are hand-tuned (not random). Learner: Lê Trung Hiếu.
+ * Every slug below is a real route in mock/data.ts so nothing is a dead click.
  */
 
 export type LearnStatus = 'on-track' | 'attention' | 'at-risk';
+export const LEVELS = ['Cơ bản', 'Trung cấp', 'Nâng cao'] as const;
+export type LevelName = (typeof LEVELS)[number];
 
 export interface Kpi {
   value: number;
-  delta: number; // vs previous period, same unit
-  spark: number[]; // recent trend for a mini sparkline
+  delta: number;
+  spark: number[];
+}
+
+/** One studied topic — the backbone of the multi-topic metrics. */
+export interface TopicStat {
+  slug: string; // real /topics/:slug
+  name: string;
+  courseSlug: string; // a representative /courses/:slug
+  mastery: number; // 0..100 avg concept mastery in this topic
+  target: number; // 0..100 goal
+  accuracy: number; // 0..100 quiz accuracy in this topic
+  coverage: number; // 0..1 concepts done / total in this topic
+  confidence: number; // 0..100 self-reported
+  affinity: number; // relative interest weight
+  weekly: number[]; // minutes per week (8 weeks)
+  level: { current: number; readiness: number }; // current level index 0..2, readiness % to next
 }
 
 export interface CourseProgress {
   title: string;
-  level: 'Cơ bản' | 'Trung cấp' | 'Nâng cao';
-  progress: number; // 0..100 lessons completed
-  solid: number; // 0..100 of the course learned "for real"
-  skimmed: number; // 0..100 ticked-but-shallow
+  slug: string;
+  topic: string;
+  level: LevelName;
+  progress: number; // 0..100
+  solid: number;
+  skimmed: number;
 }
 
 export interface VelocityPoint {
   week: string;
-  actual: number | null; // cumulative lessons done (null = future)
-  planned: number; // cumulative planned
-  projected: number | null; // dashed forecast (null before "now")
-}
-
-export interface SkillAxis {
-  skill: string;
-  current: number; // 0..100
-  target: number; // 0..100
-}
-
-export interface MasteryCell {
-  section: string;
-  coverage: number; // 0..1 mastered-of-section
-  weight: number; // relative size
+  actual: number | null;
+  planned: number;
+  projected: number | null;
 }
 
 export interface PrereqNode {
   id: string;
   label: string;
-  mastery: number; // 0..1
-  col: number; // layer 0..n (left→right)
-  row: number; // vertical slot within layer
+  mastery: number;
+  col: number;
+  row: number;
 }
 export interface PrereqEdge {
   from: string;
   to: string;
 }
-
 export interface BloomBar {
   level: string;
-  value: number; // activity/accuracy share 0..100
+  value: number;
 }
-
 export interface QuizScore {
   quiz: string;
-  score: number; // 0..100
+  score: number;
+  topic: string;
+  courseSlug: string;
 }
-
-export interface Point2D {
-  label: string;
-  x: number;
-  y: number;
-  tone?: 'good' | 'warning' | 'danger' | 'neutral';
-}
-
 export interface CalibrationPoint {
   bucket: string;
-  predicted: number; // 0..1 self-confidence
-  actual: number; // 0..1 real accuracy
+  predicted: number;
+  actual: number;
 }
-
 export interface CalendarDay {
-  /** days ago from "today" (0 = today). Used only to lay out the grid. */
   daysAgo: number;
-  minutes: number; // study minutes that day (0 = no activity)
-}
-
-export interface WeekMinutes {
-  week: string;
   minutes: number;
 }
-
 export interface HourBar {
-  hour: number; // 0..23
-  value: number; // relative activity
+  hour: number;
+  value: number;
 }
-
 export interface MoodPoint {
   label: string;
-  value: number; // 1..5 mood
+  value: number;
 }
-
 export interface Recommendation {
   title: string;
+  topic: string;
   reason: string;
-  fit: number; // 0..100 how well it fits right now
+  fit: number;
   kind: 'video' | 'interactive' | 'quiz';
-  needsReview?: string; // optional prerequisite to refresh first
+  courseSlug: string; // real /courses/:slug
+  needsReview?: string;
 }
-
 export interface ZpdPoint {
-  difficulty: number; // 0..100
-  accuracy: number; // 0..100
+  difficulty: number;
+  accuracy: number;
 }
-
 export interface Slice {
   label: string;
   value: number;
 }
-
 export interface Badge {
   label: string;
   earned: boolean;
-  hint?: string; // for the not-yet-earned one
-}
-
-export interface LevelStep {
-  label: string;
-  readiness: number; // 0..100
+  hint?: string;
 }
 
 export interface LearnerAnalytics {
   learner: {
     name: string;
-    joinedLabel: string;
+    focusTopic: string;
+    topicCount: number;
     currentCourse: string;
+    currentCourseSlug: string;
     chronotype: string;
     motive: string;
     status: LearnStatus;
   };
+  topics: TopicStat[];
   health: { score: number; delta: number; trend: number[] };
   kpis: {
     streak: Kpi & { record: number };
@@ -145,74 +130,86 @@ export interface LearnerAnalytics {
     weeklyMinutes: Kpi & { goal: number };
     conceptsMastered: Kpi & { total: number };
   };
-
   progress: {
     courses: CourseProgress[];
     velocity: VelocityPoint[];
     etaLabel: string;
+    etaCourse: string;
     daysLeft: number;
     levels: { level: string; mastered: number; total: number }[];
     badges: Badge[];
-    weeklyGoal: { target: number; actual: number };
   };
-
   mastery: {
-    skills: SkillAxis[];
-    coverage: MasteryCell[];
+    prereqCourse: string;
+    prereqCourseSlug: string;
     prereqNodes: PrereqNode[];
     prereqEdges: PrereqEdge[];
     bloom: BloomBar[];
   };
-
   assessment: {
     quizzes: QuizScore[];
-    topicAccuracy: { topic: string; accuracy: number }[];
-    itemMap: Point2D[];
     calibration: CalibrationPoint[];
   };
-
   rhythm: {
     calendar: CalendarDay[];
-    weekly: WeekMinutes[];
+    weekLabels: string[];
     weeklyGoal: number;
     clock: HourBar[];
-    consistency: number; // 0..100
-    momentum: number; // % change vs previous 7 days
+    consistency: number;
+    momentum: number;
   };
-
   mindset: {
-    confidence: number; // 0..100
+    confidence: number;
     confidenceSpark: number[];
-    illusion: Point2D[]; // x=confidence 0..100, y=real score 0..100
     selfReg: { axis: string; value: number }[];
     mood: MoodPoint[];
   };
-
   recommend: {
     next: Recommendation[];
     zpd: ZpdPoint[];
-    zpdBand: [number, number]; // optimal difficulty window
-    skillGap: SkillAxis[];
+    zpdBand: [number, number];
     formatPref: Slice[];
-    topicAffinity: Slice[];
-    levelUp: { steps: LevelStep[]; current: number };
   };
 }
 
-// ---- Hand-tuned dataset -----------------------------------------------------
+const TOPICS: TopicStat[] = [
+  { slug: 'tri-tue-nhan-tao', name: 'Trí tuệ nhân tạo', courseSlug: 'ai-co-ban-den-thuc-tien', mastery: 72, target: 90, accuracy: 74, coverage: 0.68, confidence: 76, affinity: 34, weekly: [50, 60, 55, 70, 65, 80, 75, 85], level: { current: 1, readiness: 72 } },
+  { slug: 'khoa-hoc-du-lieu', name: 'Khoa học dữ liệu', courseSlug: 'python-cho-khoa-hoc-du-lieu', mastery: 64, target: 85, accuracy: 68, coverage: 0.55, confidence: 60, affinity: 24, weekly: [40, 45, 50, 55, 60, 65, 70, 75], level: { current: 1, readiness: 58 } },
+  { slug: 'co-vua', name: 'Cờ Vua', courseSlug: 'co-vua-tuong-tac', mastery: 55, target: 75, accuracy: 62, coverage: 0.5, confidence: 58, affinity: 16, weekly: [30, 35, 25, 40, 35, 45, 40, 50], level: { current: 0, readiness: 64 } },
+  { slug: 'tieng-anh-giao-tiep', name: 'Tiếng Anh giao tiếp', courseSlug: 'tieng-anh-giao-tiep-co-ban', mastery: 48, target: 80, accuracy: 58, coverage: 0.42, confidence: 74, affinity: 15, weekly: [20, 25, 30, 35, 40, 45, 50, 55], level: { current: 0, readiness: 47 } },
+  { slug: 'ky-nang-thuyet-trinh', name: 'Kỹ năng thuyết trình', courseSlug: 'ky-nang-thuyet-trinh-hieu-qua', mastery: 40, target: 70, accuracy: 52, coverage: 0.35, confidence: 64, affinity: 11, weekly: [15, 20, 25, 20, 30, 35, 40, 45], level: { current: 0, readiness: 38 } },
+];
 
-const decay = (from: number, step: number, n: number) =>
-  Array.from({ length: n }, (_, i) => Math.round(from + step * i));
+const WEEK_LABELS = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8'];
+
+function buildCalendar(): CalendarDay[] {
+  const days: CalendarDay[] = [];
+  for (let daysAgo = 90; daysAgo >= 0; daysAgo--) {
+    const dow = (daysAgo + 3) % 7;
+    const weekend = dow === 5 || dow === 6;
+    const recent = daysAgo <= 8;
+    let minutes = 0;
+    if (recent) minutes = 35 + ((daysAgo * 7) % 30);
+    else if (daysAgo > 60 && daysAgo < 66) minutes = 0;
+    else if (weekend) minutes = daysAgo % 3 === 0 ? 0 : 15 + (daysAgo % 20);
+    else minutes = 20 + ((daysAgo * 11) % 45);
+    days.push({ daysAgo, minutes });
+  }
+  return days.reverse();
+}
 
 const DATA: LearnerAnalytics = {
   learner: {
     name: 'Lê Trung Hiếu',
-    joinedLabel: 'Học từ tháng 5, 2026',
+    focusTopic: 'Trí tuệ nhân tạo',
+    topicCount: TOPICS.length,
     currentCourse: 'Trí tuệ nhân tạo (AI) từ cơ bản đến thực tiễn',
+    currentCourseSlug: 'ai-co-ban-den-thuc-tien',
     chronotype: 'Cú đêm',
     motive: 'Học để xây kỹ năng',
     status: 'on-track',
   },
+  topics: TOPICS,
   health: {
     score: 78,
     delta: 6,
@@ -221,16 +218,18 @@ const DATA: LearnerAnalytics = {
   kpis: {
     streak: { value: 9, delta: 3, record: 21, spark: [1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1] },
     completion: { value: 47, delta: 8, spark: [22, 25, 28, 30, 33, 36, 38, 40, 42, 43, 45, 46, 47] },
-    weeklyMinutes: { value: 320, delta: 45, goal: 300, spark: [180, 210, 240, 200, 260, 290, 275, 300, 285, 310, 305, 320] },
-    conceptsMastered: { value: 38, delta: 5, total: 72, spark: [18, 21, 24, 26, 28, 30, 31, 33, 34, 35, 36, 38] },
+    weeklyMinutes: { value: 310, delta: 40, goal: 300, spark: [180, 210, 240, 200, 260, 290, 275, 300, 285, 310, 305, 310] },
+    conceptsMastered: { value: 46, delta: 6, total: 96, spark: [24, 27, 30, 33, 36, 38, 40, 41, 43, 44, 45, 46] },
   },
-
   progress: {
     courses: [
-      { title: 'AI từ cơ bản đến thực tiễn', level: 'Cơ bản', progress: 64, solid: 52, skimmed: 12 },
-      { title: 'Python cho khoa học dữ liệu', level: 'Cơ bản', progress: 100, solid: 88, skimmed: 12 },
-      { title: 'Machine Learning thực chiến', level: 'Trung cấp', progress: 28, solid: 20, skimmed: 8 },
-      { title: 'Phân tích dữ liệu với Pandas', level: 'Trung cấp', progress: 12, solid: 9, skimmed: 3 },
+      { title: 'AI từ cơ bản đến thực tiễn', slug: 'ai-co-ban-den-thuc-tien', topic: 'Trí tuệ nhân tạo', level: 'Cơ bản', progress: 64, solid: 52, skimmed: 12 },
+      { title: 'Machine Learning thực chiến', slug: 'machine-learning-thuc-chien', topic: 'Trí tuệ nhân tạo', level: 'Trung cấp', progress: 28, solid: 20, skimmed: 8 },
+      { title: 'Python cho khoa học dữ liệu', slug: 'python-cho-khoa-hoc-du-lieu', topic: 'Khoa học dữ liệu', level: 'Cơ bản', progress: 100, solid: 88, skimmed: 12 },
+      { title: 'Phân tích dữ liệu với Pandas', slug: 'phan-tich-du-lieu-voi-pandas', topic: 'Khoa học dữ liệu', level: 'Trung cấp', progress: 40, solid: 30, skimmed: 10 },
+      { title: 'Cờ Vua tương tác', slug: 'co-vua-tuong-tac', topic: 'Cờ Vua', level: 'Cơ bản', progress: 55, solid: 44, skimmed: 11 },
+      { title: 'Tiếng Anh giao tiếp', slug: 'tieng-anh-giao-tiep-co-ban', topic: 'Tiếng Anh giao tiếp', level: 'Cơ bản', progress: 48, solid: 38, skimmed: 10 },
+      { title: 'Kỹ năng thuyết trình', slug: 'ky-nang-thuyet-trinh-hieu-qua', topic: 'Kỹ năng thuyết trình', level: 'Cơ bản', progress: 30, solid: 22, skimmed: 8 },
     ],
     velocity: [
       { week: 'T1', actual: 3, planned: 3, projected: null },
@@ -244,11 +243,12 @@ const DATA: LearnerAnalytics = {
       { week: 'T9', actual: null, planned: 27, projected: 27 },
     ],
     etaLabel: '20 tháng 8',
+    etaCourse: 'AI từ cơ bản đến thực tiễn',
     daysLeft: 16,
     levels: [
-      { level: 'Cơ bản', mastered: 26, total: 30 },
-      { level: 'Trung cấp', mastered: 10, total: 28 },
-      { level: 'Nâng cao', mastered: 2, total: 14 },
+      { level: 'Cơ bản', mastered: 34, total: 40 },
+      { level: 'Trung cấp', mastered: 10, total: 34 },
+      { level: 'Nâng cao', mastered: 2, total: 22 },
     ],
     badges: [
       { label: 'Hoàn thành khóa đầu tiên', earned: true },
@@ -258,25 +258,10 @@ const DATA: LearnerAnalytics = {
       { label: '10 giờ học', earned: true },
       { label: 'Chuỗi 30 ngày', earned: false, hint: 'còn 9 ngày' },
     ],
-    weeklyGoal: { target: 300, actual: 320 },
   },
-
   mastery: {
-    skills: [
-      { skill: 'Nền tảng AI', current: 82, target: 90 },
-      { skill: 'Học máy', current: 58, target: 85 },
-      { skill: 'Dữ liệu', current: 71, target: 80 },
-      { skill: 'Viết prompt', current: 74, target: 80 },
-      { skill: 'Đạo đức AI', current: 45, target: 75 },
-      { skill: 'Ứng dụng', current: 52, target: 80 },
-    ],
-    coverage: [
-      { section: 'Giới thiệu về AI', coverage: 1, weight: 3 },
-      { section: 'Nền tảng học máy', coverage: 0.62, weight: 4 },
-      { section: 'Ứng dụng thực tiễn', coverage: 0.38, weight: 4 },
-      { section: 'Dữ liệu & đặc trưng', coverage: 0.8, weight: 2 },
-      { section: 'Đạo đức & rủi ro', coverage: 0.3, weight: 2 },
-    ],
+    prereqCourse: 'AI từ cơ bản đến thực tiễn',
+    prereqCourseSlug: 'ai-co-ban-den-thuc-tien',
     prereqNodes: [
       { id: 'a', label: 'AI là gì', mastery: 0.95, col: 0, row: 1 },
       { id: 'b', label: 'Dữ liệu & đặc trưng', mastery: 0.8, col: 1, row: 0 },
@@ -302,31 +287,14 @@ const DATA: LearnerAnalytics = {
       { level: 'Sáng tạo', value: 18 },
     ],
   },
-
   assessment: {
     quizzes: [
-      { quiz: 'Giới thiệu AI', score: 92 },
-      { quiz: 'Học máy cơ bản', score: 68 },
-      { quiz: 'Dữ liệu', score: 81 },
-      { quiz: 'Prompt', score: 88 },
-      { quiz: 'Đạo đức AI', score: 54 },
-    ],
-    topicAccuracy: [
-      { topic: 'Khái niệm AI', accuracy: 90 },
-      { topic: 'Học máy', accuracy: 62 },
-      { topic: 'Dữ liệu', accuracy: 80 },
-      { topic: 'Prompt', accuracy: 86 },
-      { topic: 'Đạo đức', accuracy: 55 },
-      { topic: 'Ứng dụng', accuracy: 64 },
-    ],
-    itemMap: [
-      { label: 'Câu dễ, phân biệt tốt', x: 28, y: 74, tone: 'good' },
-      { label: 'Câu vừa', x: 52, y: 61, tone: 'neutral' },
-      { label: 'Câu vừa 2', x: 58, y: 55, tone: 'neutral' },
-      { label: 'Câu khó, phân biệt tốt', x: 78, y: 68, tone: 'good' },
-      { label: 'Câu quá dễ', x: 14, y: 22, tone: 'warning' },
-      { label: 'Câu nhiễu (không phân biệt)', x: 62, y: 18, tone: 'danger' },
-      { label: 'Câu khó', x: 84, y: 44, tone: 'neutral' },
+      { quiz: 'Nền tảng AI', score: 88, topic: 'Trí tuệ nhân tạo', courseSlug: 'ai-co-ban-den-thuc-tien' },
+      { quiz: 'Học máy', score: 68, topic: 'Trí tuệ nhân tạo', courseSlug: 'machine-learning-thuc-chien' },
+      { quiz: 'Python cơ bản', score: 82, topic: 'Khoa học dữ liệu', courseSlug: 'python-cho-khoa-hoc-du-lieu' },
+      { quiz: 'Khai cuộc cờ', score: 64, topic: 'Cờ Vua', courseSlug: 'co-vua-tuong-tac' },
+      { quiz: 'Giao tiếp công việc', score: 58, topic: 'Tiếng Anh giao tiếp', courseSlug: 'tieng-anh-giao-tiep-co-ban' },
+      { quiz: 'Cấu trúc bài nói', score: 54, topic: 'Kỹ năng thuyết trình', courseSlug: 'ky-nang-thuyet-trinh-hieu-qua' },
     ],
     calibration: [
       { bucket: '0–20%', predicted: 0.1, actual: 0.18 },
@@ -336,65 +304,26 @@ const DATA: LearnerAnalytics = {
       { bucket: '80–100%', predicted: 0.9, actual: 0.71 },
     ],
   },
-
   rhythm: {
     calendar: buildCalendar(),
-    weekly: [
-      { week: 'Tuần 1', minutes: 180 },
-      { week: 'Tuần 2', minutes: 240 },
-      { week: 'Tuần 3', minutes: 200 },
-      { week: 'Tuần 4', minutes: 290 },
-      { week: 'Tuần 5', minutes: 275 },
-      { week: 'Tuần 6', minutes: 310 },
-      { week: 'Tuần 7', minutes: 305 },
-      { week: 'Tuần 8', minutes: 320 },
-    ],
+    weekLabels: WEEK_LABELS,
     weeklyGoal: 300,
     clock: [
-      { hour: 0, value: 8 },
-      { hour: 1, value: 3 },
-      { hour: 2, value: 1 },
-      { hour: 3, value: 0 },
-      { hour: 4, value: 0 },
-      { hour: 5, value: 0 },
-      { hour: 6, value: 2 },
-      { hour: 7, value: 6 },
-      { hour: 8, value: 9 },
-      { hour: 9, value: 7 },
-      { hour: 10, value: 5 },
-      { hour: 11, value: 4 },
-      { hour: 12, value: 6 },
-      { hour: 13, value: 5 },
-      { hour: 14, value: 4 },
-      { hour: 15, value: 3 },
-      { hour: 16, value: 4 },
-      { hour: 17, value: 5 },
-      { hour: 18, value: 6 },
-      { hour: 19, value: 7 },
-      { hour: 20, value: 12 },
-      { hour: 21, value: 18 },
-      { hour: 22, value: 22 },
-      { hour: 23, value: 15 },
+      { hour: 0, value: 8 }, { hour: 1, value: 3 }, { hour: 2, value: 1 }, { hour: 3, value: 0 }, { hour: 4, value: 0 }, { hour: 5, value: 0 },
+      { hour: 6, value: 2 }, { hour: 7, value: 6 }, { hour: 8, value: 9 }, { hour: 9, value: 7 }, { hour: 10, value: 5 }, { hour: 11, value: 4 },
+      { hour: 12, value: 6 }, { hour: 13, value: 5 }, { hour: 14, value: 4 }, { hour: 15, value: 3 }, { hour: 16, value: 4 }, { hour: 17, value: 5 },
+      { hour: 18, value: 6 }, { hour: 19, value: 7 }, { hour: 20, value: 12 }, { hour: 21, value: 18 }, { hour: 22, value: 22 }, { hour: 23, value: 15 },
     ],
     consistency: 72,
     momentum: 12,
   },
-
   mindset: {
     confidence: 66,
     confidenceSpark: [58, 60, 57, 62, 64, 61, 65, 63, 66, 68, 66],
-    illusion: [
-      { label: 'Giới thiệu AI', x: 90, y: 92, tone: 'good' },
-      { label: 'Dữ liệu', x: 78, y: 80, tone: 'good' },
-      { label: 'Prompt', x: 82, y: 86, tone: 'good' },
-      { label: 'Học máy', x: 74, y: 62, tone: 'warning' },
-      { label: 'Đạo đức AI', x: 80, y: 54, tone: 'danger' },
-      { label: 'Ứng dụng', x: 60, y: 64, tone: 'neutral' },
-    ],
     selfReg: [
       { axis: 'Lập kế hoạch', value: 64 },
       { axis: 'Theo dõi', value: 78 },
-      { axis: 'Kiểm soát', value: 58 },
+      { axis: 'Điều chỉnh', value: 58 },
     ],
     mood: [
       { label: 'T2', value: 4 },
@@ -406,19 +335,12 @@ const DATA: LearnerAnalytics = {
       { label: 'CN', value: 4 },
     ],
   },
-
   recommend: {
     next: [
-      {
-        title: 'Phân loại với học có giám sát (Học máy)',
-        reason: 'Vừa sức với bạn và lấp đúng chỗ còn yếu ở phần Học máy.',
-        fit: 92,
-        kind: 'interactive',
-        needsReview: 'Ôn nhanh "Đánh giá mô hình" khoảng 10 phút trước khi vào.',
-      },
-      { title: 'AI tạo sinh và mô hình ngôn ngữ lớn', reason: 'Nối tiếp mạch bạn đang học, đúng chủ đề bạn hay xem.', fit: 84, kind: 'video' },
-      { title: 'Bài kiểm tra ngắn: Đạo đức AI', reason: 'Điểm phần này đang thấp nhất, làm lại để chắc kiến thức.', fit: 79, kind: 'quiz' },
-      { title: 'Viết prompt hiệu quả (nâng cao)', reason: 'Bạn mạnh mảng prompt, thử thách cao hơn để giữ hứng.', fit: 71, kind: 'interactive' },
+      { title: 'Phân loại với học có giám sát', topic: 'Trí tuệ nhân tạo', reason: 'Vừa sức với bạn và lấp đúng chỗ còn yếu ở phần Học máy.', fit: 92, kind: 'interactive', courseSlug: 'machine-learning-thuc-chien', needsReview: 'Ôn nhanh "Đánh giá mô hình" khoảng 10 phút trước khi vào.' },
+      { title: 'Trình bày quan điểm trong cuộc họp', topic: 'Tiếng Anh giao tiếp', reason: 'Kỹ năng bạn đang yếu nhưng dùng được ngay ở chỗ làm.', fit: 84, kind: 'video', courseSlug: 'tieng-anh-giao-tiep-co-ban' },
+      { title: 'Dàn ý mở - thân - kết', topic: 'Kỹ năng thuyết trình', reason: 'Phần bạn mới bắt đầu, học sớm sẽ đỡ ngợp về sau.', fit: 79, kind: 'interactive', courseSlug: 'ky-nang-thuyet-trinh-hieu-qua' },
+      { title: 'Tổng hợp và trực quan hoá dữ liệu', topic: 'Khoa học dữ liệu', reason: 'Nối tiếp mạch Python bạn đang học khá tốt.', fit: 73, kind: 'video', courseSlug: 'phan-tich-du-lieu-voi-pandas' },
     ],
     zpd: [
       { difficulty: 10, accuracy: 98 },
@@ -430,55 +352,13 @@ const DATA: LearnerAnalytics = {
       { difficulty: 92, accuracy: 41 },
     ],
     zpdBand: [60, 80],
-    skillGap: [
-      { skill: 'Nền tảng AI', current: 82, target: 90 },
-      { skill: 'Học máy', current: 58, target: 85 },
-      { skill: 'Dữ liệu', current: 71, target: 80 },
-      { skill: 'Viết prompt', current: 74, target: 80 },
-      { skill: 'Đạo đức AI', current: 45, target: 75 },
-      { skill: 'Ứng dụng', current: 52, target: 80 },
-    ],
     formatPref: [
       { label: 'Video', value: 46 },
       { label: 'Tương tác', value: 38 },
       { label: 'Tài liệu', value: 16 },
     ],
-    topicAffinity: [
-      { label: 'Trí tuệ nhân tạo', value: 42 },
-      { label: 'Khoa học dữ liệu', value: 26 },
-      { label: 'Lập trình Python', value: 20 },
-      { label: 'Prompt', value: 12 },
-    ],
-    levelUp: {
-      steps: [
-        { label: 'Cơ bản', readiness: 100 },
-        { label: 'Trung cấp', readiness: 68 },
-        { label: 'Nâng cao', readiness: 24 },
-      ],
-      current: 1,
-    },
   },
 };
-
-// A gentle 91-day activity pattern: weekday-heavy, a couple of gaps, a strong recent streak.
-function buildCalendar(): CalendarDay[] {
-  const days: CalendarDay[] = [];
-  for (let daysAgo = 90; daysAgo >= 0; daysAgo--) {
-    const dow = (daysAgo + 3) % 7; // pseudo day-of-week
-    const weekend = dow === 5 || dow === 6;
-    const recent = daysAgo <= 8; // current streak
-    let minutes = 0;
-    if (recent) minutes = 35 + ((daysAgo * 7) % 30);
-    else if (daysAgo > 60 && daysAgo < 66) minutes = 0; // a gap
-    else if (weekend) minutes = (daysAgo % 3 === 0 ? 0 : 15 + (daysAgo % 20));
-    else minutes = 20 + ((daysAgo * 11) % 45);
-    days.push({ daysAgo, minutes });
-  }
-  return days.reverse();
-}
-
-// silence "decay unused" while keeping the helper available for future tuning
-void decay;
 
 export function getLearnerAnalytics(): LearnerAnalytics {
   return DATA;

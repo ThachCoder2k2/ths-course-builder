@@ -93,6 +93,29 @@ body {
   animation: dv-bubble-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* Thin, unobtrusive scrollbar for capped lists that could grow long with real data. */
+.dv-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #d5d7da transparent;
+}
+.dv-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.dv-scroll::-webkit-scrollbar-thumb {
+  background: #d5d7da;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.dv-scroll::-webkit-scrollbar-thumb:hover {
+  background: #a4a7ae;
+  background-clip: content-box;
+}
+.dv-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dv-reveal,
   .dv-reveal.dv-in {

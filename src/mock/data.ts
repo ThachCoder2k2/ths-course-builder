@@ -51,6 +51,22 @@ export const topics: Topic[] = [
     coverImage: '/src/assets/topic-data.png',
     courseIds: ['c9', 'c10', 'c11', 'c12'],
   },
+  {
+    id: 't4',
+    slug: 'tieng-anh-giao-tiep',
+    title: 'Tiếng Anh giao tiếp',
+    description: 'Luyện phản xạ nghe nói và vốn từ cho các tình huống giao tiếp hằng ngày và trong công việc.',
+    coverImage: '/src/assets/topic-data.png',
+    courseIds: ['c13'],
+  },
+  {
+    id: 't5',
+    slug: 'ky-nang-thuyet-trinh',
+    title: 'Kỹ năng thuyết trình',
+    description: 'Xây dựng bài nói mạch lạc, tự tin trước đám đông và làm slide thuyết phục.',
+    coverImage: '/src/assets/topic-data.png',
+    courseIds: ['c14'],
+  },
 ];
 
 export const courses: Course[] = [
@@ -235,6 +251,90 @@ export const courses: Course[] = [
         lessons: [
           { id: 'c2l3', title: 'Tinh chỉnh siêu tham số', durationMin: 20, videoUrl: '/media/sample-lesson.mp4', isPreview: false, resources: [] },
           { id: 'c2l4', title: 'Đưa mô hình vào sản phẩm', durationMin: 19, videoUrl: '/media/sample-lesson.mp4', isPreview: false, resources: [] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'c13',
+    slug: 'tieng-anh-giao-tiep-co-ban',
+    title: 'Tiếng Anh giao tiếp cho người đi làm',
+    subtitle: 'Nghe nói tự tin trong các tình huống công việc thường gặp.',
+    description:
+      'Khoá học tập trung vào phản xạ nghe nói: chào hỏi, họp nhóm, trình bày ý kiến và viết email công việc, với nhiều bài luyện ngắn theo tình huống.',
+    thumbnail: '/src/assets/course-c2.png',
+    coverImage: '/src/assets/course-c2-cover.png',
+    level: 'beginner',
+    durationHours: 10,
+    lessonCount: 4,
+    rating: 4.6,
+    enrolledCount: 540,
+    instructorId: 'in2',
+    topicIds: ['t4'],
+    learnPoints: [
+      'Tự tin chào hỏi và giới thiệu trong công việc',
+      'Nghe hiểu ý chính trong một cuộc họp',
+      'Trình bày quan điểm ngắn gọn, rõ ràng',
+      'Viết email công việc lịch sự, đúng trọng tâm',
+    ],
+    skills: ['Nghe hiểu', 'Phản xạ nói', 'Từ vựng công việc'],
+    sections: [
+      {
+        id: 'c13s1',
+        title: 'Giao tiếp hằng ngày',
+        lessons: [
+          { id: 'c13l1', title: 'Chào hỏi và giới thiệu', durationMin: 12, videoUrl: '/media/sample-lesson.mp4', isPreview: true, resources: [] },
+          { id: 'c13l2', title: 'Trò chuyện ngắn nơi công sở', durationMin: 14, videoUrl: '/media/sample-lesson.mp4', isPreview: false, resources: [] },
+        ],
+      },
+      {
+        id: 'c13s2',
+        title: 'Giao tiếp trong công việc',
+        lessons: [
+          { id: 'c13l3', title: 'Phát biểu trong cuộc họp', durationMin: 16, videoUrl: '/media/sample-lesson.mp4', isPreview: false, resources: [] },
+          { id: 'c13l4', title: 'Viết email công việc', durationMin: 15, videoUrl: '/media/sample-lesson.mp4', isPreview: false, resources: [] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'c14',
+    slug: 'ky-nang-thuyet-trinh-hieu-qua',
+    title: 'Kỹ năng thuyết trình hiệu quả',
+    subtitle: 'Nói mạch lạc, tự tin và làm slide thuyết phục.',
+    description:
+      'Khoá học giúp bạn cấu trúc bài nói rõ ràng, kiểm soát giọng và ngôn ngữ cơ thể, và thiết kế slide gọn mà thuyết phục.',
+    thumbnail: '/src/assets/course-c2.png',
+    coverImage: '/src/assets/course-c2-cover.png',
+    level: 'beginner',
+    durationHours: 8,
+    lessonCount: 4,
+    rating: 4.7,
+    enrolledCount: 610,
+    instructorId: 'in2',
+    topicIds: ['t5'],
+    learnPoints: [
+      'Cấu trúc một bài thuyết trình mạch lạc',
+      'Mở đầu và kết thúc gây ấn tượng',
+      'Kiểm soát giọng nói và ngôn ngữ cơ thể',
+      'Thiết kế slide gọn, dễ theo dõi',
+    ],
+    skills: ['Cấu trúc bài nói', 'Ngôn ngữ cơ thể', 'Thiết kế slide'],
+    sections: [
+      {
+        id: 'c14s1',
+        title: 'Chuẩn bị bài nói',
+        lessons: [
+          { id: 'c14l1', title: 'Xác định thông điệp chính', durationMin: 13, videoUrl: '/media/sample-lesson.mp4', isPreview: true, resources: [] },
+          { id: 'c14l2', title: 'Dàn ý mở - thân - kết', durationMin: 15, videoUrl: '/media/sample-lesson.mp4', isPreview: false, resources: [] },
+        ],
+      },
+      {
+        id: 'c14s2',
+        title: 'Trình bày tự tin',
+        lessons: [
+          { id: 'c14l3', title: 'Giọng nói và ngôn ngữ cơ thể', durationMin: 16, videoUrl: '/media/sample-lesson.mp4', isPreview: false, resources: [] },
+          { id: 'c14l4', title: 'Thiết kế slide thuyết phục', durationMin: 14, videoUrl: '/media/sample-lesson.mp4', isPreview: false, resources: [] },
         ],
       },
     ],

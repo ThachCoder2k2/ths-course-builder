@@ -16,7 +16,7 @@ export function Section({
   children: ReactNode;
 }) {
   return (
-    <section id={id} className="flex scroll-mt-28 flex-col gap-2xl">
+    <section id={id} className="flex scroll-mt-[132px] flex-col gap-2xl lg:scroll-mt-28">
       <Reveal>
         <header className="flex flex-col gap-xs">
           <span className="flex items-center gap-md">

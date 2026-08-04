@@ -19,7 +19,8 @@ export interface CompanionProps {
  * and a "Hướng dẫn tôi" guided tour that walks the learner through the dashboard.
  */
 export function AiCompanion({ label, message, tour, tourIndex, tourTotal, onStartTour, onTourNext, onTourPrev, onTourExit }: CompanionProps) {
-  const [open, setOpen] = useState(true);
+  // Default expanded on desktop, collapsed to a FAB on mobile so it never covers the last section.
+  const [open, setOpen] = useState(() => typeof window === 'undefined' || window.innerWidth >= 1024);
   const expanded = open || tour;
 
   if (!expanded) {

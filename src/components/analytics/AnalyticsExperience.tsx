@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { CalendarClock, ClipboardCheck, LayoutDashboard, Smile, Sparkles, Target, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, CalendarClock, ClipboardCheck, Compass, LayoutDashboard, Smile, Sparkles, Target, TrendingUp } from 'lucide-react';
 import { getLearnerAnalytics } from '../../mock/analytics';
+import { Reveal } from './Reveal';
 import { SectionRail, type RailSection } from './SectionRail';
 import { AiCompanion } from './AiCompanion';
 import { BentoOverview } from './sections/BentoOverview';
@@ -131,12 +133,33 @@ export function AnalyticsExperience() {
       <SectionRail sections={SECTIONS} activeId={activeId} onJump={jump} variant="mobile" />
       <div className="flex gap-3xl pt-md lg:pt-xl">
         <SectionRail sections={SECTIONS} activeId={activeId} onJump={jump} variant="desktop" />
-        <main className="flex min-w-0 flex-1 flex-col gap-7xl pb-9xl">
+        <main className="flex min-w-0 flex-1 flex-col gap-6xl pb-8xl sm:gap-7xl lg:pb-9xl">
           {SECTIONS.map((s) => (
             <div key={s.id} style={{ opacity: tour && activeId !== s.id ? 0.32 : 1, transition: 'opacity 0.4s ease' }}>
               {renderSection(s.id)}
             </div>
           ))}
+
+          <Reveal>
+            <div className="flex flex-col items-center gap-lg rounded-card border border-brand-200 bg-[linear-gradient(120deg,#F0F6FE_0%,#F4F3FF_100%)] p-xl text-center shadow-sm sm:p-6xl">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-brand-secondary shadow-xs">
+                <Compass className="h-6 w-6" aria-hidden="true" />
+              </span>
+              <div className="flex flex-col gap-xs">
+                <h3 className="text-display-xs font-semibold text-primary">Sẵn sàng cho bước tiếp theo?</h3>
+                <p className="max-w-paragraph text-md text-tertiary">Khám phá thêm khóa học mới hoặc quay lại nơi bạn đang học dở.</p>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-md">
+                <Link to="/" className="inline-flex items-center gap-xs rounded-btn bg-button-primary px-6 py-md text-sm font-semibold text-white transition hover:opacity-90">
+                  Khám phá thêm khóa học
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+                <Link to={`/courses/${a.learner.currentCourseSlug}`} className="inline-flex items-center gap-xs rounded-btn border border-button-secondary bg-white px-6 py-md text-sm font-semibold text-secondary transition hover:bg-secondary">
+                  Tiếp tục khóa đang học
+                </Link>
+              </div>
+            </div>
+          </Reveal>
         </main>
       </div>
       <AiCompanion
