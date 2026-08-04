@@ -4,6 +4,7 @@ import DashboardPage from './routes/DashboardPage';
 import TopicPage from './routes/TopicPage';
 import CourseDetailPage from './routes/CourseDetailPage';
 import LearnPage from './routes/LearnPage';
+import MyLearningPage from './routes/MyLearningPage';
 import NotFound from './routes/NotFound';
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
       <Route element={<PageShell />}>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/topics/:slug" element={<TopicPage />} />
+        <Route path="/hoc-tap-cua-toi" element={<MyLearningPage />} />
         <Route path="/courses/:slug" element={<CourseDetailPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>

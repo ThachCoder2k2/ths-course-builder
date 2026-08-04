@@ -2,7 +2,7 @@ import type { Course, Topic, Instructor, User, Collection, Comment } from './typ
 
 export const user: User = {
   id: 'u1',
-  name: 'Học viên THS',
+  name: 'Lê Trung Hiếu',
   avatar: '/src/assets/avatar-user.png',
 };
 

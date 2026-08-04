@@ -47,6 +47,8 @@ export default {
           'orange-500': '#EF6820',
         },
         success: { 50: '#ECFDF3', 200: '#ABEFC6', 600: '#079455', 700: '#067647' },
+        error: { 50: '#FEF3F2', 600: '#D92D20', 700: '#B42318' },
+        warning: { 50: '#FEF6EE', 600: '#DC6803', 700: '#B54708' },
         canvas: { dark: '#181D27', deep: '#1F427A' },
         accent: { blue: '#EFF8FF', peach: '#FEF6EE', lavender: '#F4F3FF', mint: '#ECFDF3' },
       },
