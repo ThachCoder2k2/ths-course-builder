@@ -52,18 +52,28 @@ export function AnalyticsExperience() {
     return () => io.disconnect();
   }, []);
 
-  // Scroll the section clear of the sticky header (+ mobile chip bar), then highlight it.
+  // Defer scrolling past the state-driven re-render/paint, otherwise a same-tick
+  // setState (e.g. starting the tour) cancels the programmatic scroll before it runs.
+  const rafScroll = (fn: () => void) => requestAnimationFrame(() => requestAnimationFrame(fn));
+
+  const scrollTop = () => rafScroll(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  // Scroll the section clear of the sticky header (+ mobile chip bar).
   const scrollToId = (id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
-    const offset = 76 + (isMobile ? 56 : 0) + 12;
-    const y = el.getBoundingClientRect().top + window.scrollY - offset;
-    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    if (!document.getElementById(id)) return;
+    rafScroll(() => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const isMobile = window.innerWidth < 1024;
+      const offset = 76 + (isMobile ? 56 : 0) + 12;
+      const y = el.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
   };
 
   const jumpTo = (id: string) => {
-    scrollToId(id);
+    if (id === SECTIONS[0].id) scrollTop();
+    else scrollToId(id);
     setActiveId(id);
   };
 
@@ -76,7 +86,7 @@ export function AnalyticsExperience() {
     setTourIndex(i);
     setActiveId(SECTIONS[i].id);
     // First step is the top overview — scroll all the way up so nothing sits above it.
-    if (i === 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (i === 0) scrollTop();
     else scrollToId(SECTIONS[i].id);
   };
   const startTour = () => {
