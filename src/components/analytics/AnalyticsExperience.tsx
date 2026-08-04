@@ -72,14 +72,16 @@ export function AnalyticsExperience() {
     jumpTo(id);
   };
 
-  const startTour = () => {
-    setTour(true);
-    setTourIndex(0);
-    jumpTo(SECTIONS[0].id);
-  };
   const gotoStep = (i: number) => {
     setTourIndex(i);
-    jumpTo(SECTIONS[i].id);
+    setActiveId(SECTIONS[i].id);
+    // First step is the top overview — scroll all the way up so nothing sits above it.
+    if (i === 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+    else scrollToId(SECTIONS[i].id);
+  };
+  const startTour = () => {
+    setTour(true);
+    gotoStep(0);
   };
   const tourNext = () => {
     if (tourIndex + 1 >= SECTIONS.length) setTour(false);
