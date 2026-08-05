@@ -14,6 +14,7 @@ import {
   dateFromT,
   NOW,
   SPAN_DAYS,
+  START,
   TOPIC_NAME,
   TOPICS,
   type TopicSlug,
@@ -26,20 +27,42 @@ const dayOf = (t: number): number => Math.floor(t / DAY_S);
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 
 export interface ScopeFilter {
-  rangeDays: number | null; // null = whole span
+  fromDay: number; // inclusive day-index since START (0 = START)
+  toDay: number; // inclusive
   courseId: string | null;
-  conceptId: string | null;
 }
 
-/** Slice the log by time range / course / lesson. */
+/** Slice the log by [fromDay, toDay] window and (optional) course. */
 export function scope(sts: Statement[], f: ScopeFilter): Statement[] {
-  const minDay = f.rangeDays == null ? -1 : TODAY - (f.rangeDays - 1);
   return sts.filter((x) => {
-    if (f.rangeDays != null && dayOf(x.t) < minDay) return false;
+    const d = dayOf(x.t);
+    if (d < f.fromDay || d > f.toDay) return false;
     if (f.courseId && x.courseId !== f.courseId) return false;
-    if (f.conceptId && x.concept !== f.conceptId) return false;
     return true;
   });
+}
+
+export interface SpanMonth {
+  key: string;
+  label: string; // "Th8/25"
+  startDay: number;
+  endDay: number;
+}
+
+/** The calendar months the data spans, oldest → newest, with day-index bounds. */
+export function spanMonths(): SpanMonth[] {
+  const out: SpanMonth[] = [];
+  let d = new Date(START.getFullYear(), START.getMonth(), 1);
+  const end = new Date(NOW.getFullYear(), NOW.getMonth(), 1);
+  const dayIndex = (dt: Date) => Math.round((dt.getTime() - new Date(START.getFullYear(), START.getMonth(), START.getDate()).getTime()) / (DAY_S * 1000));
+  while (d.getTime() <= end.getTime()) {
+    const next = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+    const startDay = Math.max(0, dayIndex(d));
+    const endDay = Math.min(TODAY, dayIndex(next) - 1);
+    out.push({ key: `${d.getFullYear()}-${d.getMonth()}`, label: `Th${d.getMonth() + 1}/${String(d.getFullYear()).slice(2)}`, startDay, endDay });
+    d = next;
+  }
+  return out;
 }
 
 function struggleOf(arr: Statement[]): number {
@@ -88,13 +111,11 @@ export function overviewStats(scoped: Statement[]): OverviewStats {
 }
 
 // ---------- year rhythm (calendar heatmap) ----------
-export function rhythm(scoped: Statement[], rangeDays: number | null): HeatDay[] {
-  const n = rangeDays ?? SPAN_DAYS + 1;
+export function rhythm(scoped: Statement[], fromDay: number, toDay: number): HeatDay[] {
   const byDay = new Map<number, number>();
   for (const s of sessionsOf(scoped)) byDay.set(dayOf(s.start), (byDay.get(dayOf(s.start)) ?? 0) + focusSeconds(s) / 60);
   const out: HeatDay[] = [];
-  for (let d = TODAY - n + 1; d <= TODAY; d++) {
-    if (d < 0) continue;
+  for (let d = Math.max(0, fromDay); d <= toDay; d++) {
     out.push({ daysAgo: TODAY - d, minutes: Math.round(byDay.get(d) ?? 0) });
   }
   return out;

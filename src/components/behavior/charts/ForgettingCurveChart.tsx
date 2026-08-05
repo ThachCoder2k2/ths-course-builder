@@ -5,7 +5,7 @@ import type { Forgetting, ForgettingLine } from '../../../behavior/types';
 
 const W = 640;
 const H = 240;
-const PAD = { l: 34, r: 96, t: 14, b: 26 };
+const PAD = { l: 34, r: 138, t: 14, b: 26 };
 const PLOT_L = PAD.l;
 const PLOT_R = W - PAD.r;
 const PLOT_T = PAD.t;
@@ -15,7 +15,7 @@ const X_MAX = 14; // forecast horizon: 14 ngày tới
 const THRESHOLD = 0.5; // ngưỡng nên ôn lại
 const MAX_LINES = 4;
 const LABEL_GAP = 24; // chống chồng chữ cho nhãn hai dòng bên phải
-const LABEL_MAX_CHARS = 14;
+const LABEL_MAX_CHARS = 20;
 
 function truncate(label: string): string {
   return label.length > LABEL_MAX_CHARS ? `${label.slice(0, LABEL_MAX_CHARS - 1)}…` : label;

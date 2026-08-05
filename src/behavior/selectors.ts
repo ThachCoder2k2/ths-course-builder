@@ -494,12 +494,11 @@ export function goldenHours(sts: Statement[]): GoldenHours {
 }
 
 // ---------- 9. focus waterfall ----------
-export function focusBreakdown(sts: Statement[], days = 14): FocusBreakdown {
-  const recent = sts.filter((s) => dayOf(s.t) >= TODAY_DAY - (days - 1));
-  const sess = sessionsOf(recent);
+export function focusBreakdown(sts: Statement[]): FocusBreakdown {
+  const sess = sessionsOf(sts);
   const openMinutes = Math.round(sess.reduce((n, s) => n + Math.min(s.end - s.start, 3 * 3600), 0) / 60);
-  const idleMinutes = Math.round(recent.filter((s) => s.verb === 'idled').reduce((n, s) => n + (s.durationS ?? 0), 0) / 60);
-  const blurMinutes = Math.round(recent.filter((s) => s.verb === 'blurred').reduce((n, s) => n + (s.durationS ?? 0), 0) / 60);
+  const idleMinutes = Math.round(sts.filter((s) => s.verb === 'idled').reduce((n, s) => n + (s.durationS ?? 0), 0) / 60);
+  const blurMinutes = Math.round(sts.filter((s) => s.verb === 'blurred').reduce((n, s) => n + (s.durationS ?? 0), 0) / 60);
   const focusMinutes = Math.max(0, openMinutes - idleMinutes - blurMinutes);
   return {
     openMinutes,
@@ -628,10 +627,10 @@ export function twinForecast(sts: Statement[]): TwinForecast {
   const risk = clamp01(0.34 * fInactivity + 0.24 * fAccuracy + 0.18 * fAbandon + 0.14 * fRhythm + 0.1 * fOpen);
 
   const factors: TwinFactor[] = [
-    { label: 'Số ngày chưa học lại', weight: fInactivity, dir: 'up' as const },
-    { label: 'Tỉ lệ làm đúng gần đây', weight: fAccuracy, dir: (acc < 0.7 ? 'up' : 'down') as 'up' | 'down' },
-    { label: 'Hay bỏ dở bài', weight: fAbandon, dir: 'up' as const },
-    { label: 'Học đều hay ngắt quãng', weight: fRhythm, dir: 'up' as const },
+    { label: 'Đã lâu chưa học lại', weight: fInactivity, dir: 'up' as const, detail: daysSince <= 0 ? 'có học hôm nay' : `${daysSince} ngày chưa học lại` },
+    { label: 'Làm đúng bài gần đây', weight: fAccuracy, dir: (acc < 0.7 ? 'up' : 'down') as 'up' | 'down', detail: `đúng ${Math.round(acc * 100)}% số câu gần đây` },
+    { label: 'Bỏ dở bài', weight: fAbandon, dir: 'up' as const, detail: abandons === 0 ? 'gần đây không bỏ dở bài nào' : `${abandons} lần bỏ dở gần đây` },
+    { label: 'Học đều đặn', weight: fRhythm, dir: 'up' as const, detail: `học ${activeDaysRecent}/10 ngày gần đây` },
   ];
   factors.sort((a, b) => b.weight - a.weight);
 

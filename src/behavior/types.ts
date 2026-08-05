@@ -116,6 +116,7 @@ export interface TwinFactor {
   label: string;
   weight: number; // 0..1 relative contribution
   dir: 'up' | 'down'; // pushes risk up / down
+  detail: string; // plain-language value, e.g. "3 ngày chưa học lại"
 }
 export interface HorizonBand {
   day: number;

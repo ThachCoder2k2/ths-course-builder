@@ -55,7 +55,7 @@ export function SlipGapScatter({ data }: { data: SlipGap }) {
           role="img"
           aria-label="Biểu đồ phân loại câu trả lời theo thời gian và đúng/sai"
           className="block h-auto w-full"
-          style={{ minWidth: 560 }}
+          style={{ minWidth: 500 }}
         >
           {/* mốc thời gian dọc — nền mờ */}
           {TICKS.map((t) => (
@@ -73,27 +73,10 @@ export function SlipGapScatter({ data }: { data: SlipGap }) {
             Làm sai
           </text>
 
-          {/* nhãn bốn góc — chữ nhạt, đọc nhanh */}
-          <text x={PAD_L + 8} y={PAD_T + 15} textAnchor="start" fontSize={11} fill={INK.quaternary}>
-            Thành thạo
-          </text>
-          <text x={PLOT_RIGHT - 8} y={PAD_T + 15} textAnchor="end" fontSize={11} fill={INK.quaternary}>
-            Chắc nhưng chậm
-          </text>
-          <text x={PAD_L + 8} y={PLOT_BOTTOM - 9} textAnchor="start" fontSize={11} fill={INK.quaternary}>
-            Nhầm do vội
-          </text>
-          <text x={PLOT_RIGHT - 8} y={PLOT_BOTTOM - 9} textAnchor="end" fontSize={11} fill={INK.quaternary}>
-            Chưa hiểu
-          </text>
-
           {/* đường trung vị thời gian trả lời */}
           <line x1={xMed} y1={PAD_T} x2={xMed} y2={PLOT_BOTTOM} stroke={INK.quaternary} strokeWidth={1} strokeDasharray="4 4">
             <title>{`Trung vị thời gian trả lời: ${medS} giây`}</title>
           </line>
-          <text x={medLabelX} y={PAD_T - 11} textAnchor="middle" fontSize={11} fill={INK.quaternary}>
-            {`nhanh ⟵  ${medS}s  ⟶ chậm`}
-          </text>
 
           {/* trục thời gian (một trục duy nhất) */}
           <line x1={PAD_L} y1={PLOT_BOTTOM} x2={PLOT_RIGHT} y2={PLOT_BOTTOM} stroke={AXIS} strokeWidth={1} />
@@ -111,11 +94,26 @@ export function SlipGapScatter({ data }: { data: SlipGap }) {
             const cx = xScale(clamp(p.latencyS, 0, CAP));
             const cy = (p.correct ? TOP_CY : BOT_CY) + jitter(i) * USABLE_HALF;
             return (
-              <circle key={i} cx={cx} cy={cy} r={R} fill={QUAD_FILL[p.quad]} stroke="#FFFFFF" strokeWidth={1} opacity={0.9}>
+              <circle key={i} cx={cx} cy={cy} r={R} fill={QUAD_FILL[p.quad]} stroke="#FFFFFF" strokeWidth={1} opacity={0.85}>
                 <title>{`${p.conceptLabel} · ${Math.round(p.latencyS)}s · ${p.correct ? 'đúng' : 'sai'}`}</title>
               </circle>
             );
           })}
+
+          {/* nhãn góc + trung vị vẽ ĐÈ LÊN các chấm, có viền trắng cho dễ đọc */}
+          {([
+            { x: PAD_L + 8, y: PAD_T + 15, a: 'start', t: 'Thành thạo' },
+            { x: PLOT_RIGHT - 8, y: PAD_T + 15, a: 'end', t: 'Chắc nhưng chậm' },
+            { x: PAD_L + 8, y: PLOT_BOTTOM - 9, a: 'start', t: 'Nhầm do vội' },
+            { x: PLOT_RIGHT - 8, y: PLOT_BOTTOM - 9, a: 'end', t: 'Chưa hiểu' },
+          ] as const).map((l) => (
+            <text key={l.t} x={l.x} y={l.y} textAnchor={l.a} fontSize={11} fontWeight={600} fill={INK.tertiary} stroke="#FFFFFF" strokeWidth={3} style={{ paintOrder: 'stroke' }}>
+              {l.t}
+            </text>
+          ))}
+          <text x={medLabelX} y={PAD_T - 11} textAnchor="middle" fontSize={11} fill={INK.tertiary} stroke="#FFFFFF" strokeWidth={3} style={{ paintOrder: 'stroke' }}>
+            {`nhanh ⟵  ${medS}s  ⟶ chậm`}
+          </text>
         </svg>
       </div>
 

@@ -1,40 +1,27 @@
-import { CalendarRange, ChevronRight, X } from 'lucide-react';
+import { CalendarRange } from 'lucide-react';
 import { cn } from '../../lib/cn';
+import type { SpanMonth } from '../../behavior/overview';
 
-export type RangePreset = '30' | '90' | '180' | '365' | 'all';
-
-export const RANGE_DAYS: Record<RangePreset, number | null> = { '30': 30, '90': 90, '180': 180, '365': 365, all: null };
-const RANGE_LABEL: Record<RangePreset, string> = { '30': '30 ngày', '90': '3 tháng', '180': '6 tháng', '365': '1 năm', all: 'Tất cả' };
-
-interface Opt {
-  value: string;
-  label: string;
-}
-
-/** The one control that re-scopes the whole page: time range · course · lesson. */
+/** The only control on the general report: which month window to look at. */
 export function FilterBar({
-  range,
-  onRange,
-  courseId,
-  onCourse,
-  conceptId,
-  onConcept,
-  courses,
-  lessons,
-  courseName,
-  lessonName,
+  months,
+  fromIdx,
+  toIdx,
+  onWindow,
 }: {
-  range: RangePreset;
-  onRange: (r: RangePreset) => void;
-  courseId: string | null;
-  onCourse: (id: string | null) => void;
-  conceptId: string | null;
-  onConcept: (id: string | null) => void;
-  courses: Opt[];
-  lessons: Opt[];
-  courseName: string | null;
-  lessonName: string | null;
+  months: SpanMonth[];
+  fromIdx: number;
+  toIdx: number;
+  onWindow: (from: number, to: number) => void;
 }) {
+  const last = months.length - 1;
+  const presets: { label: string; from: number; to: number }[] = [
+    { label: '3 tháng', from: Math.max(0, last - 2), to: last },
+    { label: '6 tháng', from: Math.max(0, last - 5), to: last },
+    { label: 'Cả năm', from: 0, to: last },
+  ];
+  const isActive = (p: { from: number; to: number }) => p.from === fromIdx && p.to === toIdx;
+
   return (
     <div className="sticky top-0 z-30 -mx-4 mb-2xl border-b border-secondary bg-white/90 px-4 py-lg backdrop-blur lg:top-[64px]">
       <div className="flex flex-col gap-md">
@@ -44,71 +31,61 @@ export function FilterBar({
             Khoảng thời gian
           </span>
           <div className="inline-flex flex-wrap rounded-lg border border-secondary bg-secondary p-[2px]">
-            {(Object.keys(RANGE_DAYS) as RangePreset[]).map((r) => (
+            {presets.map((p) => (
               <button
-                key={r}
+                key={p.label}
                 type="button"
-                onClick={() => onRange(r)}
-                aria-pressed={range === r}
-                className={cn('rounded-md px-lg py-xs text-xs font-semibold transition', range === r ? 'bg-primary text-brand-secondary shadow-xs' : 'text-tertiary hover:text-secondary')}
+                onClick={() => onWindow(p.from, p.to)}
+                aria-pressed={isActive(p)}
+                className={cn('rounded-md px-lg py-xs text-xs font-semibold transition', isActive(p) ? 'bg-primary text-brand-secondary shadow-xs' : 'text-tertiary hover:text-secondary')}
               >
-                {RANGE_LABEL[r]}
+                {p.label}
               </button>
             ))}
           </div>
 
-          <label className="inline-flex items-center gap-xs text-sm">
-            <span className="text-tertiary">Khóa</span>
+          <span className="inline-flex items-center gap-xs text-sm text-tertiary">
+            <span>Từ</span>
             <select
-              value={courseId ?? ''}
-              onChange={(e) => onCourse(e.target.value || null)}
-              className="max-w-[220px] rounded-md border border-primary bg-primary px-md py-xs text-sm font-medium text-primary shadow-xs outline-none focus:border-brand"
+              value={fromIdx}
+              onChange={(e) => {
+                const v = Number(e.target.value);
+                onWindow(v, Math.max(v, toIdx));
+              }}
+              aria-label="Từ tháng"
+              className="rounded-md border border-primary bg-primary px-md py-xs text-sm font-medium text-primary shadow-xs outline-none focus:border-brand"
             >
-              <option value="">Tất cả khóa</option>
-              {courses.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
+              {months.map((m, i) => (
+                <option key={m.key} value={i}>
+                  {m.label}
                 </option>
               ))}
             </select>
-          </label>
-
-          {courseId ? (
-            <label className="inline-flex items-center gap-xs text-sm">
-              <span className="text-tertiary">Bài</span>
-              <select
-                value={conceptId ?? ''}
-                onChange={(e) => onConcept(e.target.value || null)}
-                className="max-w-[220px] rounded-md border border-primary bg-primary px-md py-xs text-sm font-medium text-primary shadow-xs outline-none focus:border-brand"
-              >
-                <option value="">Tất cả bài</option>
-                {lessons.map((l) => (
-                  <option key={l.value} value={l.value}>
-                    {l.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : null}
+            <span>đến</span>
+            <select
+              value={toIdx}
+              onChange={(e) => {
+                const v = Number(e.target.value);
+                onWindow(Math.min(v, fromIdx), v);
+              }}
+              aria-label="Đến tháng"
+              className="rounded-md border border-primary bg-primary px-md py-xs text-sm font-medium text-primary shadow-xs outline-none focus:border-brand"
+            >
+              {months.map((m, i) => (
+                <option key={m.key} value={i} disabled={i < fromIdx}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+          </span>
         </div>
 
-        {/* breadcrumb of the current scope */}
         <div className="flex flex-wrap items-center gap-xs text-xs">
           <span className="inline-flex items-center gap-xs rounded-pill bg-brand-50 px-md py-xxs font-medium text-brand-secondary">Đang xem</span>
-          <span className="text-tertiary">{RANGE_LABEL[range]}</span>
-          <ChevronRight className="h-3 w-3 text-quaternary" aria-hidden="true" />
-          <button type="button" onClick={() => onCourse(null)} className={cn('rounded-pill px-md py-xxs font-medium', courseId ? 'text-secondary hover:bg-secondary' : 'text-primary')}>
-            {courseName ?? 'Mọi khóa'}
-          </button>
-          {courseId ? (
-            <>
-              <ChevronRight className="h-3 w-3 text-quaternary" aria-hidden="true" />
-              <span className="font-medium text-primary">{lessonName ?? 'Mọi bài'}</span>
-              <button type="button" onClick={() => onCourse(null)} aria-label="Bỏ lọc khóa" className="ml-xxs rounded-full p-[2px] text-quaternary hover:bg-secondary hover:text-secondary">
-                <X className="h-3.5 w-3.5" aria-hidden="true" />
-              </button>
-            </>
-          ) : null}
+          <span className="text-tertiary">
+            {months[fromIdx]?.label}
+            {fromIdx !== toIdx ? ` – ${months[toIdx]?.label}` : ''}
+          </span>
         </div>
       </div>
     </div>

@@ -1,26 +1,22 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Flame, GraduationCap, Sparkles, Target, Timer, TrendingDown, TrendingUp } from 'lucide-react';
+import { ArrowRight, Flame, GraduationCap, Sparkles, Target, Timer, TrendingDown, TrendingUp, X } from 'lucide-react';
 import Avatar from '../ui/Avatar';
 import { Reveal } from '../analytics/Reveal';
 import { TileCard } from '../analytics/TileCard';
 import { PrereqGraph } from '../analytics/charts/PrereqGraph';
-import { CalendarHeatmap } from '../analytics/charts/CalendarHeatmap';
 import { ArcGauge } from '../analytics/charts/gauges';
 import { getBehaviorData } from '../../behavior/seed';
-import { ahaMoments, confusionMap, conceptMapOf, focusBreakdown, forgetting, goldenHours, sessionReplay, slipGap, strategyFingerprint, twinForecast, watchCoverage } from '../../behavior/selectors';
-import { courseTable, lessonRows, masteryOverMonths, overviewStats, recurringStumbles, rhythm, scope, topicStrength, videoIdOfConcept } from '../../behavior/overview';
-import { CONCEPTS_OF, CONCEPT_BY_ID, COURSE_BY_ID } from '../../behavior/catalog';
+import { conceptMapOf, focusBreakdown, forgetting, goldenHours, slipGap, strategyFingerprint, twinForecast } from '../../behavior/selectors';
+import { courseTable, lessonRows, masteryOverMonths, overviewStats, recurringStumbles, rhythm, scope, spanMonths, topicStrength } from '../../behavior/overview';
+import { COURSE_BY_ID } from '../../behavior/catalog';
 import { minutesLabel, pct } from '../../behavior/format';
 import { STATUS } from '../analytics/palette';
-import type { NextAction } from '../../behavior/types';
-import { FilterBar, RANGE_DAYS, type RangePreset } from './FilterBar';
-import { ConfusionHeatmap } from './charts/ConfusionHeatmap';
-import { SessionReplay } from './charts/SessionReplay';
-import { AhaArc } from './charts/AhaArc';
-import { TwinHorizon } from './charts/TwinHorizon';
-import { WatchCoverageBar } from './charts/WatchCoverageBar';
-import { GoldenHoursHeatmap } from './charts/GoldenHoursHeatmap';
+import type { NextAction, TwinFactor } from '../../behavior/types';
+import type { Statement } from '../../behavior/events';
+import { FilterBar } from './FilterBar';
+import { YearCalendar } from './charts/YearCalendar';
 import { FocusWaterfall } from './charts/FocusWaterfall';
 import { SlipGapScatter } from './charts/SlipGapScatter';
 import { ForgettingCurveChart } from './charts/ForgettingCurveChart';
@@ -84,49 +80,46 @@ function ActionRow({ a }: { a: NextAction }) {
   return a.courseSlug ? <Link to={`/courses/${a.courseSlug}`}>{body}</Link> : body;
 }
 
-const TOPIC_TAG: Record<string, string> = { ai: 'Trí tuệ nhân tạo', data: 'Phân tích dữ liệu', web: 'Lập trình web', english: 'Tiếng Anh', pm: 'Kỹ năng & Quản lý' };
+function factorTag(f: TwinFactor): { text: string; cls: string } {
+  if (f.dir === 'up' && f.weight > 0.5) return { text: 'Đang kéo lùi', cls: 'bg-error-50 text-error-600' };
+  if (f.dir === 'up' && f.weight > 0.25) return { text: 'Cần để ý', cls: 'bg-warning-50 text-warning-700' };
+  return { text: 'Ổn', cls: 'bg-success-50 text-success-600' };
+}
+
+function ForecastItem({ tone, title, children }: { tone: string; title: string; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-xxs rounded-lg border-l-2 bg-secondary/50 px-lg py-md sm:flex-row sm:items-baseline sm:gap-md" style={{ borderColor: tone }}>
+      <span className="shrink-0 text-xs font-semibold" style={{ color: tone }}>
+        {title}
+      </span>
+      <span className="text-sm leading-relaxed text-secondary">{children}</span>
+    </div>
+  );
+}
 
 export function BehaviorExperience() {
   const data = useMemo(() => getBehaviorData('hieu'), []);
   const sts = data.statements;
+  const months = useMemo(() => spanMonths(), []);
 
-  const [range, setRange] = useState<RangePreset>('365');
-  const [courseId, setCourseId] = useState<string | null>(null);
-  const [conceptId, setConceptId] = useState<string | null>(null);
-  const rangeDays = RANGE_DAYS[range];
+  const [fromIdx, setFromIdx] = useState(0);
+  const [toIdx, setToIdx] = useState(months.length - 1);
+  const [modalCourse, setModalCourse] = useState<string | null>(null);
 
-  const scopedRange = useMemo(() => scope(sts, { rangeDays, courseId: null, conceptId: null }), [sts, rangeDays]);
-  const scopedCourse = useMemo(() => (courseId ? scope(sts, { rangeDays, courseId, conceptId: null }) : scopedRange), [sts, rangeDays, courseId, scopedRange]);
-  const lessonScoped = useMemo(() => (conceptId ? scope(sts, { rangeDays: null, courseId, conceptId }) : []), [sts, courseId, conceptId]);
+  const fromDay = months[fromIdx]?.startDay ?? 0;
+  const toDay = months[toIdx]?.endDay ?? 365;
 
-  const mode: 'overview' | 'course' | 'lesson' = conceptId ? 'lesson' : courseId ? 'course' : 'overview';
-
-  // header KPIs are the learner's overall picture for the time range (identity),
-  // not re-scoped by course — the filter narrows the body, not who you are.
-  const stats = useMemo(() => overviewStats(scopedRange), [scopedRange]);
-  const courses = useMemo(() => courseTable(scopedRange), [scopedRange]);
-  const courseOpts = courses.map((c) => ({ value: c.id, label: c.title }));
-  const lessonOpts = courseId ? CONCEPTS_OF(courseId).map((c) => ({ value: c.id, label: `Bài ${c.col + 1}: ${c.label}` })) : [];
-  const courseName = courseId ? COURSE_BY_ID[courseId]?.title ?? null : null;
-  const lessonName = conceptId ? CONCEPT_BY_ID[conceptId]?.label ?? null : null;
-
-  // đổi bộ lọc → đưa về đầu trang để đọc lại báo cáo từ đầu
   const scrollTop = () => {
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-  const onRange = (r: RangePreset) => {
-    setRange(r);
+  const onWindow = (from: number, to: number) => {
+    setFromIdx(from);
+    setToIdx(to);
     scrollTop();
   };
-  const onCourse = (id: string | null) => {
-    setCourseId(id);
-    setConceptId(null);
-    scrollTop();
-  };
-  const onConcept = (id: string | null) => {
-    setConceptId(id);
-    scrollTop();
-  };
+
+  const scopedRange = useMemo(() => scope(sts, { fromDay, toDay, courseId: null }), [sts, fromDay, toDay]);
+  const stats = useMemo(() => overviewStats(scopedRange), [scopedRange]);
 
   return (
     <div className="mx-auto w-full max-w-content px-4 pb-9xl pt-lg lg:px-4xl">
@@ -156,52 +149,38 @@ export function BehaviorExperience() {
         </div>
       </Reveal>
 
-      <FilterBar
-        range={range}
-        onRange={onRange}
-        courseId={courseId}
-        onCourse={onCourse}
-        conceptId={conceptId}
-        onConcept={onConcept}
-        courses={courseOpts}
-        lessons={lessonOpts}
-        courseName={courseName}
-        lessonName={lessonName}
-      />
+      <FilterBar months={months} fromIdx={fromIdx} toIdx={toIdx} onWindow={onWindow} />
 
       <div className="flex flex-col gap-7xl">
-        {mode === 'overview' ? <OverviewMode scoped={scopedRange} onPickCourse={onCourse} /> : null}
-        {mode === 'course' ? <CourseMode scoped={scopedCourse} courseId={courseId!} onPickLesson={onConcept} /> : null}
-        {mode === 'lesson' ? <LessonMode scoped={lessonScoped} conceptId={conceptId!} /> : null}
+        <OverviewMode scoped={scopedRange} allSts={sts} fromDay={fromDay} toDay={toDay} onPickCourse={setModalCourse} />
       </div>
+
+      {modalCourse ? <CourseDetailModal courseId={modalCourse} sts={sts} fromDay={fromDay} toDay={toDay} onClose={() => setModalCourse(null)} /> : null}
     </div>
   );
 }
 
-// ---------------- OVERVIEW ----------------
-function OverviewMode({ scoped, onPickCourse }: { scoped: import('../../behavior/events').Statement[]; onPickCourse: (id: string) => void }) {
+// ---------------- OVERVIEW (tổng hợp) ----------------
+function OverviewMode({ scoped, allSts, fromDay, toDay, onPickCourse }: { scoped: Statement[]; allSts: Statement[]; fromDay: number; toDay: number; onPickCourse: (id: string) => void }) {
   const strat = useMemo(() => strategyFingerprint(scoped), [scoped]);
   const golden = useMemo(() => goldenHours(scoped), [scoped]);
-  const focus = useMemo(() => focusBreakdown(scoped, 365), [scoped]);
+  const focus = useMemo(() => focusBreakdown(scoped), [scoped]);
   const months = useMemo(() => masteryOverMonths(scoped), [scoped]);
-  const days = useMemo(() => rhythm(scoped, 365), [scoped]);
+  const days = useMemo(() => rhythm(scoped, fromDay, toDay), [scoped, fromDay, toDay]);
   const topics = useMemo(() => topicStrength(scoped), [scoped]);
   const stumbles = useMemo(() => recurringStumbles(scoped), [scoped]);
   const sg = useMemo(() => slipGap(scoped), [scoped]);
-  const fg = useMemo(() => forgetting(scoped), [scoped]);
+  const fg = useMemo(() => forgetting(allSts), [allSts]); // forward-looking → dùng dữ liệu mới nhất
   const rows = useMemo(() => courseTable(scoped), [scoped]);
-  const twin = useMemo(() => twinForecast(scoped), [scoped]);
+  const twin = useMemo(() => twinForecast(allSts), [allSts]); // dự đoán từ giờ, không phụ thuộc khoảng đang xem
   const riskColor = twin.dropoutRisk < 0.34 ? STATUS.good : twin.dropoutRisk < 0.6 ? STATUS.warning : STATUS.danger;
 
   return (
     <>
-      <Section tag="Cách học" title="Cách bạn học" subtitle="Chân dung cách bạn học, khung giờ học vào nhất và số phút thực sự tập trung — gộp trên mọi khóa.">
-        <div className="grid gap-xl lg:grid-cols-3">
+      <Section tag="Cách học" title="Cách bạn học" subtitle="Chân dung cách bạn học và số phút thực sự tập trung — gộp trên mọi khóa.">
+        <div className="grid gap-xl lg:grid-cols-2">
           <TileCard title="Chân dung người học" subtitle={strat.label} info={{ what: 'Một hình vẽ nhanh về cách bạn học, so với chính bạn.', how: 'Đo vài thói quen từ hành vi: hay xem lại, học đều, kiên trì, làm đúng, chủ động hỏi, tập trung.' }} takeaway={<>{strat.blurb}</>}>
             <StrategyRadar axes={strat.axes} />
-          </TileCard>
-          <TileCard title="Giờ vàng của bạn" subtitle={`Học vào nhất lúc ${golden.peakLabel}`} info={{ what: 'Khung giờ trong tuần bạn học tập trung nhất.', how: 'Cộng số phút tập trung theo từng giờ và từng thứ.' }}>
-            <GoldenHoursHeatmap data={golden} />
           </TileCard>
           <TileCard title="Phút tập trung thật" subtitle={`Tập trung ${pct(focus.focusRate)} thời gian mở bài`} info={{ what: 'Trong thời gian mở bài, bao nhiêu là học thật.', how: 'Lấy thời gian mở bài trừ đi lúc ngồi không và lúc rời sang tab khác.' }}>
             <FocusWaterfall data={focus} />
@@ -209,15 +188,13 @@ function OverviewMode({ scoped, onPickCourse }: { scoped: import('../../behavior
         </div>
       </Section>
 
-      <Section tag="Tiến bộ" title="Bạn khá lên tới đâu" subtitle="Đường tiến bộ và nhịp học cả quãng — nhìn được mình đi lên hay chững lại.">
-        <div className="grid gap-xl lg:grid-cols-2">
-          <TileCard title="Tiến bộ theo tháng" subtitle="Tỉ lệ làm đúng cộng dồn" info={{ what: 'Bạn làm bài đúng dần lên theo thời gian chưa.', how: 'Cộng dồn số câu đúng trên tổng số câu đã làm, tính theo từng tháng.' }}>
-            <TrendLine data={months} />
-          </TileCard>
-          <TileCard title="Nhịp học của bạn" subtitle="Mỗi ô là một ngày · đậm là học nhiều" info={{ what: 'Bạn học đều hay dồn cục, có quãng nghỉ dài không.', how: 'Tô đậm nhạt theo số phút tập trung mỗi ngày.' }}>
-            <CalendarHeatmap days={days} />
-          </TileCard>
-        </div>
+      <Section tag="Tiến bộ" title="Bạn khá lên tới đâu" subtitle="Gộp mọi khóa: bạn làm đúng bài nhiều dần lên không, và học có đều không.">
+        <TileCard title="Tiến bộ theo tháng" subtitle="Tỉ lệ làm đúng bài, gộp mọi khóa" info={{ what: 'Bạn làm bài đúng dần lên theo thời gian chưa.', how: 'Tỉ lệ câu đúng trên tổng số câu đã làm, tính theo từng tháng, gộp mọi khóa.' }}>
+          <TrendLine data={months} />
+        </TileCard>
+        <TileCard title="Nhịp học của bạn" subtitle={`Mỗi ô là một ngày · đậm là học nhiều · học vào nhất lúc ${golden.peakLabel}`} info={{ what: 'Bạn học đều hay dồn cục, có quãng nghỉ dài không — và khung giờ nào học nhiều nhất.', how: 'Tô đậm nhạt theo số phút tập trung mỗi ngày; nhãn tháng ở trên, thứ trong tuần ở bên trái.' }} takeaway={<>Trong tuần, bạn học tập trung nhất vào quãng <b>{golden.peakLabel}</b>.</>}>
+          <YearCalendar days={days} />
+        </TileCard>
       </Section>
 
       <Section tag="Mạnh & yếu" title="Bạn mạnh yếu môn nào, hay vấp kiểu gì" subtitle="So các chủ đề và những chỗ bạn vấp đi vấp lại qua nhiều khóa.">
@@ -242,9 +219,11 @@ function OverviewMode({ scoped, onPickCourse }: { scoped: import('../../behavior
         </div>
       </Section>
 
-      <Section tag="Khóa học" title="Các khóa của bạn" subtitle="Toàn bộ khóa bạn đã học trong khoảng này — bấm một khóa để xem riêng.">
+      <Section tag="Khóa học" title="Các khóa của bạn" subtitle="Toàn bộ khóa bạn đã học trong khoảng này — bấm một khóa để mở chi tiết ngay tại đây.">
         <TileCard title="Danh sách khóa" subtitle={`${rows.length} khóa`} info={{ what: 'Bảng gộp mọi khóa: tiến độ, mức nắm, giờ học, trạng thái.', how: 'Mỗi dòng là một khóa bạn từng học trong khoảng thời gian đang chọn.' }}>
-          <CourseTable rows={rows} onPick={onPickCourse} />
+          <div className="dv-scroll max-h-[520px] overflow-y-auto">
+            <CourseTable rows={rows} onPick={onPickCourse} />
+          </div>
         </TileCard>
       </Section>
 
@@ -252,27 +231,46 @@ function OverviewMode({ scoped, onPickCourse }: { scoped: import('../../behavior
         <div className="grid gap-xl lg:grid-cols-2">
           <TileCard title="Dự báo 14 ngày tới" subtitle={`Nguy cơ bỏ dở đang ${twin.dropoutRisk < 0.34 ? 'thấp' : twin.dropoutRisk < 0.6 ? 'ở mức trung bình' : 'cao'}`} info={{ what: 'Ước lượng nguy cơ bỏ giữa chừng và những gì sắp cản bạn.', how: 'Kết hợp số ngày chưa học lại, tỉ lệ làm đúng gần đây, số bài bỏ dở và độ đều đặn.' }}>
             <div className="flex flex-col gap-xl">
-              <div className="flex flex-col items-center gap-lg sm:flex-row">
+              <div className="flex flex-col items-center gap-xl sm:flex-row">
                 <ArcGauge value={Math.round(twin.dropoutRisk * 100)} max={100} unit="%" color={riskColor} sublabel="nguy cơ bỏ dở" size={168} />
-                <div className="flex min-w-0 flex-1 flex-col gap-md">
+                <div className="flex min-w-0 flex-1 flex-col gap-sm">
                   <span className="flex items-center gap-xs text-sm font-medium text-secondary">
-                    {twin.trend >= 0 ? <TrendingUp className="h-4 w-4 text-warning-600" /> : <TrendingDown className="h-4 w-4 text-success-600" />}
-                    {twin.trend >= 0 ? `Nhích lên ${twin.trend}%` : `Giảm ${Math.abs(twin.trend)}%`} so với trước
+                    {twin.trend > 3 ? <TrendingUp className="h-4 w-4 text-warning-600" /> : twin.trend < -3 ? <TrendingDown className="h-4 w-4 text-success-600" /> : null}
+                    {twin.trend > 3 ? 'Nhích lên một chút so với 2 tuần trước' : twin.trend < -3 ? 'Dịu đi một chút so với 2 tuần trước' : 'Gần như không đổi so với 2 tuần trước'}
                   </span>
-                  {twin.factors.slice(0, 4).map((f) => (
-                    <span key={f.label} className="flex flex-col gap-xxs">
-                      <span className="flex items-center justify-between text-xs text-tertiary">
-                        <span>{f.label}</span>
-                        <span className="tabular-nums">{Math.round(f.weight * 100)}%</span>
+                  <p className="mt-xs text-xs font-medium text-tertiary">Vì sao có con số này:</p>
+                  {twin.factors.slice(0, 4).map((f) => {
+                    const tag = factorTag(f);
+                    return (
+                      <span key={f.label} className="flex items-center justify-between gap-md">
+                        <span className="flex min-w-0 flex-col">
+                          <span className="text-sm font-medium text-primary">{f.label}</span>
+                          <span className="text-xs text-tertiary">{f.detail}</span>
+                        </span>
+                        <span className={`shrink-0 rounded-pill px-md py-xxs text-xs font-semibold ${tag.cls}`}>{tag.text}</span>
                       </span>
-                      <span className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
-                        <span className="block h-full rounded-full" style={{ width: `${Math.round(f.weight * 100)}%`, background: f.dir === 'up' ? STATUS.warning : STATUS.good }} />
-                      </span>
-                    </span>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
-              <TwinHorizon horizon={twin.horizon} />
+              <div className="flex flex-col gap-md border-t border-secondary pt-lg">
+                <p className="text-sm font-semibold text-primary">Sắp tới có thể gặp</p>
+                <ForecastItem tone={STATUS.warning} title="Dễ vấp">
+                  khả năng vấp ở <b>{twin.nextConceptLabel}</b> — phần trước chưa thật vững.
+                </ForecastItem>
+                <ForecastItem tone="#7A5AF8" title="Sắp quên">
+                  {fg.dueSoon[0] ? (
+                    <>
+                      <b>{fg.dueSoon[0].conceptLabel}</b> {fg.dueSoon[0].dueInDays <= 0 ? 'nên ôn ngay hôm nay.' : `sẽ mờ dần trong khoảng ${fg.dueSoon[0].dueInDays} ngày tới.`}
+                    </>
+                  ) : (
+                    <>chưa có kiến thức nào sắp quên gấp.</>
+                  )}
+                </ForecastItem>
+                <ForecastItem tone={riskColor} title="Nguy cơ bỏ dở">
+                  đang ở mức <b>{twin.dropoutRisk < 0.34 ? 'thấp' : twin.dropoutRisk < 0.6 ? 'trung bình' : 'cao'}</b>.
+                </ForecastItem>
+              </div>
             </div>
           </TileCard>
           <TileCard title="Việc nên làm tiếp" subtitle="Xếp theo mức giúp ích, kèm lý do bằng lời thường" info={{ what: 'Vài việc cụ thể nên làm ngay để giữ nhịp và gỡ chỗ khó.', how: 'Rút ra từ chính dự báo bên cạnh.' }}>
@@ -287,91 +285,72 @@ function OverviewMode({ scoped, onPickCourse }: { scoped: import('../../behavior
   );
 }
 
-// ---------------- COURSE ----------------
-function CourseMode({ scoped, courseId, onPickLesson }: { scoped: import('../../behavior/events').Statement[]; courseId: string; onPickLesson: (id: string) => void }) {
+// ---------------- COURSE DETAIL (modal woven into the general report) ----------------
+function CourseDetailModal({ courseId, sts, fromDay, toDay, onClose }: { courseId: string; sts: Statement[]; fromDay: number; toDay: number; onClose: () => void }) {
+  const scoped = useMemo(() => scope(sts, { fromDay, toDay, courseId }), [sts, fromDay, toDay, courseId]);
   const lessons = useMemo(() => lessonRows(scoped, courseId), [scoped, courseId]);
   const strat = useMemo(() => strategyFingerprint(scoped), [scoped]);
   const sg = useMemo(() => slipGap(scoped), [scoped]);
   const fg = useMemo(() => forgetting(scoped), [scoped]);
   const cmap = useMemo(() => conceptMapOf(scoped, courseId), [scoped, courseId]);
   const course = COURSE_BY_ID[courseId];
+  const hrefFor = (conceptId: string) => `/learn/${course?.slug ?? ''}/${encodeURIComponent(conceptId)}`;
 
-  return (
-    <>
-      <Section tag="Trong khóa" title={`Bài trong khóa “${course?.title ?? ''}”`} subtitle="Từng bài, mức bạn đã nắm và chỗ hay vấp — bấm một bài để xem chi tiết khoảnh khắc.">
-        <TileCard title="Các bài của khóa" subtitle={`${lessons.length} bài`} info={{ what: 'Danh sách bài trong khóa và mức bạn nắm từng bài.', how: 'Mức nắm lấy từ kết quả làm bài của bài đó.' }}>
-          <LessonList rows={lessons} onPick={onPickLesson} />
-        </TileCard>
-      </Section>
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose]);
 
-      <Section tag="Cách học" title="Cách bạn học khóa này" subtitle="Chân dung cách học và những lỗi hay gặp, tính riêng cho khóa này.">
-        <div className="grid gap-xl lg:grid-cols-3">
-          <TileCard title="Chân dung người học" subtitle={strat.label} info={{ what: 'Cách bạn học riêng trong khóa này.', how: 'Đo các thói quen từ hành vi trong khóa.' }} takeaway={<>{strat.blurb}</>}>
-            <StrategyRadar axes={strat.axes} />
-          </TileCard>
-          <TileCard title="Nhầm do vội hay chưa hiểu" subtitle={`Nhầm do vội ${sg.counts.slip} · chưa hiểu ${sg.counts.gap}`} info={{ what: 'Lỗi sai do vội hay do chưa nắm bài, trong khóa này.', how: 'Nhìn thời gian suy nghĩ và đúng/sai mỗi câu.' }}>
-            <SlipGapScatter data={sg} />
-          </TileCard>
-          <TileCard title="Sắp quên gì?" subtitle="Khái niệm nên ôn lại sớm" info={{ what: 'Kiến thức của khóa đang mờ dần.', how: 'Tuỳ độ khó và số lần ôn của từng khái niệm.' }}>
-            <ForgettingCurveChart data={fg} />
-          </TileCard>
+  if (typeof document === 'undefined') return null;
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:p-8"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div role="dialog" aria-modal="true" aria-label={`Chi tiết khóa ${course?.title ?? ''}`} className="dv-bubble my-auto flex w-full max-w-[960px] flex-col gap-xl rounded-card border border-secondary bg-primary p-xl shadow-lg sm:p-3xl">
+        <div className="flex items-start justify-between gap-md">
+          <div className="flex min-w-0 flex-col gap-xxs">
+            <span className="text-xs font-semibold uppercase tracking-wide text-brand-secondary">Chi tiết khóa</span>
+            <h2 className="text-display-xs font-semibold text-primary">{course?.title}</h2>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Đóng" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-secondary bg-white text-tertiary transition hover:bg-secondary">
+            <X className="h-4 w-4" aria-hidden="true" />
+          </button>
         </div>
-      </Section>
 
-      {cmap ? (
-        <Section tag="Bản đồ" title="Bản đồ khái niệm" subtitle="Các phần kiến thức nối nhau — tô theo mức bạn đã nắm.">
-          <TileCard title={`Trong khóa “${cmap.courseTitle}”`} subtitle="Xanh là đã nắm, cam/đỏ là còn yếu" info={{ what: 'Sơ đồ các khái niệm và thứ tự nên học.', how: 'Tô mỗi khái niệm theo mức làm đúng bài của nó.' }} takeaway={cmap.blocked.length > 0 ? <>Có <b>{cmap.blocked.length}</b> phần đang bị chặn vì phần trước chưa vững.</> : undefined}>
+        <TileCard title="Các bài của khóa" subtitle={`${lessons.length} bài · bấm một bài để mở báo cáo chi tiết của bài đó`} info={{ what: 'Danh sách bài trong khóa và mức bạn nắm từng bài.', how: 'Mức nắm lấy từ kết quả làm bài của bài đó.' }}>
+          <LessonList rows={lessons} hrefFor={hrefFor} />
+        </TileCard>
+
+        <TileCard title="Chân dung cách học khóa này" subtitle={strat.label} info={{ what: 'Cách bạn học riêng trong khóa này.', how: 'Đo các thói quen từ hành vi trong khóa.' }} takeaway={<>{strat.blurb}</>}>
+          <StrategyRadar axes={strat.axes} />
+        </TileCard>
+
+        <TileCard title="Nhầm do vội hay chưa hiểu" subtitle={`Nhầm do vội ${sg.counts.slip} · chưa hiểu ${sg.counts.gap}`} info={{ what: 'Lỗi sai do vội hay do chưa nắm bài, trong khóa này.', how: 'Nhìn thời gian suy nghĩ và đúng/sai mỗi câu.' }}>
+          <SlipGapScatter data={sg} />
+        </TileCard>
+
+        <TileCard title="Sắp quên gì trong khóa" subtitle="Khái niệm nên ôn lại sớm" info={{ what: 'Kiến thức của khóa đang mờ dần.', how: 'Tuỳ độ khó và số lần ôn của từng khái niệm.' }}>
+          <ForgettingCurveChart data={fg} />
+        </TileCard>
+
+        {cmap ? (
+          <TileCard title="Bản đồ khái niệm" subtitle="Xanh là đã nắm, cam/đỏ là còn yếu" info={{ what: 'Sơ đồ các khái niệm và thứ tự nên học.', how: 'Tô mỗi khái niệm theo mức làm đúng bài của nó.' }} takeaway={cmap.blocked.length > 0 ? <>Có <b>{cmap.blocked.length}</b> phần đang bị chặn vì phần trước chưa vững.</> : undefined}>
             <PrereqGraph nodes={cmap.nodes} edges={cmap.edges} />
           </TileCard>
-        </Section>
-      ) : null}
-    </>
-  );
-}
-
-// ---------------- LESSON ----------------
-function LessonMode({ scoped, conceptId }: { scoped: import('../../behavior/events').Statement[]; conceptId: string }) {
-  const videoId = videoIdOfConcept(conceptId);
-  const hero = useMemo(() => confusionMap(scoped, videoId), [scoped, videoId]);
-  const cover = useMemo(() => watchCoverage(scoped, videoId), [scoped, videoId]);
-  const replay = useMemo(() => sessionReplay(scoped), [scoped]);
-  const aha = useMemo(() => ahaMoments(scoped)[0] ?? null, [scoped]);
-  const concept = CONCEPT_BY_ID[conceptId];
-
-  return (
-    <>
-      <Section tag="Chỗ vấp" title={`Chỗ vấp trong bài “${concept?.label ?? ''}”`} subtitle="Đúng giây phút bạn hay dừng, tua lại, xin gợi ý — chỗ đậm màu là chỗ khó nhất.">
-        {hero ? (
-          <TileCard title={`Bản đồ chỗ vấp · ${hero.videoTitle}`} subtitle={`${hero.courseTitle} · chỗ đậm là nơi bạn dừng và tua lại nhiều nhất`} info={{ what: 'Chỗ nào trong video bạn hay dừng, tua lại, giảm tốc hay xin gợi ý.', how: 'Trải video theo trục thời gian, đếm số lần mỗi thao tác rơi vào từng đoạn ngắn.' }}>
-            <ConfusionHeatmap map={hero} />
-          </TileCard>
-        ) : (
-          <TileCard title="Chưa đủ dữ liệu" subtitle={concept?.label ?? ''}>
-            <p className="text-sm text-tertiary">Bài này chưa có đủ thao tác để dựng bản đồ chỗ vấp.</p>
-          </TileCard>
-        )}
-        {cover ? (
-          <TileCard title="Bạn xem thật hay chỉ mở cho có" subtitle={hero?.videoTitle ?? ''} info={{ what: 'Phần nào của video bạn thực sự xem, phần nào tua nhanh hay bỏ qua.', how: 'Dựng lại từ các đoạn đã phát, chỗ tua lại và chỗ nhảy qua.' }}>
-            <WatchCoverageBar data={cover} />
-          </TileCard>
         ) : null}
-      </Section>
-
-      {aha ? (
-        <Section tag="Hiểu ra" title="Lúc bạn hiểu ra bài này" subtitle="Lúc bạn đang lúng túng rồi làm đúng bài ngay sau đó.">
-          <TileCard title={`Lúc bạn hiểu ra “${aha.conceptLabel}”`} subtitle={`tua lại ${aha.rewinds} lần rồi làm được`} info={{ what: 'Thời điểm chỗ khó bỗng hiểu ra.', how: 'Nhìn ra từ việc tua lại nhiều lần rồi làm đúng bài ngay sau.' }}>
-            <AhaArc moment={aha} />
-          </TileCard>
-        </Section>
-      ) : null}
-
-      {replay ? (
-        <Section tag="Tua lại" title="Xem lại buổi học bài này" subtitle="Kéo thanh tua để xem chỗ nào khó nhưng gỡ được, chỗ nào loay hoay chưa ra.">
-          <TileCard title={`Buổi học · ${replay.courseTitle}`} subtitle={replay.summary} info={{ what: 'Diễn biến khi bạn học bài này, tua lại được.', how: 'Xâu chuỗi các thao tác theo thứ tự, tô màu theo trạng thái.' }}>
-            <SessionReplay replay={replay} />
-          </TileCard>
-        </Section>
-      ) : null}
-    </>
+      </div>
+    </div>,
+    document.body,
   );
 }
