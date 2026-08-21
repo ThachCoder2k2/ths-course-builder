@@ -38,7 +38,7 @@ export default function TopicPillGrid({ title = 'Kỹ năng phổ biến' }: { t
     <section className="flex w-full flex-col gap-xl">
       <div className="flex w-full flex-col gap-2xl">
         <div className="flex w-full flex-wrap items-start gap-xl">
-          <div className="flex min-w-[320px] flex-1 flex-col gap-xs">
+          <div className="flex min-w-0 flex-1 flex-col gap-xs">
             <h2 className="w-full text-display-xs text-primary">{title}</h2>
           </div>
         </div>
@@ -49,7 +49,7 @@ export default function TopicPillGrid({ title = 'Kỹ năng phổ biến' }: { t
           <button
             key={label}
             type="button"
-            className="relative flex h-[60px] shrink-0 items-center justify-center gap-md overflow-hidden rounded-full bg-button-secondary px-[22px] py-xl text-lg font-semibold text-button-secondary-fg shadow-xs-ring-primary"
+            className="relative flex h-[52px] max-w-full items-center justify-center gap-md overflow-hidden rounded-full bg-button-secondary px-xl py-lg text-md font-semibold text-button-secondary-fg shadow-xs-ring-primary transition-transform duration-200 hover:-translate-y-0.5 sm:h-[60px] sm:px-[22px] sm:py-xl sm:text-lg"
           >
             <Icon className="h-6 w-6 shrink-0" aria-hidden="true" />
             <span className="flex items-center justify-center px-xxs">{label}</span>

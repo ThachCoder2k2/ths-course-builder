@@ -9,7 +9,7 @@ import { CourseTableCard } from './CourseTableCard';
 import { NextActionsCard } from './NextActionsCard';
 import { TimeDonut } from './charts/TimeDonut';
 import { BarList, type BarRow } from './charts/BarList';
-import { Reveal } from './Reveal';
+import { Reveal } from '../ui/Reveal';
 import { EmptyState } from './EmptyState';
 import { StrategyRadar } from './charts/StrategyRadar';
 import { getBehaviorData } from '../../behavior/seed';
@@ -142,7 +142,7 @@ export function ReportExperience() {
             trang: bấm chuột làm nút nhận focus, và trình duyệt sẽ cuộn phần tử đang focus
             vào tầm nhìn — nút nằm trên đỉnh document thì cả trang bị kéo lên. Dính lại
             thì nút luôn ở trong tầm nhìn nên không còn gì để cuộn. */}
-        <div className="rp-sticky sticky top-[76px] z-30 -mx-4 flex flex-col gap-lg border-b border-secondary bg-primary px-4 pb-lg pt-md lg:-mx-4xl lg:px-4xl">
+        <div className="rp-sticky sticky top-20 z-30 -mx-4 flex flex-col gap-lg border-b border-secondary bg-primary px-4 pb-lg pt-md lg:-mx-4xl lg:px-4xl">
           <header className="flex items-center gap-xl">
             <Avatar name={data.learner.name} src={avatarUser} size="md" className="border-[0.75px] border-[rgba(0,0,0,0.08)]" />
             <h1 className="text-lg font-semibold text-primary">{data.learner.name}</h1>

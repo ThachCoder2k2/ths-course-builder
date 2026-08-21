@@ -98,16 +98,299 @@ body {
   opacity: var(--rp-dim, 1);
 }
 
+/* ---- Chuyển động của trang chủ (ln-*) -------------------------------------
+   Cùng luật với hệ rp-* của trang báo cáo: chỉ opacity và transform, ease-out,
+   mỗi thứ động một lần khi cuộn tới. Ngoại lệ duy nhất được lặp là con mascot,
+   vì nó là nhân vật chứ không phải đồ trang trí. */
+
+/* Ảnh thẻ nở nhẹ vào trước, chữ theo sau — cảm giác "bộ thẻ đang được chia ra". */
+.rp-reveal .ln-card-img {
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 300ms ease-out, transform 300ms cubic-bezier(0, 0, 0.2, 1);
+}
+.rp-reveal.rp-in .ln-card-img {
+  opacity: 1;
+  transform: none;
+}
+.rp-reveal .ln-card-body {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 260ms ease-out 80ms, transform 260ms cubic-bezier(0, 0, 0.2, 1) 80ms;
+}
+.rp-reveal.rp-in .ln-card-body {
+  opacity: 1;
+  transform: none;
+}
+
+/* Lộ trình ở khối mời xây chương trình: đường tự vẽ, rồi từng chặng hiện ra. */
+.ln-path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.ln-in .ln-path {
+  animation: ln-draw 700ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes ln-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.ln-stop,
+.ln-stop-label {
+  opacity: 0;
+}
+.ln-in .ln-stop,
+.ln-in .ln-stop-label {
+  animation: ln-appear 240ms ease-out forwards;
+}
+@keyframes ln-appear {
+  to {
+    opacity: 1;
+  }
+}
+.ln-cta-art {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 320ms ease-out 200ms, transform 320ms cubic-bezier(0, 0, 0.2, 1) 200ms;
+}
+.ln-in .ln-cta-art {
+  opacity: 1;
+  transform: none;
+}
+
+/* Nền wash dịch chậm hơn nội dung một nhịp. Rất nhẹ và tắt hẳn khi người dùng bật giảm
+   chuyển động, vì parallax là thứ dễ gây chóng nhất trong nhóm này. */
+.ln-wash {
+  will-change: transform;
+}
+
+/* Mascot: thân dểnh theo nhịp thở. */
+.ln-mascot {
+  animation: ln-bob 4s ease-in-out infinite;
+}
+
+/* Hover mascot — thông số lấy đúng từ Figma: ON_HOVER, SMART_ANIMATE, EASE_OUT, 150ms.
+   Gốc phóng ở góc DƯỚI-TRÁI: mép trái đứng yên nên con robot không bị đẩy sang trái, đúng
+   như thiết kế; nó nở sang phải, vừa chạm mép cột nội dung mà không lấn vào. */
+.ln-mascot-scale {
+  transform-origin: bottom left;
+  transition: transform 150ms ease-out;
+}
+.ln-mascot-hit:hover .ln-mascot-scale {
+  transform: scale(1.5);
+}
+
+/* Đổi bản vẽ: bản hover có đôi mắt to và nghiêng, các vạch chuyển động toả rộng hơn.
+   Cùng một khung nên hai bản chồng khít; chỉ đổi độ mờ, không chạm layout. */
+.ln-face-hover {
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+.ln-mascot-hit:hover .ln-face-hover {
+  opacity: 1;
+}
+.ln-face-rest {
+  transition: opacity 150ms ease-out;
+}
+.ln-mascot-hit:hover .ln-face-rest {
+  opacity: 0;
+}
+
+/* Bong bóng chào. KHÔNG có hiệu ứng mờ dần: bản vẽ hover đã xoá bong bóng nên chỗ đó là
+   một lỗ khoét vào vòm đầu, bong bóng phải đục hoàn toàn ngay từ đầu để che kín cái lỗ
+   suốt cú phóng. Bù lại nó vẫn "bật" ra bằng transform, nên vẫn có cảm giác robot đang nói. */
+.ln-bubble {
+  opacity: 0;
+  transform: scale(0.9);
+  transform-origin: bottom left;
+  transition: transform 100ms ease-out, opacity 0ms linear 100ms;
+}
+.ln-mascot-hit:hover .ln-bubble {
+  opacity: 1;
+  transform: none;
+  transition: transform 150ms ease-out, opacity 0ms linear;
+}
+@keyframes ln-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Băng chuyền tin: bề rộng slide TÍNH RA từ chỗ còn trống, không chốt cứng 800px.
+   Chốt cứng thì phần hé của slide kế tiếp chỉ là số dư: ở 1712px bề rộng cửa sổ (rất
+   nhiều laptop sau khi trừ thanh cuộn) nó ra đúng 32px — một vạch xám dọc sát mép phải,
+   trông hệt lỗi render. Ở đây phần hé luôn bằng 0.3 lần slide, đúng tỉ lệ 240/800 của
+   thiết kế, nên khổ nào nhìn cũng ra vẻ có chủ đích.
+   Công thức: chỗ trống = n·slide + n·khe + hé·slide  =>  slide = (trống − n·khe)/(n + hé) */
+.ln-carousel {
+  --ln-gap: 16px;
+  --ln-peek: 0.3;
+  --ln-slide: min(800px, calc((100% - var(--ln-gap)) / (1 + var(--ln-peek))));
+  --ln-step: calc(var(--ln-slide) + var(--ln-gap));
+}
+@media (min-width: 1440px) {
+  /* Từ 1440px hai slide mới vừa nằm cạnh nhau. Ở đúng 1920px công thức ra 800px và hé
+     240px — trùng khít thiết kế. Trên 1920px thì min() giữ slide ở 800 và phần hé nở
+     dần, đúng như Figma dựng: ray 2432px bị khung cửa sổ cắt. */
+  .ln-carousel {
+    --ln-slide: min(800px, calc((100% - 2 * var(--ln-gap)) / (2 + var(--ln-peek))));
+  }
+}
+
+/* Đường ray băng chuyền cuộn bằng chính trình duyệt, nên phải ẩn thanh cuộn đi — vị trí
+   đã có thanh tiến độ bên dưới nói hộ, để thêm thanh cuộn nữa là nói hai lần. */
+.ln-rail {
+  scrollbar-width: none;
+}
+.ln-rail::-webkit-scrollbar {
+  display: none;
+}
+/* Đã cuộn rồi thì slide bên trái bị chặt ngang giữa chữ. Cho nó mờ dần ở mép thay vì cắt
+   thẳng — nhìn ra là "còn nữa ở phía trước" chứ không ra vẻ tràn lỗi. Chỉ bật khi đã cuộn,
+   để lúc ở đầu ray thì slide đầu vẫn nét nguyên. */
+.ln-rail-mo-trai {
+  mask-image: linear-gradient(to right, transparent 0, #000 40px);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 40px);
+}
+
+/* Thẻ khoá học nghiêng khi trỏ vào — như cầm một tấm thiệp lên nhìn. 200ms là đúng quy
+   ước hover của cả file Figma (140 component trong thư viện đều ON_HOVER 200ms).
+   Góc nghiêng đặt thành biến để đổi một chỗ là đổi cả trang. */
+.ln-card-tilt {
+  --ln-tilt: -2deg;
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+.group:hover .ln-card-tilt {
+  transform: rotate(var(--ln-tilt)) scale(1.03) translateY(-6px);
+  box-shadow: 0 18px 32px -12px rgba(10, 13, 18, 0.18);
+}
+
+/* Phản hồi khi bấm, dùng chung cho mọi nút. Trước đây 16 nút trên trang bấm không có
+   gì xảy ra. Vào 200ms, ra 90ms — nhanh hơn lúc vào nên cảm giác nút đáp lẹ. */
+.ln-press {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+.ln-press:hover {
+  transform: translateY(-2px);
+}
+.ln-press:active {
+  transform: scale(0.97);
+  transition-duration: 90ms;
+}
+
+/* Dot băng chuyền: cao lên khi trỏ vào, để biết nó bấm được. */
+.ln-dot {
+  transition: background-color 200ms ease-out, transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+.ln-dot:hover {
+  transform: scaleY(1.5);
+}
+
+@media print {
+  .ln-press,
+  .ln-dot,
+  .ln-mascot-scale,
+  .ln-bubble,
+  .ln-card-tilt,
+  .group:hover .ln-card-tilt {
+    transition: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  .ln-bubble {
+    display: none !important;
+  }
+  .ln-card-img,
+  .ln-card-body,
+  .ln-cta-art,
+  .ln-stop,
+  .ln-stop-label {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+  .ln-path {
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rp-reveal .ln-card-img,
+  .rp-reveal.rp-in .ln-card-img,
+  .rp-reveal .ln-card-body,
+  .rp-reveal.rp-in .ln-card-body,
+  .ln-cta-art,
+  .ln-in .ln-cta-art,
+  .ln-stop,
+  .ln-in .ln-stop,
+  .ln-stop-label,
+  .ln-in .ln-stop-label {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+  .ln-path,
+  .ln-in .ln-path {
+    animation: none !important;
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+  .ln-mascot {
+    animation: none !important;
+  }
+  /* Bỏ cú phóng 1.5 lần, nhưng vẫn cho bong bóng hiện ra — nó là lời chào, không phải
+     chuyển động. Chỉ hiện thẳng, không bật. */
+  .ln-mascot-scale,
+  .ln-mascot-hit:hover .ln-mascot-scale {
+    transform: none !important;
+    transition: none !important;
+  }
+  /* Vẫn đổi sang bản mắt to khi trỏ vào — đó là thông tin, không phải chuyển động.
+     Chỉ bỏ phần mờ dần. */
+  .ln-face-rest,
+  .ln-face-hover {
+    transition: none !important;
+  }
+  .ln-bubble {
+    transition: none !important;
+    transform: none !important;
+  }
+  .ln-mascot-hit:hover .ln-bubble {
+    opacity: 1;
+  }
+  .ln-wash {
+    transform: none !important;
+    will-change: auto !important;
+  }
+  /* Nút vẫn phải cho biết là đã bấm, chỉ bỏ phần dịch chuyển. Đổi màu thì giữ. */
+  .ln-press,
+  .ln-press:hover,
+  .ln-press:active,
+  .ln-dot:hover,
+  .ln-card-tilt,
+  .group:hover .ln-card-tilt {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
 /* Mọi cú nhảy tới trong trang (neo, scrollIntoView, Ctrl+F, focus bàn phím) phải dừng
    DƯỚI dải dính, không thì nội dung nằm hẳn sau nó. Đặt trên phần tử cuộn bằng
    scroll-padding-top mới áp cho mọi đích đến; scroll-margin trên thanh dính chỉ lo được
    cho chính mấy cái nút trong thanh. Dải dính cao hơn ở khung hẹp vì các mốc xuống dòng. */
 html {
-  scroll-padding-top: 260px;
+  scroll-padding-top: 264px;
 }
 @media (min-width: 1024px) {
   html {
-    scroll-padding-top: 190px;
+    scroll-padding-top: 194px;
   }
 }
 

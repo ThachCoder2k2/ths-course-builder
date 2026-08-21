@@ -5,53 +5,61 @@ import ListingColumns from '../components/home/ListingColumns';
 import CTABanner from '../components/home/CTABanner';
 import TopicPillGrid from '../components/home/TopicPillGrid';
 import DashboardBanner from '../components/home/DashboardBanner';
-import NavWash from '../components/layout/NavWash';
+import { HeroWash } from '../components/home/HeroWash';
+import { Mascot } from '../components/home/Mascot';
 import { getCourses, getFeaturedCourses } from '../mock';
 
 /**
- * Figma: `Sau đăng nhập` (node 177:2981).
+ * Trang chủ, theo thiết kế Figma node 550:11174.
  *
- * Main content (node 177:3007) puts its sections in a 1440-wide container
- * inset 32px — so 1376 content — separated by 64px. The CTA section
- * (179:5458) and the Banner (177:2985) are full-bleed 1920 and therefore sit
- * outside that container.
+ * Thiết kế gói toàn bộ phần nội dung vào một khối tên "Testimonial section"
+ * (`550:11205`, 1920 × 3151) và đặt ảnh nền lên chính khối đó — tức dải nền trải từ ngay
+ * dưới thanh đầu trang xuống hết nội dung rồi DỪNG ở băng chuyền tin. Ở đây dựng lại đúng
+ * cấu trúc ấy: một lớp bọc `relative` chứa mọi mục nằm trên băng chuyền, `HeroWash` phủ
+ * kín lớp bọc đó. Bản trước phủ cứng 1200px nên nửa dưới trang trắng trơn.
+ *
+ * Các mục nội dung rộng 1440 lùi vào 32px. Hai khối chạy tràn viền (khối mời xây lộ trình
+ * và băng chuyền tin) nằm ngoài khung nội dung để trải hết bề ngang.
+ *
+ * Con mascot đứng ở lề trái trong khe giữa mục 2 và mục 3, chỉ hiện từ 1920px trở lên vì
+ * hẹp hơn thì máng lề không đủ chỗ cho nó đứng mà không đè lên nội dung.
  */
 export default function DashboardPage() {
+  const courses = getCourses();
+
   return (
     <div data-testid="page-dashboard" className="relative flex flex-col">
-      {/* Figma 177:2982 — hero wash + grid behind the transparent nav band. */}
-      <NavWash />
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-7xl px-4 pt-7xl lg:px-4xl">
-        {/* Figma 179:4442 — the render shows the circular next arrow here too. */}
-        <CourseSection title="Khoá học nổi bật" courses={getFeaturedCourses(3)} showNext />
+      <div className="relative isolate flex flex-col">
+        <HeroWash />
 
-        {/* Figma 179:4444 */}
-        <FeaturedTabsSection courses={getCourses()} />
+        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-7xl px-4 pt-7xl lg:px-4xl">
+          <CourseSection title="Khoá học nổi bật" courses={getFeaturedCourses(4)} showNext />
 
-        {/* Figma 179:4624 */}
-        <TabbedCourseSection
-          title="Những khoá học giúp bạn mở khoá kĩ năng mới"
-          courses={getCourses()}
-        />
+          <FeaturedTabsSection courses={courses} />
 
-        {/* Figma 179:5518 */}
-        <ListingColumns />
+          {/* Mốc cao 0 đánh dấu khe giữa mục 2 và mục 3 — con robot neo vào đây. Phải nằm
+              đúng chỗ này trong luồng DOM, không phải treo bằng toạ độ tính từ đỉnh trang. */}
+          <Mascot />
+
+          <TabbedCourseSection
+            title="Những khoá học giúp bạn mở khoá kĩ năng mới"
+            courses={courses}
+          />
+
+          <ListingColumns />
+        </div>
+
+        <div className="pt-7xl">
+          <CTABanner />
+        </div>
+
+        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-7xl px-4 pb-9xl pt-7xl lg:px-4xl">
+          <CourseSection title="Khoá học đang được học nhiều" courses={courses.slice(4, 8)} showNext />
+
+          <TopicPillGrid />
+        </div>
       </div>
 
-      {/* Figma 179:5458 — full-bleed */}
-      <div className="pt-7xl">
-        <CTABanner />
-      </div>
-
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-7xl px-4 pb-9xl pt-7xl lg:px-4xl">
-        {/* Figma 179:5208 */}
-        <CourseSection title="Khoá học nổi bật" courses={getCourses().slice(3, 6)} showNext />
-
-        {/* Figma 179:7785 */}
-        <TopicPillGrid />
-      </div>
-
-      {/* Figma 177:2985 — full-bleed */}
       <DashboardBanner />
     </div>
   );

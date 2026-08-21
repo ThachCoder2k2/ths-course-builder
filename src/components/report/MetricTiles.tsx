@@ -1,5 +1,5 @@
 import { Flame, GraduationCap, Timer } from 'lucide-react';
-import { CountUp } from './Reveal';
+import { CountUp } from '../ui/Reveal';
 
 interface Tile {
   label: string;

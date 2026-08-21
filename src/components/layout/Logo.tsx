@@ -1,25 +1,22 @@
-import mark from '../../assets/brand/logo-mark.svg';
-import word from '../../assets/brand/logo-word.svg';
+import icon from '../../assets/brand/logo-icon.png';
 import { cn } from '../../lib/cn';
 
-/** Figma: `Logo wrap` (node 83:16941) — 64.269 × 32, mark over wordmark. */
+/**
+ * Dấu hiệu thương hiệu ở thanh đầu trang, theo Figma node 550:11175 — chỉ còn hình khối
+ * lục giác và cây bút chì, không kèm dòng chữ "GK EBOOKS" như bản trước.
+ *
+ * Ảnh cắt ra từ chính bản thiết kế ở tỉ lệ 3x — 48×38 khi vẽ, nên vẫn nét trên màn
+ * hình mật độ cao. Cắt phải giữ kênh trong suốt: nền của bản render là trong suốt, đổi
+ * sang RGB một cái là nền thành đen và logo hiện ra như một ô đen giữa thanh trắng.
+ */
 export default function Logo({ className }: { className?: string }) {
   return (
-    <div className={cn('relative h-8 w-16 shrink-0', className)} aria-label="THS Learning">
-      {/* Explicit sizes: Tailwind preflight (img height:auto) breaks the
-          inset-solved box, rendering the SVGs at intrinsic size. */}
-      <img
-        src={mark}
-        alt=""
-        className="absolute max-w-none"
-        style={{ top: 0, left: '11.21%', width: '77.75%', height: '58.38%' }}
-      />
-      <img
-        src={word}
-        alt=""
-        className="absolute max-w-none"
-        style={{ top: '78.46%', left: '4.4%', width: '90.39%', height: '21.64%' }}
-      />
-    </div>
+    <img
+      src={icon}
+      alt="THS Learning"
+      width={48}
+      height={38}
+      className={cn('h-[38px] w-12 shrink-0 object-contain', className)}
+    />
   );
 }

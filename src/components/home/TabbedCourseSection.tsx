@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import CourseCard from './CourseCard';
+import { Reveal } from '../ui/Reveal';
 import { cn } from '../../lib/cn';
 import type { Course } from '../../mock/types';
 
@@ -35,7 +36,8 @@ export default function TabbedCourseSection({
 
   // The mock carries no per-tab taxonomy; rotate the pool so switching tabs
   // shows a different trio while the default tab matches Figma's three cards.
-  const visible = Array.from({ length: 3 }, (_, i) => courses[(active + i) % courses.length]).filter(
+  // Bốn thẻ một hàng theo thiết kế (node 550:11307), không phải ba như bản cũ.
+  const visible = Array.from({ length: 4 }, (_, i) => courses[(active + i) % courses.length]).filter(
     Boolean,
   );
 
@@ -43,7 +45,7 @@ export default function TabbedCourseSection({
     <section className="flex w-full flex-col gap-xl">
       <div className="flex w-full flex-col gap-2xl">
         <div className="flex w-full flex-wrap items-start gap-xl">
-          <div className="flex min-w-[320px] flex-1 flex-col gap-xs">
+          <div className="flex min-w-0 flex-1 flex-col gap-xs">
             <h2 className="w-full text-display-xs text-primary">{title}</h2>
           </div>
         </div>
@@ -72,11 +74,11 @@ export default function TabbedCourseSection({
       </div>
 
       <div className="flex w-full flex-col items-center gap-5xl">
-        <div className="flex w-full items-start gap-4xl">
-          {visible.map((course) => (
-            <div key={course.id} className="flex min-w-px flex-1 flex-col gap-4xl">
-              <CourseCard course={course} />
-            </div>
+        <div className="grid w-full grid-cols-1 gap-3xl sm:grid-cols-2 xl:grid-cols-4">
+          {visible.map((course, i) => (
+            <Reveal key={course.id} order={i} className="flex">
+              <CourseCard course={course} slot={i} />
+            </Reveal>
           ))}
         </div>
       </div>

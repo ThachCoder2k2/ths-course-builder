@@ -14,7 +14,8 @@ import type { Course } from '../../mock/types';
  * cả" secondary button — beside a body with an 8-tab underlined topic strip
  * (node 181:3622) and a Card list of four compact Blog post cards.
  *
- * The supporting paragraph is Figma's Lorem placeholder, kept verbatim.
+ * Câu mô tả trong thiết kế là lorem ipsum; ở đây thay bằng câu nói đúng việc mà khối
+ * này làm, vì để chữ giả trên trang chạy thật thì không dùng được.
  */
 const TABS = [
   'Trí tuệ nhân tạo',
@@ -28,7 +29,7 @@ const TABS = [
 ] as const;
 
 const SUPPORTING =
-  'Porem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec fringilla accumsan, risus sem';
+  'Mỗi chủ đề chia thành ba mức: cơ bản, trung cấp và nâng cao. Bắt đầu ở mức nào cũng được, hệ thống sẽ đo lại sau bài kiểm tra đầu tiên rồi xếp bạn vào đúng chỗ.';
 
 export default function FeaturedTabsSection({ courses }: { courses: Course[] }) {
   const [active, setActive] = useState(0);
@@ -41,9 +42,9 @@ export default function FeaturedTabsSection({ courses }: { courses: Course[] }) 
 
   return (
     <section className="flex w-full flex-col gap-xl">
-      <div className="flex w-full flex-col justify-center gap-5xl rounded-4xl bg-gradient-to-t from-[#c1dfc4] to-[#deecdd] py-3xl pl-6xl pr-3xl">
-        <div className="flex w-full items-stretch gap-lg">
-          <div className="flex w-[250px] shrink-0 flex-col justify-center gap-2xl">
+      <div className="flex w-full flex-col justify-center gap-5xl rounded-4xl bg-gradient-to-t from-[#c1dfc4] to-[#deecdd] p-xl sm:p-3xl lg:py-3xl lg:pl-6xl lg:pr-3xl">
+        <div className="flex w-full flex-col items-stretch gap-3xl lg:flex-row lg:gap-lg">
+          <div className="flex w-full shrink-0 flex-col justify-center gap-2xl lg:w-[250px]">
             {/* Figma `Featured icon` (182:14426) — downloaded verbatim. */}
             <img src={zapFast} alt="" className="h-14 w-14 shrink-0" />
             <div className="flex flex-col gap-[2px]">
@@ -81,7 +82,10 @@ export default function FeaturedTabsSection({ courses }: { courses: Course[] }) 
               </div>
             </div>
 
-            <div className="flex items-stretch gap-lg">
+            {/* Lưới xuống dòng, không phải một hàng flex: bốn thẻ trong một hàng không
+                xuống dòng làm mỗi thẻ co về 0 ở khung hẹp, và nhãn kinh nghiệm (shrink-0)
+                chọc ra ngoài viewport 151px. */}
+            <div className="grid grid-cols-1 gap-lg sm:grid-cols-2 xl:grid-cols-4">
               {visible.map((course) => (
                 <CompactCourseCard key={course.id} course={course} />
               ))}

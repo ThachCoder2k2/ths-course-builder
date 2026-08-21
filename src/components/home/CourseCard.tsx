@@ -6,36 +6,36 @@ import type { Course } from '../../mock/types';
 import { courseImage } from './courseImage';
 
 /**
- * Figma: `Blog post card` (node 179:2925).
- * bg-tertiary, radius-2xl, 240px image, gap-2xl; content gap-3xl with px/pb-xl.
- * Title Text xl/Semibold, badges (star/clock), supporting text Text sm/Regular.
+ * Thẻ khoá học của trang chủ, theo thiết kế Figma node 550:11174: tranh minh hoạ bo góc
+ * ở trên, tên khoá một dòng, hai nhãn kinh nghiệm và thời lượng ở dòng dưới, rồi mô tả.
+ *
+ * Nhãn xuống dòng riêng thay vì nằm cạnh tên: một hàng bốn thẻ thì mỗi thẻ chỉ còn ~320px,
+ * để tên và hai nhãn chung một dòng là tên bị bóp còn vài chữ.
+ *
+ * Ảnh dùng `ln-card-img` để nở nhẹ khi thẻ hiện ra, chữ theo sau — xem globals.css.
  */
-export default function CourseCard({ course }: { course: Course }) {
+export default function CourseCard({ course, slot }: { course: Course; slot?: number }) {
   return (
     <Link to={'/courses/' + course.slug} className="group block h-full">
-      <article className="flex h-full flex-col gap-2xl rounded-2xl bg-tertiary">
+      <article className="ln-card ln-card-tilt flex h-full flex-col gap-xl rounded-2xl bg-tertiary">
         <img
-          src={courseImage(course.id)}
+          src={courseImage(course.id, slot)}
           alt=""
-          className="h-[240px] w-full shrink-0 rounded-2xl object-cover"
+          loading="lazy"
+          className="ln-card-img aspect-[4/3] w-full shrink-0 rounded-2xl object-cover"
         />
 
-        <div className="flex flex-1 flex-col gap-3xl px-xl pb-xl">
-          <div className="flex flex-col gap-md">
-            <div className="flex items-center gap-xl">
-              <h3 className="line-clamp-1 min-w-0 flex-1 text-xl font-semibold text-primary transition-colors group-hover:text-brand-secondary">
-                {course.title}
-              </h3>
-              <div className="flex shrink-0 items-center gap-md">
-                <IconBadge icon={<Star className="h-3 w-3 text-utility-orange-500" />}>
-                  +{courseExp(course)} exp
-                </IconBadge>
-                <IconBadge icon={<Clock className="h-3 w-3" />}>{courseMinutes(course)} phút</IconBadge>
-              </div>
-            </div>
-            {/* Figma reserves a fixed two-line supporting block (40px). */}
-            <p className="line-clamp-2 min-h-[40px] text-sm text-tertiary">{course.subtitle}</p>
+        <div className="ln-card-body flex flex-1 flex-col gap-md px-xl pb-xl">
+          <h3 className="line-clamp-1 text-lg font-semibold text-primary transition-colors group-hover:text-brand-secondary">
+            {course.title}
+          </h3>
+          <div className="flex flex-wrap items-center gap-md">
+            <IconBadge icon={<Star className="h-3 w-3 text-utility-orange-500" />}>
+              +{courseExp(course)} exp
+            </IconBadge>
+            <IconBadge icon={<Clock className="h-3 w-3" />}>{courseMinutes(course)} phút</IconBadge>
           </div>
+          <p className="line-clamp-2 text-sm text-tertiary">{course.subtitle}</p>
         </div>
       </article>
     </Link>

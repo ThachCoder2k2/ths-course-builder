@@ -7,7 +7,7 @@ import AvatarMenu from './AvatarMenu';
 import { getTopics, getUser } from '../../mock';
 import { cn } from '../../lib/cn';
 
-// Used by MobileNavDrawer; desktop uses the logo + links + dropdowns below.
+// Dùng bởi MobileNavDrawer; bản cho máy tính là logo + link + dropdown bên dưới.
 export const NAV_LINKS = [
   { to: '/', label: 'Trang chủ' },
   { to: '/hoc-tap-cua-toi', label: 'Học tập của tôi' },
@@ -15,82 +15,100 @@ export const NAV_LINKS = [
   { to: '/topics/khoa-hoc-du-lieu', label: 'Khoa học dữ liệu' },
 ];
 
+const linkClass = ({ isActive }: { isActive: boolean }) =>
+  cn(
+    'whitespace-nowrap text-md text-[#535862] transition-colors hover:text-primary',
+    isActive ? 'font-semibold' : 'font-medium',
+  );
+
 /**
- * Transparent 76px header band. Left: logo (→ home) + "Trang chủ" + dropdowns.
- * Right: search + account avatar menu (entry into "Học tập của tôi").
+ * Thanh đầu trang, đo lại từ thiết kế Figma node 550:11175 ở tỉ lệ 3x.
+ *
+ * Bản trước dựng sai bốn chỗ: dải cao 76px lồng một thẻ trắng bo 16px có viền và bóng,
+ * logo kèm dòng chữ "GK EBOOKS", ô tìm kiếm bo 8px và bị chặn ở 420px.
+ *
+ * Thiết kế thì: dải cao 80px và phẳng — không thẻ, không viền, không bóng; logo chỉ còn
+ * hình khối lục giác 48×38, cách nhóm link 20px; ô tìm kiếm cao 44px, bo tròn hết, rộng 833px chiếm gần hết
+ * khoảng giữa nhóm link và ảnh đại diện.
+ *
+ * Ba link đều một màu #535862 trong thiết kế, không có link nào được tô xanh. Ở đây giữ
+ * lại một dấu hiệu rất nhẹ cho trang đang mở (chữ đậm hơn), vì trang thật có nhiều mục
+ * chứ không chỉ một màn hình tĩnh — bỏ hẳn thì người dùng mất chỗ định vị.
  */
 export default function TopNav({ onOpenMenu }: { onOpenMenu?: () => void }) {
   const user = getUser();
   const topics = getTopics();
 
   return (
-    <header className="sticky top-0 z-40 h-[76px] pt-lg bg-white/85 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-content items-center justify-center px-4 lg:px-4xl">
-        <div className="flex h-16 flex-1 items-center justify-between gap-xl rounded-2xl border border-secondary bg-primary pl-xl pr-lg shadow-xs">
-          <div className="flex items-center gap-xl">
-            <IconButton className="lg:hidden" aria-label="Mở menu" onClick={onOpenMenu}>
-              <Menu className="h-5 w-5" />
-            </IconButton>
+    <header className="sticky top-0 z-40 h-20 bg-white/90 backdrop-blur">
+      <div className="mx-auto flex h-full w-full max-w-content items-center px-4 lg:px-4xl">
+        <div className="flex shrink-0 items-center gap-xl lg:gap-2xl">
+          <IconButton className="lg:hidden" aria-label="Mở menu" onClick={onOpenMenu}>
+            <Menu className="h-5 w-5" />
+          </IconButton>
 
-            <Link to="/" aria-label="Về trang chủ" className="shrink-0">
-              <Logo />
-            </Link>
+          <Link to="/" aria-label="Về trang chủ" className="shrink-0">
+            <Logo />
+          </Link>
 
-            <nav className="hidden items-center gap-[20px] lg:flex">
-              <NavLink
-                to="/"
-                end
-                className={({ isActive }) =>
-                  cn('text-md font-semibold text-button-tertiary-fg hover:text-brand-secondary', isActive && 'text-brand-secondary')
-                }
-              >
-                Trang chủ
-              </NavLink>
+          <nav className="hidden items-center gap-2xl lg:flex">
+            <NavLink to="/" end className={linkClass}>
+              Trang chủ
+            </NavLink>
 
-              <NavDropdown label="Chủ đề">
-                <ul className="flex flex-col">
-                  {topics.map((topic) => (
-                    <li key={topic.id}>
-                      <NavLink
-                        to={'/topics/' + topic.slug}
-                        className={({ isActive }) =>
-                          cn('block rounded-md px-lg py-md text-md text-secondary hover:bg-secondary', isActive && 'text-brand-secondary')
-                        }
-                      >
-                        {topic.title}
-                      </NavLink>
-                    </li>
-                  ))}
-                </ul>
-              </NavDropdown>
-
-              <NavDropdown label="Học tập của tôi">
-                <ul className="flex flex-col">
-                  <li>
-                    <Link to="/hoc-tap-cua-toi" className="block rounded-md px-lg py-md text-md font-medium text-brand-secondary hover:bg-secondary">
-                      Phân tích học tập
-                    </Link>
+            <NavDropdown label="Chủ đề">
+              <ul className="flex flex-col">
+                {topics.map((topic) => (
+                  <li key={topic.id}>
+                    <NavLink
+                      to={'/topics/' + topic.slug}
+                      className={({ isActive }) =>
+                        cn('block rounded-md px-lg py-md text-md text-secondary hover:bg-secondary', isActive && 'font-semibold text-brand-secondary')
+                      }
+                    >
+                      {topic.title}
+                    </NavLink>
                   </li>
-                  <li>
-                    <Link to="/" className="block rounded-md px-lg py-md text-md text-secondary hover:bg-secondary">
-                      Khoá học của tôi
-                    </Link>
-                  </li>
-                </ul>
-              </NavDropdown>
-            </nav>
-          </div>
+                ))}
+              </ul>
+            </NavDropdown>
 
-          <label className="flex h-10 min-w-0 flex-1 items-center gap-md rounded-md border border-primary bg-primary px-lg shadow-xs focus-within:border-brand focus-within:ring-2 focus-within:ring-brand-500/40 lg:max-w-[420px]">
-            <Search className="h-5 w-5 shrink-0 text-quaternary" aria-hidden="true" />
-            <input
-              type="search"
-              aria-label="Tìm khoá học"
-              placeholder="Hôm nay bạn muốn tìm hiểu chủ đề gì?"
-              className="w-full bg-transparent text-md text-primary outline-none placeholder:text-placeholder"
-            />
-          </label>
+            <NavDropdown label="Học tập của tôi">
+              <ul className="flex flex-col">
+                <li>
+                  <Link to="/hoc-tap-cua-toi" className="block rounded-md px-lg py-md text-md font-medium text-brand-secondary hover:bg-secondary">
+                    Phân tích học tập
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/" className="block rounded-md px-lg py-md text-md text-secondary hover:bg-secondary">
+                    Khoá học của tôi
+                  </Link>
+                </li>
+              </ul>
+            </NavDropdown>
+          </nav>
+        </div>
 
+        {/* focus-within là bắt buộc: thiết kế Figma không vẽ trạng thái focus, nhưng bỏ hẳn
+            thì Tab vào ô tìm kiếm là mất dấu con trỏ hoàn toàn. */}
+        <label className="mx-xl hidden h-11 min-w-0 flex-1 items-center gap-md rounded-full border border-primary bg-primary px-xl focus-within:border-brand focus-within:ring-2 focus-within:ring-brand-500/40 sm:flex lg:mx-4xl">
+          <Search className="h-5 w-5 shrink-0 text-quaternary" aria-hidden="true" />
+          <input
+            type="search"
+            aria-label="Tìm khoá học"
+            placeholder="Hôm nay bạn muốn tìm hiểu chủ đề gì?"
+            className="w-full min-w-0 bg-transparent text-md text-primary outline-none placeholder:text-placeholder"
+          />
+        </label>
+
+        <div className="flex flex-1 justify-end sm:hidden">
+          <IconButton aria-label="Tìm khoá học">
+            <Search className="h-5 w-5" />
+          </IconButton>
+        </div>
+
+        <div className="shrink-0">
           <AvatarMenu name={user.name} src={user.avatar} />
         </div>
       </div>
