@@ -259,8 +259,17 @@ export const VIDEO_BY_ID: Record<string, Video> = Object.fromEntries(VIDEOS.map(
 export const CONCEPTS_OF = (courseId: string): Concept[] => CONCEPTS.filter((c) => c.courseId === courseId);
 export const VIDEOS_OF = (courseId: string): Video[] => VIDEOS.filter((v) => v.courseId === courseId);
 
-// ---- time base (fixed, deterministic) ----
-export const NOW = new Date(2026, 7, 5, 20, 30, 0); // 05/08/2026 20:30
+// ---- time base ----
+/**
+ * "Bây giờ" của bản demo = hôm nay trên máy đang xem, chốt vào 20:30 tối.
+ * Neo vào ngày thật để các mốc "hôm qua", "2 hôm trước" luôn đọc đúng; chốt giờ
+ * vào 20:30 để khung giờ học vàng không bị lệch theo lúc mở trang.
+ */
+function todayAt2030(): Date {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 20, 30, 0, 0);
+}
+export const NOW = todayAt2030();
 export const SPAN_DAYS = 365; // một năm học đầy đủ
 export const START = new Date(NOW.getTime() - SPAN_DAYS * 86400000);
 

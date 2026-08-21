@@ -553,14 +553,18 @@ export function forgetting(sts: Statement[]): Forgetting {
     // days until retention dips below 0.5
     let dueInDays = 0;
     while (retentionAt(TODAY_DAY + dueInDays) > 0.5 && dueInDays < 30) dueInDays++;
-    lines.push({ conceptLabel: c.label, courseTitle: COURSE_BY_ID[c.courseId]?.title ?? '', points, dueInDays, retentionNow });
+    lines.push({ conceptLabel: c.label, courseTitle: COURSE_BY_ID[c.courseId]?.title ?? '', courseSlug: COURSE_BY_ID[c.courseId]?.slug ?? '', points, dueInDays, retentionNow });
   }
   lines.sort((a, b) => a.dueInDays - b.dueInDays || a.retentionNow - b.retentionNow);
   return { lines, dueSoon: lines.filter((l) => l.dueInDays <= 5).slice(0, 4) };
 }
 
 // ---------- 12. strategy fingerprint ----------
-export function strategyFingerprint(sts: Statement[]): StrategyFingerprint {
+/**
+ * `spanDays` = số ngày của khoảng đang xem. Trục "Nhịp đều" là tỉ lệ ngày có học trên
+ * số ngày của khoảng đó — chia cứng cho cả năm thì lọc 7 ngày sẽ luôn ra gần 0.
+ */
+export function strategyFingerprint(sts: Statement[], spanDays: number = SPAN_DAYS): StrategyFingerprint {
   const videos = new Set(sts.filter((s) => s.objectType === 'video').map((s) => `${s.sessionId}|${s.objectId}`));
   const nVideo = Math.max(1, videos.size);
   const rewinds = sts.filter((s) => s.verb === 'seeked' && s.dir === 'back').length;
@@ -573,13 +577,18 @@ export function strategyFingerprint(sts: Statement[]): StrategyFingerprint {
   const sess = sessionsOf(sts);
   const focusRate = mean(sess.map((s) => focusSeconds(s) / Math.max(1, Math.min(s.end - s.start, 3 * 3600))));
 
+  const revisits = sts.filter((s) => s.verb === 'revisited').length;
+
+  // Bảy trục, xếp đúng thứ tự vòng tròn trong thiết kế.
   const axes = [
     { key: 'rewatch', label: 'Xem lại kỹ', value: clamp01(rewinds / nVideo / 3) },
-    { key: 'pace', label: 'Nhịp đều', value: clamp01(activeDays / SPAN_DAYS / 0.7) },
+    { key: 'pace', label: 'Nhịp đều', value: clamp01(activeDays / Math.max(1, spanDays) / 0.7) },
     { key: 'grit', label: 'Kiên trì', value: clamp01(completed / (completed + abandoned || 1)) },
     { key: 'accuracy', label: 'Làm đúng', value: clamp01(acc) },
     { key: 'help', label: 'Chủ động hỏi', value: clamp01(hints / nVideo / 1.2) },
     { key: 'focus', label: 'Tập trung', value: clamp01(focusRate) },
+    // tự mở lại bài cũ ở một buổi khác — khác với tua lại ngay trong lúc đang xem
+    { key: 'initiative', label: 'Chủ động', value: clamp01(revisits / nVideo / 0.5) },
   ];
   const top = [...axes].sort((a, b) => b.value - a.value)[0];
   const LABELS: Record<string, { label: string; blurb: string }> = {
@@ -589,6 +598,7 @@ export function strategyFingerprint(sts: Statement[]): StrategyFingerprint {
     accuracy: { label: 'Người chắc kiến thức', blurb: 'Bạn làm bài đúng cao — nắm bài khá vững.' },
     help: { label: 'Người chủ động hỏi', blurb: 'Bạn hay mở gợi ý khi bí — biết tìm trợ giúp đúng lúc.' },
     focus: { label: 'Người tập trung', blurb: 'Khi đã học là học thật, ít bị phân tâm.' },
+    initiative: { label: 'Người chủ động', blurb: 'Bạn tự mở lại bài cũ để xem lại, không cần ai nhắc.' },
   };
   return { axes, label: LABELS[top.key].label, blurb: LABELS[top.key].blurb };
 }
@@ -626,13 +636,17 @@ export function twinForecast(sts: Statement[]): TwinForecast {
   const fOpen = clamp01(open / 5);
   const risk = clamp01(0.34 * fInactivity + 0.24 * fAccuracy + 0.18 * fAbandon + 0.14 * fRhythm + 0.1 * fOpen);
 
+  // Mỗi yếu tố góp vào nguy cơ đúng bằng hệ số của nó trong công thức trên, quy ra
+  // điểm phần trăm. Liệt kê đủ cả năm yếu tố nên cộng lại vừa khít con số nguy cơ ở
+  // giữa vòng tròn — thiếu một dòng là người xem thấy tổng không ra và mất tin ngay.
   const factors: TwinFactor[] = [
-    { label: 'Đã lâu chưa học lại', weight: fInactivity, dir: 'up' as const, detail: daysSince <= 0 ? 'có học hôm nay' : `${daysSince} ngày chưa học lại` },
-    { label: 'Làm đúng bài gần đây', weight: fAccuracy, dir: (acc < 0.7 ? 'up' : 'down') as 'up' | 'down', detail: `đúng ${Math.round(acc * 100)}% số câu gần đây` },
-    { label: 'Bỏ dở bài', weight: fAbandon, dir: 'up' as const, detail: abandons === 0 ? 'gần đây không bỏ dở bài nào' : `${abandons} lần bỏ dở gần đây` },
-    { label: 'Học đều đặn', weight: fRhythm, dir: 'up' as const, detail: `học ${activeDaysRecent}/10 ngày gần đây` },
+    { label: 'Không ôn lại', weight: fInactivity, dir: 'up' as const, points: Math.round(0.34 * fInactivity * 100), detail: daysSince <= 0 ? 'Có học hôm nay' : `${daysSince} ngày chưa ôn` },
+    { label: 'Đúng bài gần đây', weight: fAccuracy, dir: (acc < 0.7 ? 'up' : 'down') as 'up' | 'down', points: Math.round(0.24 * fAccuracy * 100) * (acc < 0.7 ? 1 : -1), detail: `Đúng ${Math.round(acc * 100)}% câu hỏi gần đây` },
+    { label: 'Bỏ bài', weight: fAbandon, dir: 'up' as const, points: Math.round(0.18 * fAbandon * 100), detail: abandons === 0 ? 'Gần đây không bỏ dở bài nào' : `${abandons} lần bỏ dở gần đây` },
+    { label: 'Học đều đặn', weight: fRhythm, dir: (activeDaysRecent >= 6 ? 'down' : 'up') as 'up' | 'down', points: Math.round(0.14 * fRhythm * 100) * (activeDaysRecent >= 6 ? -1 : 1), detail: `Học ${activeDaysRecent}/10 ngày gần đây` },
+    { label: 'Chỗ khó chưa gỡ', weight: fOpen, dir: 'up' as const, points: Math.round(0.1 * fOpen * 100), detail: open === 0 ? 'Không còn chỗ khó nào treo lại' : `${open} chỗ khó còn treo lại` },
   ];
-  factors.sort((a, b) => b.weight - a.weight);
+  factors.sort((a, b) => Math.abs(b.points) - Math.abs(a.points));
 
   const prevRisk = clamp01(risk - (recent.length - prior.length) / 400);
   const trend = Math.round((risk - prevRisk) * 100);
@@ -652,15 +666,28 @@ export function twinForecast(sts: Statement[]): TwinForecast {
 
   const sg = slipGap(sts);
   const abandonedVideo = [...sts].reverse().find((s) => s.verb === 'abandoned');
+
+  // Khoá được mở gần nhất — dùng làm đích cho những việc không gắn với một bài cụ thể,
+  // để mọi dòng "việc nên làm tiếp" đều bấm được chứ không có dòng nào là mũi tên chết.
+  const lastCourseId = [...sts].reverse().find((s) => s.courseId)?.courseId ?? '';
+  const fallbackSlug = COURSE_BY_ID[lastCourseId]?.slug;
+  const slugOfConcept = (conceptId?: string): string | undefined => {
+    const c = conceptId ? CONCEPT_BY_ID[conceptId] : undefined;
+    return c ? COURSE_BY_ID[c.courseId]?.slug : undefined;
+  };
+
   const actions: NextAction[] = [];
-  if (dueLine) actions.push({ id: 'review', kind: 'review', minutes: 8, impact: 0.9, label: `Ôn nhanh “${dueLine.conceptLabel}”`, why: `Kiến thức này sắp mờ (còn nhớ ~${Math.round(dueLine.retentionNow * 100)}%).` });
-  if (nextConcept && cmap?.blocked.includes(nextConcept.id)) actions.push({ id: 'unblock', kind: 'next', minutes: 15, impact: 0.75, label: `Gỡ nút thắt “${nextConcept.label}”`, why: 'Phần trước chưa vững đang chặn bạn đi tiếp.' });
-  if (sg.slipShare > 0.4) actions.push({ id: 'slip', kind: 'redo', minutes: 6, impact: 0.6, label: 'Làm lại vài câu hay sai do vội', why: 'Nhiều lỗi là do bấm nhanh chứ không phải chưa hiểu.' });
+  if (dueLine) actions.push({ id: 'review', kind: 'review', minutes: 8, impact: 0.9, label: `Ôn nhanh “${dueLine.conceptLabel}”`, why: `Kiến thức này sắp mờ (còn nhớ ~${Math.round(dueLine.retentionNow * 100)}%).`, courseSlug: dueLine.courseSlug || fallbackSlug });
+  if (nextConcept && cmap?.blocked.includes(nextConcept.id)) actions.push({ id: 'unblock', kind: 'next', minutes: 15, impact: 0.75, label: `Gỡ nút thắt “${nextConcept.label}”`, why: 'Phần trước chưa vững đang chặn bạn đi tiếp.', courseSlug: slugOfConcept(nextConcept.id) ?? fallbackSlug });
+  if (sg.slipShare > 0.4) actions.push({ id: 'slip', kind: 'redo', minutes: 6, impact: 0.6, label: 'Làm lại vài câu hay sai do vội', why: 'Nhiều lỗi là do bấm nhanh chứ không phải chưa hiểu.', courseSlug: fallbackSlug });
   if (abandonedVideo) {
     const v = VIDEO_BY_ID[abandonedVideo.objectId];
     if (v) actions.push({ id: 'resume', kind: 'resume', minutes: 10, impact: 0.55, label: `Xem nốt “${v.title}”`, why: 'Bạn đang bỏ dở ở đoạn khó — xem nốt sẽ liền mạch hơn.', courseSlug: COURSE_BY_ID[v.courseId]?.slug });
   }
-  if (activeDaysRecent < 4) actions.push({ id: 'habit', kind: 'habit', minutes: 12, impact: 0.5, label: 'Đặt một buổi học ngắn tối nay', why: 'Học đều mỗi ngày giữ nhịp tốt hơn học dồn.' });
+  if (activeDaysRecent < 4) actions.push({ id: 'habit', kind: 'habit', minutes: 12, impact: 0.5, label: 'Đặt một buổi học ngắn tối nay', why: 'Học đều mỗi ngày giữ nhịp tốt hơn học dồn.', courseSlug: fallbackSlug });
+  const weakest = cmap?.nodes.slice().sort((a, b) => a.mastery - b.mastery)[0];
+  if (weakest) actions.push({ id: 'quiz', kind: 'redo', minutes: 5, impact: 0.45, label: `Làm mấy câu kiểm tra nhanh về “${weakest.label}”`, why: 'Phần này bạn đang nắm yếu nhất — làm vài câu là biết hổng ở đâu.', courseSlug: slugOfConcept(weakest.id) ?? fallbackSlug });
+  if (fg.lines[1]) actions.push({ id: 'review2', kind: 'review', minutes: 7, impact: 0.4, label: `Ôn lại “${fg.lines[1].conceptLabel}”`, why: 'Đã một thời gian bạn chưa quay lại phần này.', courseSlug: fg.lines[1].courseSlug || fallbackSlug });
 
   return {
     dropoutRisk: risk,
@@ -669,6 +696,6 @@ export function twinForecast(sts: Statement[]): TwinForecast {
     horizon,
     nextConceptLabel: nextConcept?.label ?? '—',
     forgetConceptLabel: dueLine?.conceptLabel ?? '—',
-    actions: actions.sort((a, b) => b.impact - a.impact).slice(0, 4),
+    actions: actions.sort((a, b) => b.impact - a.impact).slice(0, 5),
   };
 }

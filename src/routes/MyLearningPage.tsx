@@ -1,6 +1,6 @@
-import { BehaviorExperience } from '../components/behavior/BehaviorExperience';
+import { ReportExperience } from '../components/report/ReportExperience';
 
-/** "Học tập của tôi" — dashboard hành vi: dòng thời gian, chỗ vấp, tua lại buổi học. */
+/** "Học tập của tôi" — báo cáo gộp mọi khoá theo thiết kế Figma "Báo cáo sau khi hoàn thành khoá học". */
 export default function MyLearningPage() {
-  return <BehaviorExperience />;
+  return <ReportExperience />;
 }

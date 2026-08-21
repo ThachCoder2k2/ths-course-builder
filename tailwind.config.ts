@@ -88,6 +88,22 @@ export default {
       },
       divideColor: { primary: '#D5D7DA', secondary: '#E9EAEB' },
 
+      /**
+       * Tailwind lấy `ringColor` từ bảng `colors`, KHÔNG lấy từ `borderColor`. Thiếu khai
+       * báo này thì `ring-primary` / `ring-secondary` không được sinh ra, class bị bỏ và
+       * `ring-1` rơi về màu mặc định của Tailwind là blue-500 — sinh ra viền xanh lạ ở
+       * tab, nút và chip. DEFAULT để xám để một `ring-1` trơ trọi cũng không bị xanh.
+       */
+      ringColor: {
+        DEFAULT: '#D5D7DA',
+        primary: '#D5D7DA',
+        secondary: '#E9EAEB',
+        brand: '#055BE6',
+        'brand-alt': '#0D67F7',
+        'brand-500': '#0D67F7', // AvatarMenu dựa vào class này cho vòng focus
+        'button-secondary': '#D5D7DA',
+      },
+
       fontFamily: {
         // Font family/font-family-body + font-family-display
         sans: ['Inter', 'system-ui', 'sans-serif'],

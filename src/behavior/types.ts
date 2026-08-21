@@ -116,7 +116,9 @@ export interface TwinFactor {
   label: string;
   weight: number; // 0..1 relative contribution
   dir: 'up' | 'down'; // pushes risk up / down
-  detail: string; // plain-language value, e.g. "3 ngày chưa học lại"
+  detail: string; // plain-language value, e.g. "3 ngày chưa ôn"
+  /** đóng góp vào nguy cơ, tính bằng điểm phần trăm và có dấu (+ đẩy nguy cơ lên) */
+  points: number;
 }
 export interface HorizonBand {
   day: number;
@@ -226,6 +228,7 @@ export interface RetentionPoint {
 export interface ForgettingLine {
   conceptLabel: string;
   courseTitle: string;
+  courseSlug: string;
   points: RetentionPoint[];
   dueInDays: number;
   retentionNow: number;
@@ -291,7 +294,11 @@ export interface TopicStrength {
   minutes: number;
   courses: number;
 }
-export type CourseStatus = 'done' | 'active' | 'paused';
+/**
+ * Chỉ hai trạng thái: đang học và hoàn thành. Hết khoá là tính hoàn thành, kể cả
+ * sau đó người học có quay lại xem lại hay không.
+ */
+export type CourseStatus = 'done' | 'active';
 export interface CourseRow {
   id: string;
   slug: string;
@@ -305,6 +312,12 @@ export interface CourseRow {
   status: CourseStatus;
   lastActiveDaysAgo: number;
   conceptsTotal: number;
+}
+export interface TimeSlice {
+  label: string;
+  minutes: number;
+  share: number; // 0..1
+  color: string;
 }
 export interface RecurringStumble {
   conceptLabel: string;

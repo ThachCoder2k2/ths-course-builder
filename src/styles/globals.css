@@ -21,76 +21,134 @@ body {
   font-family: 'Inter', system-ui, sans-serif;
 }
 
-/* ---- Learner-analytics animations (all reduced-motion safe) ---- */
-.dv-reveal {
+/* ---- Chuyển động của trang báo cáo ----------------------------------------
+   Ba nguyên tắc: chỉ chạm opacity và transform (không gây reflow), 200-300ms cho
+   tương tác nhỏ, và tắt sạch khi người dùng bật "giảm chuyển động". Mỗi thẻ chỉ
+   động một lần lúc lọt vào khung nhìn — không có gì lặp vô hạn. */
+
+.rp-reveal {
   opacity: 0;
-  transform: translateY(18px);
-  transition: opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-  will-change: opacity, transform;
+  transform: translateY(10px);
+  transition: opacity 260ms cubic-bezier(0, 0, 0.2, 1), transform 260ms cubic-bezier(0, 0, 0.2, 1);
 }
-.dv-reveal.dv-in {
+.rp-reveal.rp-in {
   opacity: 1;
   transform: none;
 }
 
-.dv-draw {
+/* Đường biểu đồ tự vẽ ra: dùng cho hình radar. */
+.rp-draw {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
 }
-.dv-in .dv-draw {
-  animation: dv-draw 1.05s cubic-bezier(0.4, 0, 0.2, 1) 0.12s forwards;
+.rp-in .rp-draw {
+  animation: rp-draw 620ms cubic-bezier(0.4, 0, 0.2, 1) 80ms forwards;
 }
-@keyframes dv-draw {
+@keyframes rp-draw {
   to {
     stroke-dashoffset: 0;
   }
 }
 
-.dv-grow {
-  transform: scaleY(0.001);
-  transform-origin: bottom;
-  transform-box: fill-box;
+/* Nền của hình radar hiện lên sau khi đường đã vẽ xong. */
+.rp-in .rp-fade {
+  animation: rp-fade 300ms ease-out 380ms forwards;
 }
-.dv-in .dv-grow {
-  animation: dv-grow 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+.rp-fade {
+  opacity: 0;
 }
-@keyframes dv-grow {
+@keyframes rp-fade {
   to {
-    transform: scaleY(1);
+    opacity: 1;
   }
 }
 
-.dv-pop {
+/* Vòng donut nở nhẹ ra khi hiện. Không đổi stroke-dasharray vì thuộc tính đó không
+   chạy mượt qua CSS; nở bằng transform thì vừa đúng vừa không tốn repaint. */
+.rp-pop {
   opacity: 0;
+  transform: scale(0.94);
   transform-box: fill-box;
   transform-origin: center;
+  transition: opacity 280ms ease-out, transform 280ms cubic-bezier(0, 0, 0.2, 1);
 }
-.dv-in .dv-pop {
-  animation: dv-pop 0.45s ease forwards;
+.rp-in .rp-pop {
+  opacity: 1;
+  transform: none;
 }
-@keyframes dv-pop {
-  from {
-    opacity: 0;
-    transform: scale(0.5);
+
+/* Thanh ngang mọc từ trái sang. */
+.rp-bar {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 300ms cubic-bezier(0, 0, 0.2, 1);
+}
+.rp-in .rp-bar {
+  transform: scaleX(1);
+}
+
+/* Ô lịch nhịp học hiện dần theo tháng, mỗi tháng trễ hơn tháng trước một nhịp. */
+.rp-cell {
+  opacity: 0;
+  transition: opacity 240ms ease-out;
+  transition-delay: var(--rp-delay, 0ms);
+}
+/* Ngày nằm ngoài khoảng đang chọn dừng ở độ mờ riêng của nó, không nhảy về 1. */
+.rp-in .rp-cell {
+  opacity: var(--rp-dim, 1);
+}
+
+/* Chốt phòng xa cho cú nhảy về đầu trang: nếu trình duyệt vẫn quyết định cuộn phần tử
+   đang focus vào tầm nhìn, cho nó dừng ngay dưới thanh điều hướng thay vì lên tận đỉnh. */
+.rp-sticky button,
+.rp-sticky [role='tab'] {
+  scroll-margin-top: 96px;
+}
+
+/* Khi in, mọi thứ phải hiện đủ: thẻ chưa cuộn tới vẫn đang ở opacity 0. */
+@media print {
+  .rp-reveal,
+  .rp-fade,
+  .rp-pop,
+  .rp-cell {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
   }
-  to {
-    opacity: 1;
-    transform: scale(1);
+  .rp-bar {
+    transform: none !important;
+  }
+  .rp-draw {
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
   }
 }
 
-@keyframes dv-bubble-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.96);
+@media (prefers-reduced-motion: reduce) {
+  .rp-reveal,
+  .rp-reveal.rp-in,
+  .rp-bar,
+  .rp-in .rp-bar,
+  .rp-fade,
+  .rp-in .rp-fade,
+  .rp-pop,
+  .rp-in .rp-pop {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
   }
-  to {
-    opacity: 1;
-    transform: none;
+  .rp-cell,
+  .rp-in .rp-cell {
+    opacity: var(--rp-dim, 1) !important;
+    transition: none !important;
   }
-}
-.dv-bubble {
-  animation: dv-bubble-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  .rp-draw,
+  .rp-in .rp-draw {
+    animation: none !important;
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+  }
 }
 
 /* Thin, unobtrusive scrollbar for capped lists that could grow long with real data. */
