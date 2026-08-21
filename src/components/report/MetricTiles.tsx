@@ -54,8 +54,10 @@ export function MetricTiles({
     },
   ];
 
+  // Chia ba cột từ 726px, không phải 640px: ở 640-725px nhãn bị cắt và con số "6 ngày"
+  // tách dòng giữa số và chữ, cả hàng đội thêm 38px.
   return (
-    <div className="grid grid-cols-1 gap-2xl sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-2xl min-[726px]:grid-cols-3">
       {tiles.map((t) => {
         const Icon = t.icon;
         return (
@@ -67,7 +69,7 @@ export function MetricTiles({
               <span className="truncate text-sm font-semibold" style={{ color: t.fg }}>
                 {t.label}
               </span>
-              <span data-kpi className="text-display-sm font-semibold tabular-nums" style={{ color: t.fg }}>
+              <span data-kpi className="whitespace-nowrap text-display-sm font-semibold tabular-nums" style={{ color: t.fg }}>
                 {t.count ? <CountUp to={t.count.to} decimals={t.count.decimals} suffix={t.count.suffix} /> : t.value}
               </span>
             </span>

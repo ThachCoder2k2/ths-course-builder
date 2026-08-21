@@ -82,6 +82,10 @@ export function CourseTableCard({ rows }: { rows: CourseRow[] }) {
   const current = Math.min(page, pages - 1);
   const slice = sorted.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
 
+  // Bảng rỗng thì đừng vẽ khung: thead sáu cột + ô sắp xếp + dòng phân trang làm thẻ
+  // cao 342px cho đúng 64px nội dung. Chỉ còn lời nhắn là đủ.
+  const empty = sorted.length === 0;
+
   const toggle = (key: SortKey) => {
     setSort((s) => (s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: key === 'title' ? 'asc' : 'desc' }));
     setPage(0);
@@ -95,7 +99,7 @@ export function CourseTableCard({ rows }: { rows: CourseRow[] }) {
     >
       {/* Bảng sáu cột cần chỗ; khung hẹp hơn thì xếp mỗi khoá thành một thẻ nhỏ thay vì
           bắt người đọc kéo ngang. */}
-      <table className="hidden w-full border-collapse text-left lg:table">
+      <table className={cn('hidden w-full border-collapse text-left', !empty && 'lg:table')}>
           <thead>
             <tr className="border-b border-secondary">
               {COLUMNS.map((c) => {
@@ -148,18 +152,13 @@ export function CourseTableCard({ rows }: { rows: CourseRow[] }) {
                 <td className="whitespace-nowrap px-lg py-xl pr-3xl text-sm text-secondary">{lastSeen(r.lastActiveDaysAgo)}</td>
               </tr>
             ))}
-            {slice.length === 0 ? (
-              <tr>
-                <td colSpan={COLUMNS.length}>
-                  <EmptyState text="Chưa mở khoá nào trong khoảng này" />
-                </td>
-              </tr>
-            ) : null}
           </tbody>
       </table>
 
+      {empty ? <EmptyState text="Chưa mở khoá nào trong khoảng này" /> : null}
+
       {/* bản cho khung hẹp: mỗi khoá một thẻ, nhãn đi kèm giá trị */}
-      <div className="flex flex-col lg:hidden">
+      <div className={cn('flex flex-col', empty ? 'hidden' : 'lg:hidden')}>
         {slice.map((r) => {
           const body = (
             <div className="flex flex-col gap-lg border-b border-secondary px-3xl py-xl last:border-0">
@@ -203,11 +202,10 @@ export function CourseTableCard({ rows }: { rows: CourseRow[] }) {
             <div key={r.id}>{body}</div>
           );
         })}
-        {slice.length === 0 ? <EmptyState text="Chưa mở khoá nào trong khoảng này" /> : null}
       </div>
 
       {/* sắp xếp: khung hẹp không có tiêu đề cột để bấm nên đưa ra một ô chọn */}
-      <div className="flex flex-wrap items-center gap-md px-3xl lg:hidden">
+      <div className={cn('flex flex-wrap items-center gap-md px-3xl', empty ? 'hidden' : 'lg:hidden')}>
         <label htmlFor="course-sort" className="text-xs font-semibold text-quaternary">
           Sắp xếp theo
         </label>
@@ -226,7 +224,7 @@ export function CourseTableCard({ rows }: { rows: CourseRow[] }) {
         <span className="text-xs text-tertiary">{sort.dir === 'asc' ? 'tăng dần' : 'giảm dần'}</span>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-lg px-3xl">
+      <div className={cn('flex flex-wrap items-center justify-between gap-lg px-3xl', empty && 'hidden')}>
         <span className="text-sm font-medium text-secondary">
           Trang {current + 1} trên {pages}
         </span>

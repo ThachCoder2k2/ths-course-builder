@@ -10,6 +10,7 @@ const GAP = 2;
 const GROUP_GAP = 6; // khoảng chừa giữa các khối tháng
 const GRID_HEIGHT = 250; // chiều cao mong muốn của phần lưới
 const MIN_CELL = 12; // nhỏ hơn nữa thì ô vừa không thấy vừa không trỏ vào được
+const MAX_CELL = 180; // rộng hơn nữa thì ô thành cái thanh, không còn ra dáng lưới
 
 /**
  * Vẽ lưới nhịp học. Nhận đúng một ma trận hàng × cột kèm nhãn, nên bốn kiểu lưới
@@ -47,7 +48,13 @@ export function RhythmHeatmap({ matrix }: { matrix: RhythmMatrix }) {
   // cỡ máy tính, nên hễ khung hẹp hơn giả định là lưới tràn ra và mọc thanh cuộn ngang.
   const scroller = useRef<HTMLDivElement>(null);
   const labelCol = useRef<HTMLDivElement>(null);
+  const gridBox = useRef<HTMLDivElement>(null);
   const [track, setTrack] = useState<number | null>(null);
+  // Bề rộng lưới thực vẽ ra, đo sau khi vẽ. Chú thích "Ít – Nhiều" phải khớp lề phải của
+  // lưới; neo vào lề thẻ thì khi ô bị chặn cỡ, chú thích trôi ra giữa vùng trống trông
+  // như lưới bị mất mấy cột bên phải. Tính bằng công thức thì lệch, vì ref đọc trong thân
+  // render là số của lần vẽ trước.
+  const [gridWidth, setGridWidth] = useState<number | null>(null);
   useLayoutEffect(() => {
     const el = scroller.current;
     if (!el) return;
@@ -60,11 +67,17 @@ export function RhythmHeatmap({ matrix }: { matrix: RhythmMatrix }) {
     };
     measure();
     if (typeof ResizeObserver === 'undefined') return;
+    const measureGrid = () => setGridWidth(gridBox.current?.offsetWidth ?? null);
+    measureGrid();
     // Theo dõi cả cột nhãn: đổi kiểu lưới là nhãn hàng đổi từ "0–4h" sang "Chủ nhật",
     // cột nhãn rộng ra nhưng vùng cuộn thì không đổi nên số đo cũ vẫn còn nguyên.
-    const ro = new ResizeObserver(measure);
+    const ro = new ResizeObserver(() => {
+      measure();
+      measureGrid();
+    });
     ro.observe(el);
     if (labelCol.current) ro.observe(labelCol.current);
+    if (gridBox.current) ro.observe(gridBox.current);
     return () => ro.disconnect();
   }, [mode, cols]);
 
@@ -74,10 +87,26 @@ export function RhythmHeatmap({ matrix }: { matrix: RhythmMatrix }) {
   // chữ nhật, nếu không lưới sẽ teo thành một vệt nhỏ giữa cái thẻ rất rộng.
   const dense = cols > 26;
   const fit = Math.floor(free / Math.max(1, cols));
-  const w = dense ? Math.max(MIN_CELL, Math.min(24, fit)) : Math.max(MIN_CELL, Math.min(160, fit));
+  // Chặn trên nới rộng: mức 160px cũ làm lưới chỉ dùng 74% bề rộng thẻ ở màn to,
+  // chú thích "Ít – Nhiều" trôi ra giữa vùng trống trông như hình bị mất mấy cột.
+  const w = dense ? Math.max(MIN_CELL, Math.min(24, fit)) : Math.max(MIN_CELL, Math.min(MAX_CELL, fit));
   const h = dense ? w : Math.max(20, Math.min(56, Math.floor(GRID_HEIGHT / rows)));
-  /** cột quá hẹp để chứa nhãn đầy đủ */
+  /** cột hẹp: nhãn tháng bỏ tiền tố "T" */
   const tight = w < 26;
+  /** cột quá hẹp cho nhãn đầy đủ dạng "CN 16/8" (cần ~46px) — phải rút gọn, không chặt */
+  const veryTight = w < 48;
+
+  /**
+   * Rút gọn nhãn cột thay vì để overflow chặt ngang chữ. Nhãn "CN 16/8" bị cắt còn
+   * "CN 16" rồi "T2 17/" với dấu gạch treo lơ lửng thì đọc lên vô nghĩa; thà bỏ hẳn
+   * phần tháng, ngày đầy đủ vẫn còn trong lời chú khi trỏ vào ô.
+   */
+  const shortLabel = (label: string): string => {
+    if (!veryTight) return label;
+    const m = label.match(/^(\S+)\s+(\d+)\/\d+$/); // "CN 16/8" -> thứ + ngày
+    if (m) return w < 34 ? m[2] : `${m[1]} ${m[2]}`;
+    return tight ? label.replace(/^T(?=\d)/, '') : label;
+  };
 
   // Khung hẹp tới mức ô đã co hết cỡ mà vẫn không vừa (xem cả năm trên điện thoại) thì
   // đành cuộn ngang — cuộn sẵn về cuối để phần gần đây nằm trong tầm mắt.
@@ -96,7 +125,7 @@ export function RhythmHeatmap({ matrix }: { matrix: RhythmMatrix }) {
   return (
     <div className="flex flex-col gap-lg">
       <div ref={scroller} className="-mx-3xl overflow-x-auto overflow-y-hidden px-3xl">
-        <div className="flex min-w-max">
+        <div ref={gridBox} className="flex min-w-max">
           {/* cột nhãn hàng, dính bên trái để không trôi mất khi cuộn ngang */}
           <div ref={labelCol} className="sticky left-0 z-10 flex flex-col bg-primary pr-lg" style={{ gap: GAP }}>
             <div style={{ height: 18 }} aria-hidden="true" />
@@ -120,12 +149,11 @@ export function RhythmHeatmap({ matrix }: { matrix: RhythmMatrix }) {
                     <div
                       key={`${label}-${i}`}
                       data-col-label
-                      className={cn('overflow-hidden whitespace-nowrap text-center font-medium text-tertiary', tight ? 'text-[10px]' : 'text-xs')}
+                      className={cn('overflow-hidden text-ellipsis whitespace-nowrap text-center font-medium text-tertiary', veryTight ? 'text-[10px]' : 'text-xs')}
                       style={{ width: w, marginRight: i === cols - 1 ? 0 : gapAfter(i), lineHeight: '18px' }}
+                      title={label}
                     >
-                      {/* Cột hẹp thì bỏ tiền tố "T" của nhãn tháng, không thì các nhãn dính
-                          vào nhau thành "T10T11T12". */}
-                      {tight ? label.replace(/^T(?=\d)/, '') : label}
+                      {shortLabel(label)}
                     </div>
                   ))
                 : colGroups.map((g) => (
@@ -173,7 +201,7 @@ export function RhythmHeatmap({ matrix }: { matrix: RhythmMatrix }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-md text-xs text-tertiary">
+      <div className="flex items-center justify-end gap-md text-xs text-tertiary" style={{ maxWidth: gridWidth ?? undefined }}>
         <span>Ít</span>
         <span className="flex gap-xxs">
           {RAMP.map((c) => (

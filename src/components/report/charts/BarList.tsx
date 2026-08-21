@@ -43,15 +43,20 @@ export function BarList({ rows, onSelect, className }: { rows: BarRow[]; onSelec
         const inner = (
           <>
             <span className="flex min-w-0 basis-[38%] flex-col text-left">
-              <span className="truncate text-sm font-semibold" style={{ color: c.text }}>
+              {/* title: tên chủ đề và tên khoá bị cắt tới một phần ba ở khung hẹp,
+                  không có nó thì người đọc không còn đường nào xem đủ */}
+              <span className="truncate text-sm font-semibold" style={{ color: c.text }} title={r.title}>
                 {r.title}
               </span>
-              <span className="truncate text-xs text-quaternary">{r.note}</span>
+              <span className="truncate text-xs text-quaternary" title={r.note}>
+                {r.note}
+              </span>
             </span>
             <span className="h-2 min-w-0 flex-1 overflow-hidden rounded-md" style={{ background: c.track }}>
               <span className="rp-bar block h-full rounded-md" style={{ width: `${value}%`, background: c.bar }} />
             </span>
-            <span className="w-[38px] shrink-0 text-right text-sm font-medium tabular-nums text-primary">{value}%</span>
+            {/* 44px: "100%" cần 41.1px, ô 38px cũ làm cả cột lệch 3px so với các dòng khác */}
+            <span className="w-[44px] shrink-0 text-right text-sm font-medium tabular-nums text-primary">{value}%</span>
           </>
         );
         return (

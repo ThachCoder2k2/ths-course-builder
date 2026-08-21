@@ -52,7 +52,9 @@ export function RangeTabs({
                 aria-selected={active}
                 onClick={() => onChange(t.key)}
                 className={cn(
-                  'whitespace-nowrap rounded-md px-lg py-md text-sm font-semibold transition',
+                  // Khung hẹp thì thu nút lại để cả sáu mốc vừa một dòng; để nguyên cỡ thì
+                  // chúng xuống hai dòng với một nút đứng lẻ, và dải dính đội lên 199px.
+                  'whitespace-nowrap rounded-md px-md py-md text-xs font-semibold transition min-[520px]:px-lg min-[520px]:text-sm',
                   active ? 'bg-primary text-secondary shadow-xs ring-1 ring-primary' : 'text-quaternary hover:text-secondary',
                 )}
               >

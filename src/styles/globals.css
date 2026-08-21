@@ -98,8 +98,19 @@ body {
   opacity: var(--rp-dim, 1);
 }
 
-/* Chốt phòng xa cho cú nhảy về đầu trang: nếu trình duyệt vẫn quyết định cuộn phần tử
-   đang focus vào tầm nhìn, cho nó dừng ngay dưới thanh điều hướng thay vì lên tận đỉnh. */
+/* Mọi cú nhảy tới trong trang (neo, scrollIntoView, Ctrl+F, focus bàn phím) phải dừng
+   DƯỚI dải dính, không thì nội dung nằm hẳn sau nó. Đặt trên phần tử cuộn bằng
+   scroll-padding-top mới áp cho mọi đích đến; scroll-margin trên thanh dính chỉ lo được
+   cho chính mấy cái nút trong thanh. Dải dính cao hơn ở khung hẹp vì các mốc xuống dòng. */
+html {
+  scroll-padding-top: 260px;
+}
+@media (min-width: 1024px) {
+  html {
+    scroll-padding-top: 190px;
+  }
+}
+
 .rp-sticky button,
 .rp-sticky [role='tab'] {
   scroll-margin-top: 96px;

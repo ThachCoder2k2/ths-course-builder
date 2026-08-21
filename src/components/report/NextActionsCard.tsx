@@ -25,12 +25,23 @@ function scoreColor(score: number): string {
  * bên cạnh, nên hai thẻ luôn nói cùng một câu chuyện.
  */
 export function NextActionsCard({ actions }: { actions: NextAction[] }) {
+  // Ít việc thì căn giữa theo chiều dọc; dồn lên đỉnh sẽ chừa cả trăm px trắng ở dưới
+  // vì thẻ bị kéo cao bằng thẻ bảng khoá học bên cạnh.
+  //
+  // Danh sách còn bị chặn bề rộng khi thẻ chưa chia 1/3 cột (dưới xl): để tràn thì cụm
+  // điểm ưu tiên trôi cách tên việc cả nghìn px, mắt không nối được hai bên với nhau.
+  const few = actions.length < 3;
+
   return (
-    <ReportCard title="Việc nên làm tiếp" subtitle="Duy trì - nắm vững - phát triển" bodyClassName="gap-2xl">
+    <ReportCard
+      title="Việc nên làm tiếp"
+      subtitle="Duy trì - nắm vững - phát triển"
+      bodyClassName={few ? 'gap-2xl justify-center' : 'gap-2xl'}
+    >
       {actions.length === 0 ? (
         <EmptyState text="Chưa có việc nào cần làm gấp" />
       ) : (
-        <ol className="flex flex-col gap-2xl">
+        <ol className="flex max-w-[620px] flex-col gap-2xl xl:max-w-none">
           {actions.map((a, i) => {
             const rank = RANK_STYLE[Math.min(i, RANK_STYLE.length - 1)];
             const score = Math.round(a.impact * 100);

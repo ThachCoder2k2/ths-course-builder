@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Calendar, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '../../lib/cn';
 
@@ -16,6 +16,7 @@ function monthGrid(year: number, month: number): Date[] {
 }
 
 interface MonthProps {
+  className?: string;
   year: number;
   month: number;
   from: Date | null;
@@ -27,7 +28,7 @@ interface MonthProps {
   onHover: (d: Date | null) => void;
 }
 
-function MonthView({ year, month, from, to, hover, min, max, onPick, onHover }: MonthProps) {
+function MonthView({ className, year, month, from, to, hover, min, max, onPick, onHover }: MonthProps) {
   const days = useMemo(() => monthGrid(year, month), [year, month]);
   // Khi mới chọn được đầu khoảng, dùng ngày đang trỏ chuột làm cuối tạm để người dùng
   // thấy trước khoảng mình sắp chọn.
@@ -48,7 +49,7 @@ function MonthView({ year, month, from, to, hover, min, max, onPick, onHover }: 
   };
 
   return (
-    <div className="flex min-w-[252px] flex-1 flex-col gap-lg">
+    <div className={cn('flex min-w-[252px] flex-1 flex-col gap-lg', className)}>
       <div className="text-center text-sm font-semibold text-primary">
         tháng {month + 1} / {year}
       </div>
@@ -181,6 +182,30 @@ export function DateRangePicker({
     setDraftTo(day);
   };
 
+  // Hộp lịch neo absolute bên trong thanh dính, nên cuộn trang KHÔNG đưa nó lên được:
+  // đáy hộp bị ghim mãi ở một toạ độ khung nhìn. Khung hẹp thì hai bảng tháng xếp dọc,
+  // hộp cao hơn màn hình và hai nút Huỷ/Xác nhận nằm ngoài, bấm cách nào cũng không tới.
+  // Vì vậy phải đo khoảng trống thật dưới nút rồi kẹp chiều cao hộp lại.
+  const [maxH, setMaxH] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    if (!open) return;
+    const measure = () => {
+      const el = box.current;
+      if (!el || typeof window === 'undefined') return;
+      // Hộp mở ra ngay dưới nút (mt-md = 8px), nên đo từ ĐÁY khung chứa nút.
+      // Đo từ đỉnh khung sẽ hụt mất chiều cao cái nút và hộp lại tràn đáy.
+      const top = el.getBoundingClientRect().bottom + 13;
+      setMaxH(Math.max(220, window.innerHeight - top - 12));
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    window.addEventListener('scroll', measure, { passive: true });
+    return () => {
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('scroll', measure);
+    };
+  }, [open]);
+
   const ready = draftFrom !== null && draftTo !== null;
   const draftLabel = draftFrom ? `${dmy(draftFrom)}${draftTo ? ` – ${dmy(draftTo)}` : ' – …'}` : '';
 
@@ -206,9 +231,10 @@ export function DateRangePicker({
         <div
           role="dialog"
           aria-label="Chọn khoảng thời gian"
-          className="absolute right-0 z-40 mt-md flex w-[min(92vw,600px)] flex-col gap-2xl rounded-xl bg-primary p-2xl shadow-lg ring-1 ring-secondary"
+          style={maxH ? { maxHeight: maxH } : undefined}
+          className="absolute right-0 z-40 mt-[13px] flex w-[min(92vw,600px)] flex-col overflow-hidden rounded-xl bg-primary shadow-lg ring-1 ring-secondary"
         >
-          <div className="flex items-center justify-between gap-md">
+          <div className="flex items-center justify-between gap-md p-2xl pb-lg">
             <button
               type="button"
               disabled={!canPrev}
@@ -230,7 +256,8 @@ export function DateRangePicker({
             </button>
           </div>
 
-          <div className="flex flex-col gap-3xl sm:flex-row">
+          {/* phần lịch cuộn bên trong hộp, hàng nút bên dưới luôn thấy */}
+          <div className="flex min-h-0 flex-1 flex-col gap-3xl overflow-y-auto px-2xl sm:flex-row">
             <MonthView
               year={anchor.getFullYear()}
               month={anchor.getMonth()}
@@ -242,7 +269,10 @@ export function DateRangePicker({
               onPick={pick}
               onHover={setHover}
             />
+            {/* Khung hẹp chỉ hiện một tháng: hai bảng xếp dọc làm hộp cao gấp đôi mà chẳng
+                thêm thông tin gì, người dùng lùi/tiến tháng là đủ. */}
             <MonthView
+              className="hidden sm:flex"
               year={second.getFullYear()}
               month={second.getMonth()}
               from={draftFrom}
@@ -255,7 +285,7 @@ export function DateRangePicker({
             />
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-lg border-t border-secondary pt-xl">
+          <div className="flex flex-wrap items-center justify-between gap-lg border-t border-secondary bg-primary p-2xl">
             <span className="inline-flex items-center rounded-md bg-secondary px-lg py-md text-sm font-medium tabular-nums text-secondary ring-1 ring-secondary">
               {draftLabel || 'Chưa chọn ngày nào'}
             </span>

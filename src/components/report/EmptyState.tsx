@@ -7,7 +7,8 @@ import { cn } from '../../lib/cn';
  */
 export function EmptyState({ text, className }: { text: string; className?: string }) {
   return (
-    <div className={cn('flex flex-1 flex-col items-center justify-center gap-md py-2xl text-center', className)}>
+    // không thêm đệm dọc ở đây: thân thẻ đã có py-2xl, cộng vào thành 80px trắng cho 64px chữ
+    <div className={cn('flex min-h-[112px] flex-1 flex-col items-center justify-center gap-md text-center', className)}>
       <span className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
         <Inbox className="h-4 w-4 text-fg-quinary" aria-hidden="true" />
       </span>

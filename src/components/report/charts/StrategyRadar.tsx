@@ -22,6 +22,11 @@ const CY = VH / 2 + 6;
 const R = 118;
 const LABEL_GAP = 24;
 const RINGS = [0.2, 0.4, 0.6, 0.8, 1] as const;
+/**
+ * Chặn bề rộng SVG quanh cỡ viewBox (max-w-[440px] ở dưới). Để `w-full` trơn thì ở khổ
+ * 768 hệ số phóng lên 1.5 và nhãn trục thành 21px — to hơn cả tiêu đề thẻ; chiều cao thẻ
+ * cũng chạy theo bề rộng chứ không theo nội dung, sinh ra thẻ 537px cho hình 268px.
+ */
 
 export function StrategyRadar({ axes }: { axes: RadarAxis[] }) {
   const [hover, setHover] = useState<number | null>(null);
@@ -48,7 +53,7 @@ export function StrategyRadar({ axes }: { axes: RadarAxis[] }) {
       viewBox={`0 0 ${VW} ${VH}`}
       role="img"
       aria-label={`Chân dung cách học của bạn theo ${n} thói quen`}
-      className="mx-auto block h-auto w-full"
+      className="mx-auto block h-auto w-full max-w-[440px]"
     >
       {/* lưới: năm vòng 20 / 40 / 60 / 80 / 100% */}
       {RINGS.map((level) => (
