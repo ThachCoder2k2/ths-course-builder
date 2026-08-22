@@ -14,6 +14,9 @@ import { COURSES, NOW, SPAN_DAYS } from '../behavior/catalog';
 import { dropHint, rhythmMatrix } from '../behavior/rhythm';
 import { minutesLabel } from '../behavior/format';
 import { Reveal } from '../components/ui/Reveal';
+import FloatingChatbot from '../components/learn/FloatingChatbot';
+import CourseAiPanel from '../components/learn/CourseAiPanel';
+import { troLyBaoCao } from '../ai/noiDung';
 
 /**
  * Báo cáo sau khi hoàn thành khoá học (Figma node 432:6863).
@@ -42,6 +45,10 @@ export default function CourseReportPage() {
   // Bài đang chọn trên sơ đồ. Mặc định chọn bài YẾU NHẤT: mở báo cáo ra là thấy ngay chỗ
   // cần xem lại, chứ không phải bài đầu tiên vốn thường đã vững.
   const [chon, setChon] = useState<NutSoDo | null>(null);
+  const [aiMo, setAiMo] = useState(false);
+  // Chỉ trả tiêu điểm về con robot SAU lần mở đầu tiên; lúc mới vào trang thì không.
+  const [daMoAi, setDaMoAi] = useState(false);
+  const troLy = useMemo(() => (bc ? troLyBaoCao(bc) : null), [bc]);
   const dangChon = chon ?? bc?.yeuNhat ?? bc?.nut[0] ?? null;
 
   /**
@@ -114,7 +121,15 @@ export default function CourseReportPage() {
         <p className="min-w-0 truncate text-lg font-semibold text-primary">{khoa.title}</p>
       </header>
 
-      <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-3xl px-4 pb-9xl pt-6xl lg:px-6xl">
+      {/*
+        Mở bảng chat thì ĐẨY nội dung sang, không phủ lên — người học phần lớn hỏi về con số
+        đang xem, phủ lên là che mất thứ họ đang hỏi. Nên hàng này chứa hai cột.
+
+        Chỉ đẩy từ xl. Ở 1024 mà cắt 360px thì sơ đồ mạng lưới và cặp thanh không còn bề
+        ngang để đọc, nên dưới xl bảng thành tấm phủ (xem class của CourseAiPanel bên dưới).
+      */}
+      <div className="mx-auto flex w-full max-w-[1440px] flex-1 items-start gap-3xl px-4 pb-9xl pt-6xl lg:px-6xl">
+      <main className="flex min-w-0 flex-1 flex-col gap-3xl">
         <div className="flex flex-col items-center gap-xs text-center">
           <p className="text-sm font-semibold text-brand-secondary">Bạn đã hoàn thành khoá học</p>
           <h1 className="text-display-sm text-primary lg:text-display-lg">Báo cáo kết quả toàn khoá</h1>
@@ -246,6 +261,42 @@ export default function CourseReportPage() {
         </ReportCard>
         </Reveal>
       </main>
+
+      {/*
+        MỘT thẻ duy nhất, đổi cách định vị theo khổ — không dựng hai bản, vì hai bản là hai
+        cuộc hội thoại riêng và người học đóng bảng ở khổ này mở ở khổ kia là mất hết.
+
+        Dưới xl: fixed, nên nó ra khỏi luồng và hàng không chừa chỗ.
+        Từ xl: static rồi sticky, dính dưới dải đầu trang cao 80px cộng 24px lề trên.
+      */}
+      {aiMo && troLy ? (
+        <CourseAiPanel
+          troLy={troLy}
+          onClose={() => setAiMo(false)}
+          className="fixed inset-x-4 bottom-4 top-[104px] z-40 shadow-lg xl:static xl:inset-auto xl:z-auto xl:h-[calc(100dvh-128px)] xl:shadow-none"
+        />
+      ) : null}
+      </div>
+
+      {/* Khổ hẹp: bảng phủ gần hết màn nên cần một lớp mờ phía sau, bấm ra ngoài là đóng. */}
+      {aiMo ? (
+        <button
+          type="button"
+          aria-label="Đóng Course AI"
+          onClick={() => setAiMo(false)}
+          className="fixed inset-0 z-30 bg-black/20 xl:hidden"
+        />
+      ) : null}
+
+      {aiMo ? null : (
+        <FloatingChatbot
+          onOpen={() => {
+            setAiMo(true);
+            setDaMoAi(true);
+          }}
+          traLaiTieuDiem={daMoAi}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowRight,
@@ -21,6 +21,7 @@ import CourseAiPanel from '../components/learn/CourseAiPanel';
 import NotFound from './NotFound';
 import { flattenLessons, getCourseBySlug, getLesson } from '../mock';
 import { useProgress } from '../lib/useProgress';
+import { troLyBaiHoc } from '../ai/noiDung';
 
 /**
  * Figma: `Học` (node 204:4565).
@@ -41,12 +42,21 @@ export default function LearnPage() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
+  // Chỉ trả tiêu điểm về con robot SAU lần mở đầu tiên; lúc mới vào trang thì không.
+  const [daMoAi, setDaMoAi] = useState(false);
   const [tocOpen, setTocOpen] = useState(true);
 
   const currentLessonId = currentLesson?.lesson.id;
   useEffect(() => {
     if (currentLessonId) setLast(currentLessonId);
   }, [currentLessonId, setLast]);
+
+  // Kho câu trả lời của Course AI cho bài đang mở. Tính trước lần trả về sớm bên dưới
+  // vì hook không được gọi sau một câu return có điều kiện.
+  const troLy = useMemo(
+    () => troLyBaiHoc({ khoa: course?.title ?? '', bai: currentLesson?.lesson.title ?? '' }),
+    [course?.title, currentLesson?.lesson.title],
+  );
 
   if (!course || !currentLesson) return <NotFound />;
 
@@ -174,10 +184,18 @@ export default function LearnPage() {
         </main>
 
         {/* Figma variant 211:10306 — the Course AI side panel. */}
-        {aiOpen ? <CourseAiPanel onClose={() => setAiOpen(false)} /> : null}
+        {aiOpen ? <CourseAiPanel troLy={troLy} onClose={() => setAiOpen(false)} /> : null}
       </div>
 
-      {aiOpen ? null : <FloatingChatbot onOpen={() => setAiOpen(true)} />}
+      {aiOpen ? null : (
+        <FloatingChatbot
+          onOpen={() => {
+            setAiOpen(true);
+            setDaMoAi(true);
+          }}
+          traLaiTieuDiem={daMoAi}
+        />
+      )}
 
       <Drawer open={sidebarOpen} onClose={() => setSidebarOpen(false)} title="Danh sách bài học" side="left">
         <LessonSidebar

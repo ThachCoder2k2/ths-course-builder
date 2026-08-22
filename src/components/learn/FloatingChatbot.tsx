@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '../../lib/cn';
 import botGlyph from '../../assets/icons/course-ai.svg';
 
@@ -11,7 +11,21 @@ import botGlyph from '../../assets/icons/course-ai.svg';
 const SIZE = 64;
 const CLICK_SLOP = 5;
 
-export default function FloatingChatbot({ onOpen }: { onOpen: () => void }) {
+export default function FloatingChatbot({
+  onOpen,
+  traLaiTieuDiem = false,
+}: {
+  onOpen: () => void;
+  /**
+   * Đưa tiêu điểm về nút này ngay khi nó hiện lại — dùng sau khi người dùng đóng bảng chat.
+   *
+   * Trang gỡ nút khỏi DOM lúc bảng mở, nên "trả tiêu điểm về chỗ vừa bấm" không tự xảy ra:
+   * đóng bảng thì tiêu điểm rơi về <body> và người đi bàn phím phải Tab lại từ đầu trang.
+   * Cờ này chỉ bật sau lần mở đầu tiên, để lúc mới vào trang nút không giật tiêu điểm.
+   */
+  traLaiTieuDiem?: boolean;
+}) {
+  const nut = useRef<HTMLButtonElement | null>(null);
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const [dragging, setDragging] = useState(false);
   const drag = useRef<{ dx: number; dy: number; startX: number; startY: number; moved: boolean } | null>(null);
@@ -41,12 +55,17 @@ export default function FloatingChatbot({ onOpen }: { onOpen: () => void }) {
     if (wasClick) onOpen();
   };
 
+  useEffect(() => {
+    if (traLaiTieuDiem) nut.current?.focus();
+  }, [traLaiTieuDiem]);
+
   return (
     <div
       className={cn('fixed z-20', pos ? '' : 'right-6 top-[104px]')}
       style={pos ? { left: pos.x, top: pos.y } : undefined}
     >
       <button
+        ref={nut}
         type="button"
         aria-label="Mở Course AI"
         onPointerDown={onPointerDown}
