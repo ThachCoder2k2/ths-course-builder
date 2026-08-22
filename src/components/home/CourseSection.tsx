@@ -31,7 +31,7 @@ export default function CourseSection({
         <div className="grid w-full grid-cols-1 gap-3xl sm:grid-cols-2 xl:grid-cols-4">
           {courses.map((course, i) => (
             <Reveal key={course.id} order={i} className="flex">
-              <CourseCard course={course} slot={i} />
+              <CourseCard course={course} />
             </Reveal>
           ))}
         </div>
@@ -41,7 +41,7 @@ export default function CourseSection({
             type="button"
             onClick={onNext}
             aria-label="Xem thêm khoá học"
-            className="absolute right-0 top-[128px] hidden translate-x-1/2 items-center justify-center rounded-full bg-button-secondary p-xl shadow-xs-ring-primary transition-transform duration-200 hover:scale-105 xl:flex"
+            className="ln-press ln-press-grow ln-focus absolute right-0 top-[128px] hidden translate-x-1/2 items-center justify-center rounded-full bg-button-secondary p-xl shadow-xs-ring-primary xl:flex"
           >
             <ArrowRight className="h-6 w-6 text-black" aria-hidden="true" />
             <span

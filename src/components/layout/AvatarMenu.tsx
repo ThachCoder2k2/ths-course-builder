@@ -50,13 +50,13 @@ export default function AvatarMenu({ name, src }: { name: string; src?: string }
         aria-expanded={open}
         aria-label="Mở menu tài khoản"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center rounded-full outline-none ring-brand-500 ring-offset-2 focus-visible:ring-2"
+        className="ln-press ln-focus-flat flex items-center rounded-full outline-none"
       >
         <Avatar name={name} src={src} size="md" className="border-[0.75px] border-[rgba(0,0,0,0.08)]" />
       </button>
 
       {open ? (
-        <nav aria-label="Tài khoản" className="absolute right-0 top-[calc(100%+12px)] z-50 w-[264px] overflow-hidden rounded-xl border border-secondary bg-primary p-md shadow-sm">
+        <nav aria-label="Tài khoản" className="ln-pop absolute right-0 top-[calc(100%+12px)] z-50 w-[264px] overflow-hidden rounded-xl border border-secondary bg-primary p-md shadow-sm">
           <div className="flex items-center gap-md px-lg py-md">
             <Avatar name={name} src={src} size="md" />
             <div className="flex min-w-0 flex-col">

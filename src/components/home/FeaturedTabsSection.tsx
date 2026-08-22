@@ -31,14 +31,27 @@ const TABS = [
 const SUPPORTING =
   'Mỗi chủ đề chia thành ba mức: cơ bản, trung cấp và nâng cao. Bắt đầu ở mức nào cũng được, hệ thống sẽ đo lại sau bài kiểm tra đầu tiên rồi xếp bạn vào đúng chỗ.';
 
-export default function FeaturedTabsSection({ courses }: { courses: Course[] }) {
-  const [active, setActive] = useState(0);
+export default function FeaturedTabsSection({
+  courses,
+  batDau = 0,
+}: {
+  courses: Course[];
+  /** Điểm bắt đầu trong danh sách khoá, để hai mục cạnh nhau không hiện cùng một bộ. */
+  batDau?: number;
+}) {
+  // Giữ cả hướng vừa bấm, không chỉ chỉ số: bộ thẻ mới phải vào từ đúng phía người
+  // dùng vừa chọn. Cập nhật một lần trong onClick, đừng tính hướng bằng ref lúc render.
+  const [tab, setTab] = useState({ i: 0, huong: 1 });
+  const active = tab.i;
 
-  // The mock has no per-tab taxonomy; rotate the pool so switching tabs shows a
-  // different set while the default tab matches Figma's four cards.
-  const visible = Array.from({ length: 4 }, (_, i) => courses[(active + i) % courses.length]).filter(
-    Boolean,
-  );
+  // Mock chỉ có 5 chủ đề thật (t1..t5) trong khi thiết kế cho 8 tab, nên không lọc thật
+  // theo tám nhãn đó được. Thay vào đó mỗi tab lấy một KHỐI 4 khoá khác nhau, và mỗi mục
+  // có điểm bắt đầu riêng — đủ để đổi tab là thấy bộ khác, và hai mục cạnh nhau không
+  // bao giờ hiện cùng một bộ.
+  const visible = Array.from(
+    { length: 4 },
+    (_, i) => courses[(batDau + active * 4 + i) % courses.length],
+  ).filter(Boolean);
 
   return (
     <section className="flex w-full flex-col gap-xl">
@@ -68,7 +81,7 @@ export default function FeaturedTabsSection({ courses }: { courses: Course[] }) 
                     type="button"
                     role="tab"
                     aria-selected={active === index}
-                    onClick={() => setActive(index)}
+                    onClick={() => setTab((truoc) => ({ i: index, huong: index > truoc.i ? 1 : -1 }))}
                     className={cn(
                       'flex h-9 shrink-0 items-center justify-center gap-md whitespace-nowrap border-b-2 px-xs pb-lg text-md font-semibold transition-colors',
                       active === index
@@ -85,9 +98,15 @@ export default function FeaturedTabsSection({ courses }: { courses: Course[] }) 
             {/* Lưới xuống dòng, không phải một hàng flex: bốn thẻ trong một hàng không
                 xuống dòng làm mỗi thẻ co về 0 ở khung hẹp, và nhãn kinh nghiệm (shrink-0)
                 chọc ra ngoài viewport 151px. */}
-            <div className="grid grid-cols-1 gap-lg sm:grid-cols-2 xl:grid-cols-4">
-              {visible.map((course) => (
-                <CompactCourseCard key={course.id} course={course} />
+            <div
+              key={tab.i}
+              style={{ ['--ln-dir' as string]: String(tab.huong) }}
+              className="grid grid-cols-1 gap-lg sm:grid-cols-2 xl:grid-cols-4"
+            >
+              {visible.map((course, i) => (
+                <div key={course.id} className="ln-swap flex" style={{ animationDelay: `${i * 45}ms` }}>
+                  <CompactCourseCard course={course} />
+                </div>
               ))}
             </div>
           </div>

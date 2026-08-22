@@ -13,3 +13,11 @@ coverage
 
 # Source archive for chess course modules — not part of the app
 Downloads.zip
+
+# Script và ảnh/PDF đo tạm của phiên làm việc (agent kiểm chứng ghi vào đây)
+_*
+R_*
+R2_*
+*.mjs
+!vite.config.mjs
+!*.config.mjs

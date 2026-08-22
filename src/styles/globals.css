@@ -7,6 +7,13 @@
 
 :root {
   color-scheme: light;
+
+  /* Nhịp chung cho mọi chuyển động của trang chủ. Đặt một chỗ để cả trang cùng một nhịp,
+     đổi một dòng là đổi cả hệ — thay vì rải số 200/150/90 khắp component. */
+  --ln-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ln-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ln-t-press: 90ms;
+  --ln-t-micro: 200ms;
 }
 
 html,
@@ -160,10 +167,10 @@ body {
 }
 
 /* Nền wash dịch chậm hơn nội dung một nhịp. Rất nhẹ và tắt hẳn khi người dùng bật giảm
-   chuyển động, vì parallax là thứ dễ gây chóng nhất trong nhóm này. */
-.ln-wash {
-  will-change: transform;
-}
+   chuyển động, vì parallax là thứ dễ gây chóng nhất trong nhóm này.
+
+   KHÔNG khai will-change ở đây: lớp trôi ngang bên ngoài đã tự đẩy cả nhóm lên layer khi
+   nó chạy. Khai thường trú thì ngồi ở đỉnh trang không cuộn gì cũng giữ một layer. */
 
 /* Mascot: thân dểnh theo nhịp thở. */
 .ln-mascot {
@@ -280,8 +287,10 @@ body {
    Góc nghiêng đặt thành biến để đổi một chỗ là đổi cả trang. */
 .ln-card-tilt {
   --ln-tilt: -2deg;
-  position: relative;
   transition: transform 200ms ease-out;
+}
+:where(.ln-card-tilt) {
+  position: relative;
 }
 .group:hover .ln-card-tilt {
   transform: rotate(var(--ln-tilt)) scale(1.03) translateY(-6px);
@@ -292,9 +301,12 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  z-index: -1;
   border-radius: inherit;
   opacity: 0;
+  /* KHÔNG dùng z-index: -1. `position: relative` với z-index tự động không tạo ngữ cảnh
+     xếp lớp, nên lớp giả có z-index âm sẽ nằm sau chính cái nền của thẻ và bóng biến mất
+     hoàn toàn. Để mặc định thì lớp giả nằm trên nền thẻ, nhưng nó không có màu nền nên
+     không che gì, còn bóng thì vẽ ra NGOÀI mép thẻ nên vẫn thấy. */
   box-shadow: 0 18px 32px -12px rgba(10, 13, 18, 0.18);
   transition: opacity 200ms ease-out;
 }
@@ -302,20 +314,297 @@ body {
   opacity: 1;
 }
 
-/* Phản hồi khi bấm, dùng chung cho mọi nút. Trước đây 16 nút trên trang bấm không có
-   gì xảy ra. Vào 200ms, ra 90ms — nhanh hơn lúc vào nên cảm giác nút đáp lẹ. */
+/* ---- Phản hồi khi chạm (.ln-press) --------------------------------------------
+   Ba biến thể, khác nhau ở CÁI GÌ động, chung một bộ thời lượng.
+
+   Hướng co lại (0.97) chứ không phình ra: thứ bạn đè phải LÙI RA XA khỏi bạn, đó mới
+   là chiều sâu. Lượt nhả dùng lại 200ms của hover, vì CSS không phân biệt được "nhả ra
+   vào hover" với "mới vào hover".
+
+   KHÔNG thêm will-change: hơn trăm phần tử bấm được, giữ layer thường trú cho tất cả là
+   thứ tệ nhất có thể làm với trang này. transition thì lười — không có gì lên layer cho
+   tới lúc thật sự hover hay đè. */
 .ln-press {
-  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+  --ln-press-hover: translateY(-2px);
+  --ln-press-down: scale(0.97);
+  transition: transform var(--ln-t-micro) var(--ln-ease-out);
 }
 .ln-press:hover {
-  transform: translateY(-2px);
+  transform: var(--ln-press-hover);
 }
 .ln-press:active {
-  transform: scale(0.97);
-  transition-duration: 90ms;
+  transform: var(--ln-press-down);
+  transition: transform var(--ln-t-press) var(--ln-ease-in);
+}
+/* Thẻ khoá học 384px và pill dài 400px: co 0.97 ở đó là hụt 12px, quá nhiều. */
+.ln-press-soft {
+  --ln-press-down: scale(0.99);
+}
+/* Nút mũi tên tròn: giữ cú phóng đang có thay vì nhấc lên. */
+.ln-press-grow {
+  --ln-press-hover: scale(1.05);
+}
+/* Chữ và link: nhấc một dòng chữ lên trông như lỗi hiển thị, nên chỉ mờ đi khi đè. */
+.ln-press-flat {
+  --ln-press-hover: none;
+  --ln-press-down: none;
+}
+.ln-press-flat:active {
+  opacity: 0.62;
+  transition: opacity var(--ln-t-press) var(--ln-ease-in);
+}
+
+/* ---- Vòng focus bàn phím (.ln-focus) ------------------------------------------
+   Vào 140ms, RA 0ms — cố ý phá luật "vào chậm hơn ra": đi bằng Tab là lướt qua hàng
+   chục mốc liên tiếp, vòng focus mà có lượt ra thì nó đuổi không kịp và thành vệt mờ.
+
+   Chỉ dùng :focus-visible, không dùng :focus — chạm vào :focus là bấm chuột cũng bung
+   vòng, ai cũng thấy khó chịu rồi sẽ có người xoá cả hệ. */
+/* Bọc trong :where() để độ đặc hiệu bằng KHÔNG. Nếu viết thẳng `.ln-focus { position:
+   relative }` thì nó ngang điểm với `.absolute` của Tailwind và thắng bằng thứ tự file —
+   mọi phần tử vừa `absolute` vừa `.ln-focus` sẽ rơi khỏi lớp định vị và trôi vào luồng.
+   Đã đâm đúng cái nút mũi tên của "Khoá học nổi bật": nó đáp xuống giữa hàng tab của khối
+   xanh, đo được y=745 thay vì y=320. */
+:where(.ln-focus) {
+  position: relative;
+}
+.ln-focus::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  border: 2px solid #0d67f7;
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity 140ms var(--ln-ease-out), transform 140ms var(--ln-ease-out);
+  pointer-events: none;
+}
+.ln-focus:focus-visible {
+  outline: none;
+}
+.ln-focus:focus-visible::after {
+  opacity: 1;
+  transform: none;
+}
+/* Bản phẳng cho phần tử có overflow-hidden: outline không bị cắt như lớp giả, bù lại
+   không animate được. Thà không có đường đi còn hơn có vòng bị cắt mất một nửa. */
+.ln-focus-flat:focus-visible {
+  outline: 2px solid #0d67f7;
+  outline-offset: 2px;
+}
+
+/* ---- Dải nền trôi ngang rất chậm ---------------------------------------------
+   44s một vòng đầy, tức 1.1px/s — dưới ngưỡng ý thức: mắt chỉ thấy "trang đang sống",
+   không bắt được nó đi đâu. Dùng sine ease-in-out chứ không linear, vì linear thì mỗi
+   22s lại thấy nó nảy một cái ở điểm đổi chiều.
+
+   CHỈ trục ngang, cấm thành phần dọc: ảnh nền cao hơn hộp nên object-cover phóng theo
+   chiều cao, dư dọc bằng 0 ở mọi khổ — nhích dọc là hở mép ngay. scale(1.02) là phần
+   dư ngang tự cấp: dư ngang thật teo dần theo bề rộng cửa sổ và bằng 0 ở màn siêu rộng,
+   2% overscan xoá hẳn sự phụ thuộc đó mà không tốn thêm texture. */
+@keyframes ln-drift {
+  0%,
+  100% {
+    transform: translate3d(-12px, 0, 0) scale(1.02);
+  }
+  50% {
+    transform: translate3d(12px, 0, 0) scale(1.02);
+  }
+}
+.ln-wash-drift {
+  animation: ln-drift 44s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+  animation-play-state: paused;
+}
+.ln-run > .ln-wash-drift {
+  animation-play-state: running;
+}
+
+/* ---- Vạch tiến độ đọc ---------------------------------------------------------
+   KHÔNG đặt transition cho scaleX: nó phải dính vào ngón tay, để transition là nó lết
+   theo sau, cảm giác cao su. Chỉ độ mờ của cả khối mới có lượt vào/ra. */
+.ln-progress {
+  opacity: 0;
+  transition: opacity 100ms var(--ln-ease-out);
+}
+.ln-progress[data-hien='true'] {
+  opacity: 1;
+  transition-duration: 150ms;
+}
+.ln-progress-fill {
+  transform: scaleX(var(--ln-progress, 0));
+  transform-origin: left center;
+}
+
+/* ---- Kính lúp ô tìm kiếm ------------------------------------------------------
+   Ô tìm kiếm rộng nhất đầu trang mà trỏ vào thì im hoàn toàn. Cấm animation chạy liên
+   tục bên trong thanh đầu trang vì thanh có backdrop-blur — mỗi khung hình phải lấy
+   mẫu lại nền. Đây chỉ là cú một nhịp khi có tương tác nên không sao. */
+.ln-search-icon {
+  transition: transform 150ms cubic-bezier(0, 0, 0.58, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ln-search:hover .ln-search-icon {
+    transform: scale(1.08) translateX(-1px);
+  }
+}
+.ln-search:focus-within .ln-search-icon {
+  transform: scale(1.08) translateX(-1px);
+}
+
+/* ---- Bảng menu nở ra từ nút đã mở nó -----------------------------------------
+   Không dùng scale: bảng avatar có overflow-hidden, phóng một hộp bo góc bị cắt là
+   vẽ lại đường bo mỗi khung hình, cộng backdrop-blur của thanh đầu trang thành đúng
+   tổ hợp đắt nhất. translateY 6px vẫn nói được "ra từ phía trên".
+
+   BẪY: transform trên bảng biến nó thành containing block, mọi position:fixed bên
+   trong sẽ neo sai. Hôm nay chưa có cái nào — ai thêm tooltip fixed vào menu sau này
+   sẽ đâm đúng vào đây. */
+@keyframes ln-pop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.ln-pop {
+  animation: ln-pop 180ms var(--ln-ease-out) both;
+}
+
+/* ---- Chấm sáng chạy trên đường lộ trình --------------------------------------
+   Mười mốc lấy trên chính đường cong của SVG, phần trăm chia theo ĐỘ DÀI CUNG chứ
+   không theo tham số Bézier — chia theo tham số thì chấm nhanh chậm bất thường ở khúc
+   uốn. Đi hết đường trong 0–80% (5.6s), phần còn lại là quãng nghỉ.
+
+   Chạy sau khi đường đã vẽ xong: đường mất 700ms, ba chặng và ba nhãn xong ở 960ms,
+   nên trễ 1000ms — chấm không được phép chạy trên đường chưa có. */
+@keyframes ln-spark {
+  0% {
+    transform: translate(8px, 30px);
+    opacity: 0;
+  }
+  4% {
+    opacity: 1;
+  }
+  9.5% {
+    transform: translate(56.7px, 27.5px);
+  }
+  16% {
+    transform: translate(90px, 22px);
+  }
+  23% {
+    transform: translate(123.3px, 16.5px);
+  }
+  32.5% {
+    transform: translate(172px, 14px);
+  }
+  42% {
+    transform: translate(220.7px, 16.5px);
+  }
+  49% {
+    transform: translate(254px, 22px);
+  }
+  55.5% {
+    transform: translate(287.3px, 27.5px);
+  }
+  65% {
+    transform: translate(336px, 30px);
+  }
+  74% {
+    opacity: 1;
+  }
+  80% {
+    transform: translate(412px, 30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(412px, 30px);
+    opacity: 0;
+  }
+}
+.ln-spark {
+  transform-box: view-box;
+  opacity: 0;
+}
+.ln-in .ln-spark {
+  animation: ln-spark 7000ms linear 1000ms infinite;
+  animation-play-state: paused;
+}
+/* Dùng play-state thay vì bỏ animation, để không phải chờ lại 1000ms mỗi lần cuộn vào. */
+.ln-in.ln-run .ln-spark {
+  animation-play-state: running;
+}
+
+/* ---- Đồng hồ đếm ngược của băng chuyền ---------------------------------------
+   Nằm dưới con trượt trong chính thanh vị trí, không thêm thứ mới lên màn. linear
+   tuyệt đối — thanh đếm thời gian mà có easing là nó bịa về thời gian còn lại.
+   Đứng im giữa đường khi người dùng trỏ chuột vào, chính là câu "tôi dừng vì con trỏ
+   của bạn đang ở đây" — việc dừng đó trước đây hoàn toàn vô hình. */
+@keyframes ln-dwell {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.ln-dwell {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: #0d67f7;
+  opacity: 0.22;
+  animation-name: ln-dwell;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* ---- Kéo đường ray bằng chuột ------------------------------------------------
+   Phải tắt scroll-snap trong lúc kéo, không thì trình duyệt kéo lại. will-change chỉ
+   bật trong lúc kéo: băng chuyền ở đáy trang, để một layer thường trú ở đó là đốt bộ
+   nhớ GPU không lý do. */
+.ln-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  will-change: scroll-position;
+}
+
+/* ---- Đổi tab: bộ thẻ vào theo đúng hướng vừa bấm ----------------------------
+   Chỉ có pha VÀO, không có pha ra: nội dung cũ thay ngay nên không phải giữ hai bộ
+   thẻ cùng lúc và không có cú nhảy chiều cao. Trễ 45ms giữa các thẻ khiến bốn thẻ đọc
+   ra là bốn thứ riêng biệt chứ không phải một tấm ảnh bị hoán. */
+@keyframes ln-swap {
+  from {
+    opacity: 0;
+    transform: translate3d(calc(var(--ln-dir, 1) * 10px), 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.ln-swap {
+  animation: ln-swap 260ms var(--ln-ease-out) both;
 }
 
 @media print {
+  .ln-focus::after,
+  .ln-progress,
+  .ln-spark,
+  .ln-dwell {
+    display: none !important;
+  }
+  .ln-wash-drift,
+  .ln-search-icon,
+  .ln-pop,
+  .ln-swap {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
   .ln-press,
   .ln-mascot-scale,
   .ln-bubble,
@@ -407,19 +696,57 @@ body {
     will-change: auto !important;
   }
   /* Nút vẫn phải cho biết là đã bấm, chỉ bỏ phần dịch chuyển. Đổi màu thì giữ. */
-  /* Giảm chuyển động nghĩa là bớt chuyển động, KHÔNG phải bỏ hết phản hồi. Cú lún khi
-     bấm là cách duy nhất nút cho biết nó đã nhận — giữ lại, chỉ làm nhỏ và nhanh hơn.
-     Bỏ cú nhấc lên khi hover và bỏ nghiêng thẻ, vì hai cái đó thuần trang trí. */
+  /* Giảm chuyển động nghĩa là bớt chuyển động, KHÔNG phải bỏ hết phản hồi. Biết mình đã
+     bấm được không liên quan gì tới chịu được chuyển động hay không — nên vẫn phải có
+     dấu hiệu, chỉ đổi từ dịch chuyển sang đổi độ mờ. */
+  .ln-press,
   .ln-press:hover,
+  .ln-press:active,
   .ln-card-tilt,
   .group:hover .ln-card-tilt {
     transform: none !important;
-  }
-  .ln-press {
-    transition: transform 60ms linear !important;
+    transition: none !important;
   }
   .ln-press:active {
-    transform: scale(0.985) !important;
+    opacity: 0.7;
+  }
+
+  /* Vòng focus là món DUY NHẤT trong cả bộ mà giảm chuyển động không được phép làm mất
+     một chút thông tin nào: bỏ đường đi, giữ nguyên vòng viền, và hiện ngay. */
+  .ln-focus::after {
+    transition: none !important;
+    transform: none !important;
+  }
+  .ln-focus:focus-visible::after {
+    opacity: 1;
+  }
+
+  .ln-wash-drift {
+    animation: none !important;
+    transform: none !important;
+  }
+  .ln-search-icon,
+  .ln-search:hover .ln-search-icon,
+  .ln-search:focus-within .ln-search-icon {
+    transform: none !important;
+    transition: none !important;
+  }
+  .ln-pop,
+  .ln-swap {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  /* Một vật thể đi liên tục hết chiều dài đường là đúng loại chuyển động mà người bật
+     giảm chuyển động muốn tránh. Không giảm biên, không làm chậm — ẩn hẳn. Đường và ba
+     chặng vẫn hiện đủ. */
+  .ln-spark {
+    display: none !important;
+  }
+  /* Vạch tiến độ đọc GIỮ NGUYÊN, có chủ ý: đó là số liệu vị trí do chính người dùng
+     điều khiển, không phải hiệu ứng tự chạy. Chỉ bỏ phần mờ dần khi hiện/ẩn. */
+  .ln-progress {
+    transition: none !important;
   }
   .ln-card-tilt,
   .ln-card-tilt::after,

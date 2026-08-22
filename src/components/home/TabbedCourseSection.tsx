@@ -28,18 +28,25 @@ const TABS = [
 export default function TabbedCourseSection({
   title,
   courses,
+  batDau = 0,
 }: {
   title: string;
   courses: Course[];
+  /** Điểm bắt đầu trong danh sách khoá, để hai mục cạnh nhau không hiện cùng một bộ. */
+  batDau?: number;
 }) {
-  const [active, setActive] = useState(0);
+  const [tab, setTab] = useState({ i: 0, huong: 1 });
+  const active = tab.i;
 
   // The mock carries no per-tab taxonomy; rotate the pool so switching tabs
   // shows a different trio while the default tab matches Figma's three cards.
   // Bốn thẻ một hàng theo thiết kế (node 550:11307), không phải ba như bản cũ.
-  const visible = Array.from({ length: 4 }, (_, i) => courses[(active + i) % courses.length]).filter(
-    Boolean,
-  );
+  // Nhảy theo KHỐI 4, không trượt một ô: trượt một ô thì đổi tab chỉ thay đúng một thẻ,
+  // ba thẻ còn lại y nguyên nên trông như trang không phản ứng.
+  const visible = Array.from(
+    { length: 4 },
+    (_, i) => courses[(batDau + active * 4 + i) % courses.length],
+  ).filter(Boolean);
 
   return (
     <section className="flex w-full flex-col gap-xl">
@@ -59,7 +66,7 @@ export default function TabbedCourseSection({
               type="button"
               role="tab"
               aria-selected={active === index}
-              onClick={() => setActive(index)}
+              onClick={() => setTab((truoc) => ({ i: index, huong: index > truoc.i ? 1 : -1 }))}
               className={cn(
                 'flex h-9 shrink-0 items-center justify-center gap-md whitespace-nowrap border-b-2 px-xs pb-lg text-md font-semibold transition-colors',
                 active === index
@@ -74,10 +81,20 @@ export default function TabbedCourseSection({
       </div>
 
       <div className="flex w-full flex-col items-center gap-5xl">
-        <div className="grid w-full grid-cols-1 gap-3xl sm:grid-cols-2 xl:grid-cols-4">
+        {/* `key` của Reveal phải là CHỈ SỐ, không phải mã khoá: mã khoá đổi khi đổi tab
+            nên React tháo rồi gắn lại Reveal, làm lượt hiện-khi-cuộn-tới chạy lại và
+            chồng lên cú vào của .ln-swap. Mảng luôn dài 4 nên chỉ số là danh tính ổn
+            định. Khi đó Reveal lo lần hiện đầu, .ln-swap lo mọi lần đổi tab. */}
+        <div
+          key={tab.i}
+          style={{ ['--ln-dir' as string]: String(tab.huong) }}
+          className="grid w-full grid-cols-1 gap-3xl sm:grid-cols-2 xl:grid-cols-4"
+        >
           {visible.map((course, i) => (
-            <Reveal key={course.id} order={i} className="flex">
-              <CourseCard course={course} slot={i} />
+            <Reveal key={i} order={i} className="flex">
+              <div className="ln-swap flex w-full" style={{ animationDelay: `${i * 45}ms` }}>
+                <CourseCard course={course} />
+              </div>
             </Reveal>
           ))}
         </div>

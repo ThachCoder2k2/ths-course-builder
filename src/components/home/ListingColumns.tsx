@@ -48,7 +48,7 @@ export default function ListingColumns({
                 <Link
                   key={course.id}
                   to={'/courses/' + course.slug}
-                  className="group flex w-full min-w-0 items-start gap-xl rounded-xl bg-primary p-xl shadow-xs-ring-secondary transition-transform duration-200 hover:-translate-y-0.5"
+                  className="ln-press ln-press-soft ln-focus group flex w-full min-w-0 items-start gap-xl rounded-xl bg-primary p-xl shadow-xs-ring-secondary"
                 >
                   <img
                     src={courseThumb(course.id, ci * 3 + ri)}

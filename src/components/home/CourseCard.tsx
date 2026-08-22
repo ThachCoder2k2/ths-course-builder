@@ -14,12 +14,12 @@ import { courseImage } from './courseImage';
  *
  * Ảnh dùng `ln-card-img` để nở nhẹ khi thẻ hiện ra, chữ theo sau — xem globals.css.
  */
-export default function CourseCard({ course, slot }: { course: Course; slot?: number }) {
+export default function CourseCard({ course }: { course: Course }) {
   return (
-    <Link to={'/courses/' + course.slug} className="group block h-full">
+    <Link to={'/courses/' + course.slug} className="ln-focus group block h-full rounded-2xl">
       <article className="ln-card ln-card-tilt flex h-full flex-col gap-xl rounded-2xl bg-tertiary">
         <img
-          src={courseImage(course.id, slot)}
+          src={courseImage(course.id)}
           alt=""
           loading="lazy"
           className="ln-card-img aspect-[4/3] w-full shrink-0 rounded-2xl object-cover"

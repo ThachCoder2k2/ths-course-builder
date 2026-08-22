@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import ctaIllustration from '../../assets/landing/cta-illustration.png';
 import ctaHover from '../../assets/landing/cta-illustration-hover.png';
@@ -17,6 +18,27 @@ const STOPS = ['Chọn chủ đề', 'Đo trình độ', 'Nhận lộ trình'];
  */
 export default function CTABanner() {
   const { ref, inView } = useInView<HTMLDivElement>();
+  const [trongTam, setTrongTam] = useState(false);
+
+  /**
+   * `useInView` chỉ bắn một lần rồi ngắt, vì nó lo lượt hiện-khi-cuộn-tới. Chấm sáng thì
+   * lặp vô hạn nên cần biết KHỐI CÒN TRÊN MÀN HAY KHÔNG, liên tục — cuộn qua rồi là dừng.
+   * Dùng animation-play-state chứ không bỏ animation, để cuộn quay lại không phải chờ
+   * lại một giây trễ ban đầu.
+   */
+  useEffect(() => {
+    // Quan sát chính phần tử mà `useInView` đã gắn ref vào — khỏi cần ref thứ hai.
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setTrongTam(true);
+      return;
+    }
+    const io = new IntersectionObserver((es) => setTrongTam(es.some((e) => e.isIntersecting)), {
+      rootMargin: '0px',
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [ref]);
 
   return (
     <section className="flex w-full flex-col items-center justify-center bg-primary">
@@ -26,6 +48,7 @@ export default function CTABanner() {
           className={cn(
             'flex w-full flex-wrap items-center gap-x-3xl gap-y-3xl rounded-2xl bg-[#FDF0E4] px-xl py-3xl sm:px-4xl lg:px-9xl',
             inView && 'ln-in',
+            trongTam && 'ln-run',
           )}
         >
           <div className="flex min-w-[260px] flex-1 flex-col items-start gap-xl">
@@ -73,6 +96,19 @@ export default function CTABanner() {
                     strokeWidth={2}
                   />
                 ))}
+
+                {/*
+                  Chấm sáng chạy lại đúng ba bước mà khối này bán: Chọn chủ đề → Đo trình
+                  độ → Nhận lộ trình, cùng hướng trái sang phải với hướng đọc. Nó vá đúng
+                  chỗ chết nặng nhất của trang: sau lần cuộn đầu, khối bán hàng chính
+                  không còn động một pixel nào, vì đường đã vẽ xong và không chạy lại.
+
+                  Mười mốc trong keyframes lấy trên chính đường cong này, chia theo độ dài
+                  cung chứ không theo tham số Bézier — chia theo tham số thì chấm nhanh
+                  chậm bất thường ở khúc uốn. Không quầng sáng, không filter: một element,
+                  transform và opacity, hết.
+                */}
+                <circle className="ln-spark" r={3} cx={0} cy={0} fill="#E9772C" />
               </svg>
               <div className="flex justify-between text-xs font-medium text-tertiary">
                 {STOPS.map((s, i) => (
@@ -85,7 +121,7 @@ export default function CTABanner() {
 
             <button
               type="button"
-              className="relative flex shrink-0 items-center justify-center gap-sm overflow-hidden rounded-md bg-button-secondary px-xl py-[10px] text-md font-semibold text-button-secondary-fg shadow-xs-ring-primary transition-transform duration-200 hover:-translate-y-0.5"
+              className="ln-press ln-focus-flat relative flex shrink-0 items-center justify-center gap-sm overflow-hidden rounded-md bg-button-secondary px-xl py-[10px] text-md font-semibold text-button-secondary-fg shadow-xs-ring-primary"
             >
               <span className="flex items-center justify-center px-xxs">
                 Xây dựng chương trình cho tôi

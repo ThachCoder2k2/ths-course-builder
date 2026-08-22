@@ -83,9 +83,13 @@ const DUNG_YEN: RailState = { tien: 0, thay: 1, dauRay: true, cuoiRay: true };
 
 export default function DashboardBanner() {
   const rail = useRef<HTMLDivElement>(null);
+  const khoi = useRef<HTMLElement>(null);
   const [state, setState] = useState<RailState>(DUNG_YEN);
   const [hovering, setHovering] = useState(false);
   const [stopped, setStopped] = useState(false);
+  const [trongTam, setTrongTam] = useState(false);
+  /** Tăng lên mỗi lần người dùng tự bấm chuyển, để đồng hồ 6 giây đếm lại từ đầu. */
+  const [nhip, setNhip] = useState(0);
   const reduced = useReducedMotion();
 
   const khung = useRef(0);
@@ -149,19 +153,90 @@ export default function DashboardBanner() {
     [reduced],
   );
 
-  const running = !hovering && !stopped && !reduced;
+  /**
+   * Băng chuyền tự nhảy KHÔNG còn dùng `setInterval`. Thanh đếm ngược bên dưới chạy 6
+   * giây một vòng, và mỗi lần nó chạy hết vòng thì slide nhảy — tức chỉ còn MỘT đồng hồ.
+   *
+   * Được ba thứ: không còn trôi lệch giữa bộ đếm của JavaScript và animation của CSS
+   * (trước đây thanh chạy hết rồi ngồi im chừng một tích tắc mới đổi slide, trông như
+   * treo); dừng rồi chạy lại thì giữ được phần thời gian đã trôi thay vì đếm lại từ đầu;
+   * và ra khỏi khung nhìn là ngừng hẳn, vừa đúng vừa tiết pin.
+   */
+  const running = !hovering && !stopped && !reduced && trongTam;
 
   useEffect(() => {
-    if (!running) return;
-    const t = window.setInterval(() => day(1), AUTOPLAY_MS);
-    return () => window.clearInterval(t);
-  }, [running, day]);
+    const el = khoi.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setTrongTam(true);
+      return;
+    }
+    const io = new IntersectionObserver((es) => setTrongTam(es.some((e) => e.isIntersecting)), {
+      rootMargin: '0px',
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  /* ---- Kéo đường ray bằng chuột --------------------------------------------------
+     Quẹt trên màn cảm ứng, hai ngón trên trackpad và bàn phím thì `overflow-x-auto` đã
+     lo sẵn. Thiếu đúng một thứ: kéo bằng CHUỘT, thứ mà `overflow-x-auto` không bao giờ
+     hỗ trợ — mà slide rộng 800px là phần tử to nhất trang, người dùng chuột chắc chắn
+     sẽ thử kéo. Ghi thẳng `scrollLeft`, không transform không transition: 1:1 với con
+     chuột, không có mô hình chuyển động nào chen vào giữa. */
+  const keo = useRef({ dang: false, x0: 0, s0: 0, daKeo: false, dich: 0, khung: 0 });
+
+  const batDauKeo = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== 'mouse') return;
+    // Bấm vào nút trong slide thì để nguyên cho nút, đừng biến thành cú kéo.
+    if ((e.target as HTMLElement).closest('button, a')) return;
+    const el = rail.current;
+    if (!el) return;
+    keo.current = { dang: true, x0: e.clientX, s0: el.scrollLeft, daKeo: false, dich: 0, khung: 0 };
+    el.setPointerCapture(e.pointerId);
+    el.classList.add('ln-dragging');
+  };
+
+  const dangKeo = (e: React.PointerEvent<HTMLDivElement>) => {
+    const k = keo.current;
+    if (!k.dang) return;
+    k.dich = e.clientX - k.x0;
+    if (Math.abs(k.dich) > 8) k.daKeo = true;
+    // Trackpad bắn tới 120 lần mỗi giây; gộp về một lần ghi mỗi khung hình.
+    if (k.khung) return;
+    k.khung = requestAnimationFrame(() => {
+      k.khung = 0;
+      const el = rail.current;
+      if (el) el.scrollLeft = k.s0 - k.dich;
+    });
+  };
+
+  const thoiKeo = () => {
+    const k = keo.current;
+    if (!k.dang) return;
+    k.dang = false;
+    if (k.khung) {
+      cancelAnimationFrame(k.khung);
+      k.khung = 0;
+    }
+    // Bỏ class là scroll-snap bật lại và tự chốt về slide gần nhất.
+    rail.current?.classList.remove('ln-dragging');
+  };
+
+  /* Kéo xong buông tay thì cú click bắn vào nút CTA nằm dưới con trỏ. Chặn đúng một lần
+     nếu đã di quá 8px — không thì quẹt một cái là bị đẩy sang trang khác. */
+  const chanClickSauKeo = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!keo.current.daKeo) return;
+    keo.current.daKeo = false;
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   const rongThumb = Math.max(24, Math.round(state.thay * TRACK_W));
   const xThumb = Math.round(state.tien * (TRACK_W - rongThumb));
 
   return (
     <section
+      ref={khoi}
       className="relative isolate flex w-full flex-col items-start gap-xl bg-primary pb-3xl pt-6xl"
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
@@ -176,6 +251,11 @@ export default function DashboardBanner() {
       <div
         ref={rail}
         onScroll={doLai}
+        onPointerDown={batDauKeo}
+        onPointerMove={dangKeo}
+        onPointerUp={thoiKeo}
+        onPointerCancel={thoiKeo}
+        onClickCapture={chanClickSauKeo}
         tabIndex={0}
         role="group"
         aria-label="Đường ray banner, cuộn ngang được"
@@ -236,8 +316,23 @@ export default function DashboardBanner() {
           aria-valuemax={100}
           aria-valuenow={Math.round(state.tien * 100)}
         >
+          {/* Đồng hồ đếm ngược nằm DƯỚI con trượt, cùng một thanh, không thêm thứ mới lên
+              màn. Nó biến 6 giây vô hình thành 6 giây thấy được — và khi trỏ chuột vào thì
+              nó đông cứng giữa đường, chính là câu "tôi dừng vì con trỏ của bạn đang ở đây".
+              Không render khi người dùng bật giảm chuyển động: tự chạy đã tắt sẵn, có mà
+              không chạy thì nó thành một vạch chết. */}
+          {reduced ? null : (
+            <span
+              key={nhip}
+              aria-hidden="true"
+              className="ln-dwell"
+              style={{ animationDuration: `${AUTOPLAY_MS}ms`, animationPlayState: running ? 'running' : 'paused' }}
+              onAnimationIteration={() => day(1)}
+            />
+          )}
+
           <div
-            className="h-full rounded-full bg-brand-500 transition-transform duration-200 ease-out motion-reduce:transition-none"
+            className="relative h-full rounded-full bg-brand-500 transition-transform duration-200 ease-out motion-reduce:transition-none"
             style={{ width: rongThumb, transform: `translateX(${xThumb}px)` }}
           />
         </div>
@@ -245,7 +340,7 @@ export default function DashboardBanner() {
         <div className="flex items-center gap-md">
           <button
             type="button"
-            onClick={() => day(-1)}
+            onClick={() => { setNhip((n) => n + 1); day(-1); }}
             disabled={state.dauRay}
             aria-label="Xem banner trước"
             className="ln-press flex h-8 w-8 items-center justify-center rounded-full text-secondary shadow-xs-ring-primary hover:bg-secondary disabled:pointer-events-none disabled:opacity-40"
@@ -254,7 +349,7 @@ export default function DashboardBanner() {
           </button>
           <button
             type="button"
-            onClick={() => day(1)}
+            onClick={() => { setNhip((n) => n + 1); day(1); }}
             aria-label="Xem banner sau"
             className="ln-press flex h-8 w-8 items-center justify-center rounded-full text-secondary shadow-xs-ring-primary hover:bg-secondary"
           >

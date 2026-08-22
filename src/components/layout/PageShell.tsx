@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import TopNav from './TopNav';
 import Footer from './Footer';
 import MobileNavDrawer from './MobileNavDrawer';
+import ReadingProgress from './ReadingProgress';
 
 /**
  * Những trang không có footer trong thiết kế. Trang báo cáo kết thúc ngay sau thẻ cuối,
@@ -18,6 +19,7 @@ export default function PageShell() {
   return (
     <div className="flex min-h-full flex-col">
       <TopNav onOpenMenu={() => setMenuOpen(true)} />
+      <ReadingProgress />
       <main className="flex-1">
         <Outlet />
       </main>

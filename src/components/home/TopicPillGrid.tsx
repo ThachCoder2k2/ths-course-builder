@@ -49,7 +49,7 @@ export default function TopicPillGrid({ title = 'Kỹ năng phổ biến' }: { t
           <button
             key={label}
             type="button"
-            className="relative flex h-[52px] max-w-full items-center justify-center gap-md overflow-hidden rounded-full bg-button-secondary px-xl py-lg text-md font-semibold text-button-secondary-fg shadow-xs-ring-primary transition-transform duration-200 hover:-translate-y-0.5 sm:h-[60px] sm:px-[22px] sm:py-xl sm:text-lg"
+            className="relative flex h-[52px] max-w-full items-center justify-center gap-md overflow-hidden rounded-full bg-button-secondary px-xl py-lg text-md font-semibold text-button-secondary-fg shadow-xs-ring-primary ln-press ln-press-soft ln-focus-flat sm:h-[60px] sm:px-[22px] sm:py-xl sm:text-lg"
           >
             <Icon className="h-6 w-6 shrink-0" aria-hidden="true" />
             <span className="flex items-center justify-center px-xxs">{label}</span>

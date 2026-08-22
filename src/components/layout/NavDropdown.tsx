@@ -33,16 +33,16 @@ export default function NavDropdown({ label, children }: { label: string; childr
         aria-expanded={open}
         aria-haspopup="menu"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-xs text-md font-semibold text-button-tertiary-fg"
+        className="ln-press ln-press-flat ln-focus flex items-center gap-xs rounded-sm text-md font-semibold text-button-tertiary-fg"
       >
         {label}
-        <ChevronDown className={cn('h-5 w-5 transition-transform', open && 'rotate-180')} aria-hidden="true" />
+        <ChevronDown className={cn('h-5 w-5 transition-transform duration-[180ms]', open && 'rotate-180')} aria-hidden="true" />
       </button>
 
       {open ? (
         <div
           role="menu"
-          className="absolute left-0 top-[calc(100%+12px)] z-50 min-w-[240px] rounded-xl border border-secondary bg-primary p-md shadow-sm"
+          className="ln-pop absolute left-0 top-[calc(100%+12px)] z-50 min-w-[240px] rounded-xl border border-secondary bg-primary p-md shadow-sm"
           onClick={() => setOpen(false)}
         >
           {children}

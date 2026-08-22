@@ -17,7 +17,7 @@ export const NAV_LINKS = [
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   cn(
-    'whitespace-nowrap text-md text-[#535862] transition-colors hover:text-primary',
+    'ln-press ln-press-flat ln-focus whitespace-nowrap rounded-sm text-md text-[#535862] transition-colors hover:text-primary',
     isActive ? 'font-semibold' : 'font-medium',
   );
 
@@ -47,7 +47,7 @@ export default function TopNav({ onOpenMenu }: { onOpenMenu?: () => void }) {
             <Menu className="h-5 w-5" />
           </IconButton>
 
-          <Link to="/" aria-label="Về trang chủ" className="shrink-0">
+          <Link to="/" aria-label="Về trang chủ" className="ln-press ln-focus shrink-0 rounded-md">
             <Logo />
           </Link>
 
@@ -92,8 +92,8 @@ export default function TopNav({ onOpenMenu }: { onOpenMenu?: () => void }) {
 
         {/* focus-within là bắt buộc: thiết kế Figma không vẽ trạng thái focus, nhưng bỏ hẳn
             thì Tab vào ô tìm kiếm là mất dấu con trỏ hoàn toàn. */}
-        <label className="mx-xl hidden h-11 min-w-0 flex-1 items-center gap-md rounded-full border border-primary bg-primary px-xl focus-within:border-brand focus-within:ring-2 focus-within:ring-brand-500/40 sm:flex lg:mx-4xl">
-          <Search className="h-5 w-5 shrink-0 text-quaternary" aria-hidden="true" />
+        <label className="ln-search mx-xl hidden h-11 min-w-0 flex-1 items-center gap-md rounded-full border border-primary bg-primary px-xl focus-within:border-brand focus-within:ring-2 focus-within:ring-brand-500/40 sm:flex lg:mx-4xl">
+          <Search className="ln-search-icon h-5 w-5 shrink-0 text-quaternary" aria-hidden="true" />
           <input
             type="search"
             aria-label="Tìm khoá học"

@@ -35,7 +35,7 @@ export default function DashboardPage() {
         <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-7xl px-4 pt-7xl lg:px-4xl">
           <CourseSection title="Khoá học nổi bật" courses={getFeaturedCourses(4)} showNext />
 
-          <FeaturedTabsSection courses={courses} />
+          <FeaturedTabsSection courses={courses} batDau={4} />
 
           {/* Mốc cao 0 đánh dấu khe giữa mục 2 và mục 3 — con robot neo vào đây. Phải nằm
               đúng chỗ này trong luồng DOM, không phải treo bằng toạ độ tính từ đỉnh trang. */}
@@ -44,6 +44,7 @@ export default function DashboardPage() {
           <TabbedCourseSection
             title="Những khoá học giúp bạn mở khoá kĩ năng mới"
             courses={courses}
+            batDau={8}
           />
 
           <ListingColumns />
@@ -54,7 +55,10 @@ export default function DashboardPage() {
         </div>
 
         <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-7xl px-4 pb-9xl pt-7xl lg:px-4xl">
-          <CourseSection title="Khoá học đang được học nhiều" courses={courses.slice(4, 8)} showNext />
+          {/* Lát khoá chọn tay, không phải slice liền: kho có 13 tranh cho 14 khoá nên khoá
+              thứ 13 dùng chung ảnh với khoá thứ 0. Bộ 12/13/2/3 tránh được việc hai khoá
+              đó đứng cùng một hàng. */}
+          <CourseSection title="Khoá học đang được học nhiều" courses={[courses[12], courses[13], courses[2], courses[3]]} showNext />
 
           <TopicPillGrid />
         </div>
