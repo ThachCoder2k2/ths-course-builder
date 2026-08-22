@@ -27,15 +27,25 @@ import { getCourses, getFeaturedCourses } from '../mock';
 export default function DashboardPage() {
   const courses = getCourses();
 
+  /**
+   * "Khoá học nổi bật" lấy theo điểm đánh giá nên không đoán trước được nó rơi vào khoá
+   * nào. Các mục sau lấy từ phần CÒN LẠI, nên không bao giờ có khoá xuất hiện ở hai mục
+   * cạnh nhau — trước đây "Deep Learning nâng cao" hiện ở cả hàng đầu và khối xanh.
+   */
+  const noiBat = getFeaturedCourses(4);
+  const conLai = courses.filter((c) => !noiBat.some((n) => n.id === c.id));
+  const lay = (batDau: number, n = 4) =>
+    Array.from({ length: n }, (_, i) => conLai[(batDau + i) % conLai.length]).filter(Boolean);
+
   return (
     <div data-testid="page-dashboard" className="relative flex flex-col">
       <div className="relative isolate flex flex-col">
         <HeroWash />
 
         <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-7xl px-4 pt-7xl lg:px-4xl">
-          <CourseSection title="Khoá học nổi bật" courses={getFeaturedCourses(4)} showNext />
+          <CourseSection title="Khoá học nổi bật" courses={noiBat} showNext />
 
-          <FeaturedTabsSection courses={courses} batDau={4} />
+          <FeaturedTabsSection courses={conLai} batDau={0} />
 
           {/* Mốc cao 0 đánh dấu khe giữa mục 2 và mục 3 — con robot neo vào đây. Phải nằm
               đúng chỗ này trong luồng DOM, không phải treo bằng toạ độ tính từ đỉnh trang. */}
@@ -43,8 +53,8 @@ export default function DashboardPage() {
 
           <TabbedCourseSection
             title="Những khoá học giúp bạn mở khoá kĩ năng mới"
-            courses={courses}
-            batDau={8}
+            courses={conLai}
+            batDau={4}
           />
 
           <ListingColumns />
@@ -55,10 +65,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-7xl px-4 pb-9xl pt-7xl lg:px-4xl">
-          {/* Lát khoá chọn tay, không phải slice liền: kho có 13 tranh cho 14 khoá nên khoá
-              thứ 13 dùng chung ảnh với khoá thứ 0. Bộ 12/13/2/3 tránh được việc hai khoá
-              đó đứng cùng một hàng. */}
-          <CourseSection title="Khoá học đang được học nhiều" courses={[courses[12], courses[13], courses[2], courses[3]]} showNext />
+          <CourseSection title="Khoá học đang được học nhiều" courses={lay(8)} showNext />
 
           <TopicPillGrid />
         </div>

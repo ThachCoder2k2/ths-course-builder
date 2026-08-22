@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 import CourseCard from './CourseCard';
+import CardRail from '../ui/CardRail';
 import { Reveal } from '../ui/Reveal';
 import type { Course } from '../../mock/types';
 
@@ -28,20 +29,20 @@ export default function CourseSection({
       </Reveal>
 
       <div className="relative flex w-full flex-col items-center gap-5xl">
-        <div className="grid w-full grid-cols-1 gap-3xl sm:grid-cols-2 xl:grid-cols-4">
+        <CardRail nhan={title}>
           {courses.map((course, i) => (
             <Reveal key={course.id} order={i} className="flex">
               <CourseCard course={course} />
             </Reveal>
           ))}
-        </div>
+        </CardRail>
 
         {showNext ? (
           <button
             type="button"
             onClick={onNext}
             aria-label="Xem thêm khoá học"
-            className="ln-press ln-press-grow ln-focus absolute right-0 top-[128px] hidden translate-x-1/2 items-center justify-center rounded-full bg-button-secondary p-xl shadow-xs-ring-primary xl:flex"
+            className="ln-focus-flat absolute right-0 top-[128px] hidden translate-x-1/2 items-center justify-center rounded-full bg-button-secondary p-xl shadow-xs-ring-primary xl:flex"
           >
             <ArrowRight className="h-6 w-6 text-black" aria-hidden="true" />
             <span

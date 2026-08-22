@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Clock, Star } from 'lucide-react';
 import IconBadge from '../ui/IconBadge';
 import { Reveal } from '../ui/Reveal';
+import CardRail from '../ui/CardRail';
 import { courseThumb } from './courseImage';
 import { courseExp, courseMinutes, getCourses } from '../../mock';
 
@@ -35,7 +36,7 @@ export default function ListingColumns({
         <h2 className="w-full text-display-xs text-primary">{title}</h2>
       </Reveal>
 
-      <div className="grid w-full grid-cols-1 gap-3xl xl:grid-cols-3">
+      <CardRail nhan={title} className="xl:!grid-cols-3">
         {columns.map((column, ci) => (
           <Reveal key={column.label} order={ci} className="flex">
             <div className="flex w-full min-w-0 flex-col items-start gap-md rounded-3xl bg-utility-brand-50 p-xl">
@@ -73,7 +74,7 @@ export default function ListingColumns({
             </div>
           </Reveal>
         ))}
-      </div>
+      </CardRail>
     </section>
   );
 }

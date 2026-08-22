@@ -340,10 +340,6 @@ body {
 .ln-press-soft {
   --ln-press-down: scale(0.99);
 }
-/* Nút mũi tên tròn: giữ cú phóng đang có thay vì nhấc lên. */
-.ln-press-grow {
-  --ln-press-hover: scale(1.05);
-}
 /* Chữ và link: nhấc một dòng chữ lên trông như lỗi hiển thị, nên chỉ mờ đi khi đè. */
 .ln-press-flat {
   --ln-press-hover: none;
@@ -537,29 +533,53 @@ body {
   animation-play-state: running;
 }
 
-/* ---- Đồng hồ đếm ngược của băng chuyền ---------------------------------------
-   Nằm dưới con trượt trong chính thanh vị trí, không thêm thứ mới lên màn. linear
-   tuyệt đối — thanh đếm thời gian mà có easing là nó bịa về thời gian còn lại.
-   Đứng im giữa đường khi người dùng trỏ chuột vào, chính là câu "tôi dừng vì con trỏ
-   của bạn đang ở đây" — việc dừng đó trước đây hoàn toàn vô hình. */
-@keyframes ln-dwell {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
+/* ---- Hàng thẻ cuộn ngang ở khung hẹp (.ln-shelf) -----------------------------
+   Bề rộng thẻ TÍNH RA từ chỗ trống, không chốt cứng: chốt cứng thì phần hé của thẻ kế
+   tiếp là số dư ngẫu nhiên, có khổ hé 5px trông như lỗi render. Công thức giữ phần hé
+   luôn bằng 1/4 thẻ, tức luôn ra vẻ có chủ đích.
+
+   Trần 320px để ở khung gần 1280px thẻ không phình to hơn cả bản lưới bốn cột.
+   Từ 1280px trở lên là lưới, biến này không còn được dùng. */
+.ln-shelf {
+  --ln-gap: 24px;
+  --ln-item: min(320px, calc((100% - var(--ln-gap)) / 1.25));
+  scrollbar-width: none;
+}
+.ln-shelf::-webkit-scrollbar {
+  display: none;
+}
+.ln-shelf > * {
+  width: var(--ln-item);
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+@media (min-width: 640px) {
+  .ln-shelf {
+    --ln-item: min(320px, calc((100% - 2 * var(--ln-gap)) / 2.25));
   }
 }
-.ln-dwell {
-  position: absolute;
-  inset: 0;
-  transform-origin: left center;
-  transform: scaleX(0);
-  background: #0d67f7;
-  opacity: 0.22;
-  animation-name: ln-dwell;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
+@media (min-width: 1024px) {
+  .ln-shelf {
+    --ln-item: min(320px, calc((100% - 3 * var(--ln-gap)) / 3.25));
+  }
+}
+/* Ở khổ lưới thì thẻ trở lại tự giãn theo cột, không còn bề rộng cố định. */
+@media (min-width: 1280px) {
+  .ln-shelf > * {
+    width: auto;
+    flex: 1 1 auto;
+  }
+}
+/* Đã cuộn thì thẻ bên trái bị chặt ngang; cho nó mờ dần ở mép thay vì cắt thẳng. */
+.ln-shelf-mo-trai {
+  mask-image: linear-gradient(to right, transparent 0, #000 32px);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 32px);
+}
+@media (min-width: 1280px) {
+  .ln-shelf-mo-trai {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
 }
 
 /* ---- Kéo đường ray bằng chuột ------------------------------------------------
@@ -593,8 +613,7 @@ body {
 @media print {
   .ln-focus::after,
   .ln-progress,
-  .ln-spark,
-  .ln-dwell {
+  .ln-spark {
     display: none !important;
   }
   .ln-wash-drift,

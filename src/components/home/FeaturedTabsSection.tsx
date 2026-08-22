@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import zapFast from '../../assets/icons/zap-fast.svg';
 import CompactCourseCard from './CompactCourseCard';
+import CardRail from '../ui/CardRail';
 import { cn } from '../../lib/cn';
 import type { Course } from '../../mock/types';
 
@@ -98,17 +99,13 @@ export default function FeaturedTabsSection({
             {/* Lưới xuống dòng, không phải một hàng flex: bốn thẻ trong một hàng không
                 xuống dòng làm mỗi thẻ co về 0 ở khung hẹp, và nhãn kinh nghiệm (shrink-0)
                 chọc ra ngoài viewport 151px. */}
-            <div
-              key={tab.i}
-              style={{ ['--ln-dir' as string]: String(tab.huong) }}
-              className="grid grid-cols-1 gap-lg sm:grid-cols-2 xl:grid-cols-4"
-            >
+            <CardRail key={tab.i} nhan="Giáo trình theo cấp độ" style={{ ['--ln-dir' as string]: String(tab.huong) }}>
               {visible.map((course, i) => (
                 <div key={course.id} className="ln-swap flex" style={{ animationDelay: `${i * 45}ms` }}>
                   <CompactCourseCard course={course} />
                 </div>
               ))}
-            </div>
+            </CardRail>
           </div>
         </div>
       </div>

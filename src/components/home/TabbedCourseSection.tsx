@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import CourseCard from './CourseCard';
+import CardRail from '../ui/CardRail';
 import { Reveal } from '../ui/Reveal';
 import { cn } from '../../lib/cn';
 import type { Course } from '../../mock/types';
@@ -85,11 +86,7 @@ export default function TabbedCourseSection({
             nên React tháo rồi gắn lại Reveal, làm lượt hiện-khi-cuộn-tới chạy lại và
             chồng lên cú vào của .ln-swap. Mảng luôn dài 4 nên chỉ số là danh tính ổn
             định. Khi đó Reveal lo lần hiện đầu, .ln-swap lo mọi lần đổi tab. */}
-        <div
-          key={tab.i}
-          style={{ ['--ln-dir' as string]: String(tab.huong) }}
-          className="grid w-full grid-cols-1 gap-3xl sm:grid-cols-2 xl:grid-cols-4"
-        >
+        <CardRail key={tab.i} nhan={title} style={{ ['--ln-dir' as string]: String(tab.huong) }}>
           {visible.map((course, i) => (
             <Reveal key={i} order={i} className="flex">
               <div className="ln-swap flex w-full" style={{ animationDelay: `${i * 45}ms` }}>
@@ -97,7 +94,7 @@ export default function TabbedCourseSection({
               </div>
             </Reveal>
           ))}
-        </div>
+        </CardRail>
       </div>
     </section>
   );

@@ -88,8 +88,6 @@ export default function DashboardBanner() {
   const [hovering, setHovering] = useState(false);
   const [stopped, setStopped] = useState(false);
   const [trongTam, setTrongTam] = useState(false);
-  /** Tăng lên mỗi lần người dùng tự bấm chuyển, để đồng hồ 6 giây đếm lại từ đầu. */
-  const [nhip, setNhip] = useState(0);
   const reduced = useReducedMotion();
 
   const khung = useRef(0);
@@ -154,15 +152,21 @@ export default function DashboardBanner() {
   );
 
   /**
-   * Băng chuyền tự nhảy KHÔNG còn dùng `setInterval`. Thanh đếm ngược bên dưới chạy 6
-   * giây một vòng, và mỗi lần nó chạy hết vòng thì slide nhảy — tức chỉ còn MỘT đồng hồ.
+   * Tự nhảy sau mỗi 6 giây. Có `trongTam` trong điều kiện nên cuộn ra khỏi băng chuyền là
+   * nó ngừng đếm — vừa đúng vừa đỡ tốn pin.
    *
-   * Được ba thứ: không còn trôi lệch giữa bộ đếm của JavaScript và animation của CSS
-   * (trước đây thanh chạy hết rồi ngồi im chừng một tích tắc mới đổi slide, trông như
-   * treo); dừng rồi chạy lại thì giữ được phần thời gian đã trôi thay vì đếm lại từ đầu;
-   * và ra khỏi khung nhìn là ngừng hẳn, vừa đúng vừa tiết pin.
+   * Từng có một bản dùng thanh đếm ngược nhìn thấy được để làm đồng hồ (mỗi vòng
+   * animation là một lần nhảy slide), nhưng thanh đó khai `absolute inset-0` trong khi
+   * thẻ bọc không có `relative`, nên nó neo tuốt lên `<section>` và trải thành một khối
+   * xanh nhạt tràn hết hàng điều khiển. Đã bỏ theo yêu cầu.
    */
   const running = !hovering && !stopped && !reduced && trongTam;
+
+  useEffect(() => {
+    if (!running) return;
+    const t = window.setInterval(() => day(1), AUTOPLAY_MS);
+    return () => window.clearInterval(t);
+  }, [running, day]);
 
   useEffect(() => {
     const el = khoi.current;
@@ -316,23 +320,8 @@ export default function DashboardBanner() {
           aria-valuemax={100}
           aria-valuenow={Math.round(state.tien * 100)}
         >
-          {/* Đồng hồ đếm ngược nằm DƯỚI con trượt, cùng một thanh, không thêm thứ mới lên
-              màn. Nó biến 6 giây vô hình thành 6 giây thấy được — và khi trỏ chuột vào thì
-              nó đông cứng giữa đường, chính là câu "tôi dừng vì con trỏ của bạn đang ở đây".
-              Không render khi người dùng bật giảm chuyển động: tự chạy đã tắt sẵn, có mà
-              không chạy thì nó thành một vạch chết. */}
-          {reduced ? null : (
-            <span
-              key={nhip}
-              aria-hidden="true"
-              className="ln-dwell"
-              style={{ animationDuration: `${AUTOPLAY_MS}ms`, animationPlayState: running ? 'running' : 'paused' }}
-              onAnimationIteration={() => day(1)}
-            />
-          )}
-
           <div
-            className="relative h-full rounded-full bg-brand-500 transition-transform duration-200 ease-out motion-reduce:transition-none"
+            className="h-full rounded-full bg-brand-500 transition-transform duration-200 ease-out motion-reduce:transition-none"
             style={{ width: rongThumb, transform: `translateX(${xThumb}px)` }}
           />
         </div>
@@ -340,7 +329,7 @@ export default function DashboardBanner() {
         <div className="flex items-center gap-md">
           <button
             type="button"
-            onClick={() => { setNhip((n) => n + 1); day(-1); }}
+            onClick={() => day(-1)}
             disabled={state.dauRay}
             aria-label="Xem banner trước"
             className="ln-press flex h-8 w-8 items-center justify-center rounded-full text-secondary shadow-xs-ring-primary hover:bg-secondary disabled:pointer-events-none disabled:opacity-40"
@@ -349,7 +338,7 @@ export default function DashboardBanner() {
           </button>
           <button
             type="button"
-            onClick={() => { setNhip((n) => n + 1); day(1); }}
+            onClick={() => day(1)}
             aria-label="Xem banner sau"
             className="ln-press flex h-8 w-8 items-center justify-center rounded-full text-secondary shadow-xs-ring-primary hover:bg-secondary"
           >
