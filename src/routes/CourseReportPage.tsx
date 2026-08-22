@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Flame } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Flame } from 'lucide-react';
 import { ReportCard } from '../components/report/ReportCard';
 import { RhythmHeatmap } from '../components/report/charts/RhythmHeatmap';
 import { ConceptNetwork } from '../components/completion/ConceptNetwork';
@@ -11,7 +11,7 @@ import { baoCaoKhoa, type NutSoDo } from '../behavior/completion';
 import { scope } from '../behavior/overview';
 import { getBehaviorData } from '../behavior/seed';
 import { COURSES, NOW, SPAN_DAYS } from '../behavior/catalog';
-import { rhythmMatrix } from '../behavior/rhythm';
+import { dropHint, rhythmMatrix } from '../behavior/rhythm';
 import { minutesLabel } from '../behavior/format';
 import { Reveal } from '../components/ui/Reveal';
 
@@ -56,7 +56,11 @@ export default function CourseReportPage() {
     const TUAN = 12;
     const tu = new Date(NOW.getTime() - TUAN * 7 * 86400000);
     const tuNgay = Math.max(0, SPAN_DAYS - TUAN * 7);
-    return rhythmMatrix(scope(sts, { fromDay: tuNgay, toDay: SPAN_DAYS + 1, courseId: khoa.id }), tu, NOW);
+    const trongKhoang = scope(sts, { fromDay: tuNgay, toDay: SPAN_DAYS + 1, courseId: khoa.id });
+    const luoi = rhythmMatrix(trongKhoang, tu, NOW);
+    // Thiết kế có một dòng "Phát hiện vùng bỏ dở ở …" ngay dưới lưới. `dropHint` đã có
+    // sẵn cho thẻ nhịp độ ở trang Học tập của tôi nên dùng lại, không viết mới.
+    return { luoi, boDo: dropHint(trongKhoang, luoi.mode) };
   }, [sts, khoa]);
 
   if (!khoa || !bc || !dangChon) {
@@ -215,7 +219,19 @@ export default function CourseReportPage() {
               ) : undefined
             }
           >
-            {nhiet ? <RhythmHeatmap matrix={nhiet} nhan={['Thấp', 'Cao']} /> : null}
+            {nhiet ? (
+              <div className="flex flex-col gap-xl">
+                <RhythmHeatmap matrix={nhiet.luoi} nhan={['Thấp', 'Cao']} />
+                {nhiet.boDo ? (
+                  <p className="flex items-start gap-md text-sm text-quaternary">
+                    <AlertCircle className="mt-xxs h-5 w-5 shrink-0 text-error-600" aria-hidden="true" />
+                    <span>
+                      Phát hiện vùng bỏ dở {nhiet.boDo.when} — {nhiet.boDo.count} lần dừng giữa bài.
+                    </span>
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </ReportCard>
           </Reveal>
         </div>
