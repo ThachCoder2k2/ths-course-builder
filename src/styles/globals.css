@@ -565,6 +565,12 @@ body {
 .ln-route-back {
   animation: ln-route-back 180ms var(--ln-ease-out) both;
 }
+/* Bản CHỈ đổi độ mờ, không dịch gì. Dùng cho trang học bài: trang đó có một hộp chat
+   `position: fixed`, mà `transform` trên tổ tiên biến tổ tiên thành mốc neo mới và hộp
+   chat rơi sai chỗ. `opacity` thì không tạo mốc neo, nên an toàn. */
+.ln-route-fade {
+  animation: ln-route-back 220ms var(--ln-ease-out) both;
+}
 
 /* ---- Hàng thẻ cuộn ngang ở khung hẹp (.ln-shelf) -----------------------------
    Bề rộng thẻ TÍNH RA từ chỗ trống, không chốt cứng: chốt cứng thì phần hé của thẻ kế
@@ -654,7 +660,8 @@ body {
   .ln-pop,
   .ln-swap,
   .ln-route-in,
-  .ln-route-back {
+  .ln-route-back,
+  .ln-route-fade {
     animation: none !important;
     transform: none !important;
     opacity: 1 !important;
@@ -788,7 +795,8 @@ body {
   .ln-pop,
   .ln-swap,
   .ln-route-in,
-  .ln-route-back {
+  .ln-route-back,
+  .ln-route-fade {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;

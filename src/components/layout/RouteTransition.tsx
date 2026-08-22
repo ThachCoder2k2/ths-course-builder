@@ -22,12 +22,22 @@ import { cn } from '../../lib/cn';
  * PageShell và có một hộp chat `position: fixed`; `transform` trên tổ tiên sẽ đổi mốc neo
  * của nó và hộp chat rơi sai chỗ.
  */
-export function RouteTransition({ children }: { children: ReactNode }) {
+export function RouteTransition({
+  children,
+  chiMo = false,
+}: {
+  children: ReactNode;
+  /**
+   * Chỉ đổi độ mờ, không dịch gì. Bắt buộc cho trang học bài: trang đó có hộp chat
+   * `position: fixed`, mà `transform` trên tổ tiên sẽ biến tổ tiên thành mốc neo mới.
+   */
+  chiMo?: boolean;
+}) {
   const { key } = useLocation();
   const kieu = useNavigationType();
 
   return (
-    <div key={key} className={cn(kieu === 'POP' ? 'ln-route-back' : 'ln-route-in')}>
+    <div key={key} className={cn(chiMo ? 'ln-route-fade' : kieu === 'POP' ? 'ln-route-back' : 'ln-route-in')}>
       {children}
     </div>
   );
