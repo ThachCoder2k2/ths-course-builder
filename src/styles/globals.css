@@ -356,37 +356,36 @@ body {
 
    Chỉ dùng :focus-visible, không dùng :focus — chạm vào :focus là bấm chuột cũng bung
    vòng, ai cũng thấy khó chịu rồi sẽ có người xoá cả hệ. */
-/* Bọc trong :where() để độ đặc hiệu bằng KHÔNG. Nếu viết thẳng `.ln-focus { position:
-   relative }` thì nó ngang điểm với `.absolute` của Tailwind và thắng bằng thứ tự file —
-   mọi phần tử vừa `absolute` vừa `.ln-focus` sẽ rơi khỏi lớp định vị và trôi vào luồng.
-   Đã đâm đúng cái nút mũi tên của "Khoá học nổi bật": nó đáp xuống giữa hàng tab của khối
-   xanh, đo được y=745 thay vì y=320. */
-:where(.ln-focus) {
-  position: relative;
-}
-.ln-focus::after {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  border-radius: inherit;
-  border: 2px solid #0d67f7;
-  opacity: 0;
-  transform: scale(1.06);
-  transition: opacity 140ms var(--ln-ease-out), transform 140ms var(--ln-ease-out);
-  pointer-events: none;
-}
-.ln-focus:focus-visible {
-  outline: none;
-}
-.ln-focus:focus-visible::after {
-  opacity: 1;
-  transform: none;
-}
-/* Bản phẳng cho phần tử có overflow-hidden: outline không bị cắt như lớp giả, bù lại
-   không animate được. Thà không có đường đi còn hơn có vòng bị cắt mất một nửa. */
+/* Vẽ vòng focus bằng `outline`, KHÔNG bằng lớp giả `::after`.
+
+   Bản trước dùng `::after` với `inset: -3px` và nó gây hai lỗi liên tiếp:
+
+   1. Lớp giả cần `position: relative` trên phần tử cha. Khai thẳng thì nó ngang điểm đặc
+      hiệu với `.absolute` của Tailwind và thắng bằng thứ tự file, làm mọi phần tử vừa
+      `absolute` vừa `.ln-focus` rơi khỏi lớp định vị — nút mũi tên của "Khoá học nổi bật"
+      đo được ở y=745 thay vì y=320, đáp xuống giữa hàng tab của khối xanh.
+   2. Một phần tử tuyệt đối có `inset` âm vẫn TÍNH VÀO vùng cuộn của khối chứa nó. Nên mọi
+      phần tử mang `.ln-focus` đều cộng 6px vào `scrollWidth`: đo được nút menu 40px có
+      scrollWidth 44. Nút đó nằm trong thanh đầu trang nên nó làm TRANG NÀO CŨNG tràn ngang
+      vài pixel.
+
+   `outline` không ảnh hưởng dàn trang, không tính vào vùng cuộn, và không bị tổ tiên
+   `overflow: hidden` cắt. `outline-offset` thì animate được, nên vẫn giữ được cú siết vào.
+   Nhờ vậy `.ln-focus` và `.ln-focus-flat` giờ giống nhau — giữ cả hai tên để không phải
+   sửa hàng chục chỗ đã gắn class. */
+.ln-focus:focus-visible,
 .ln-focus-flat:focus-visible {
   outline: 2px solid #0d67f7;
-  outline-offset: 2px;
+  outline-offset: 3px;
+  animation: ln-focus-siet 140ms var(--ln-ease-out) both;
+}
+@keyframes ln-focus-siet {
+  from {
+    outline-offset: 7px;
+  }
+  to {
+    outline-offset: 3px;
+  }
 }
 
 /* ---- Dải nền trôi ngang rất chậm ---------------------------------------------
@@ -659,7 +658,6 @@ body {
 }
 
 @media print {
-  .ln-focus::after,
   .ln-progress,
   .ln-spark {
     display: none !important;
@@ -782,13 +780,10 @@ body {
   }
 
   /* Vòng focus là món DUY NHẤT trong cả bộ mà giảm chuyển động không được phép làm mất
-     một chút thông tin nào: bỏ đường đi, giữ nguyên vòng viền, và hiện ngay. */
-  .ln-focus::after {
-    transition: none !important;
-    transform: none !important;
-  }
-  .ln-focus:focus-visible::after {
-    opacity: 1;
+     một chút thông tin nào: bỏ cú siết vào, giữ nguyên vòng viền. */
+  .ln-focus:focus-visible,
+  .ln-focus-flat:focus-visible {
+    animation: none !important;
   }
 
   .ln-wash-drift {

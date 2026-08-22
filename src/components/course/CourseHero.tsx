@@ -25,7 +25,9 @@ export default function CourseHero({ course }: { course: Course }) {
     <section className="relative flex flex-col items-start justify-center gap-7xl overflow-hidden rounded-4xl py-9xl">
       <img src={heroBg} alt="" className="absolute inset-0 h-full w-full object-cover" />
 
-      <div className="relative flex w-full max-w-content flex-col items-center gap-4xl px-8xl">
+      {/* Đệm 80px mỗi bên (px-8xl) chỉ hợp ở khung rộng: ở 320px nó chỉ để lại 160px cho
+          nội dung, mà nút "Bắt đầu học ngay" đã rộng 234px nên tràn ngang. */}
+      <div className="relative flex w-full max-w-content flex-col items-center gap-4xl px-4 sm:px-6xl lg:px-8xl">
         <div className="flex w-full flex-col items-start gap-4xl">
           <div className="flex w-full flex-col items-start gap-lg">
             <div className="flex w-full flex-col items-start gap-lg">
@@ -37,7 +39,9 @@ export default function CourseHero({ course }: { course: Course }) {
             <p className="w-full text-xl text-tertiary">{course.subtitle}</p>
           </div>
 
-          <div className="flex items-center gap-xl">
+          {/* flex-wrap: ở 320px nút "Bắt đầu học ngay" (234px) cộng dòng "540 người đã học"
+              không đủ chỗ trên một hàng và đẩy tràn ngang. Cho xuống dòng thì hết. */}
+          <div className="flex flex-wrap items-center gap-x-xl gap-y-lg">
             {resumeId ? (
               <Link
                 to={'/learn/' + course.slug + '/' + resumeId}

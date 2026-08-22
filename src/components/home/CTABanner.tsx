@@ -51,7 +51,7 @@ export default function CTABanner() {
             trongTam && 'ln-run',
           )}
         >
-          <div className="flex min-w-[260px] flex-1 flex-col items-start gap-xl">
+          <div className="flex min-w-0 flex-1 flex-col items-start gap-xl sm:min-w-[260px]">
             <h2 className="w-full text-display-sm text-primary">
               Thiết kế lộ trình học cá nhân hoá dành cho bạn
             </h2>

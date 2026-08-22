@@ -5,7 +5,7 @@ import type { Course } from '../../mock/types';
 
 /**
  * Figma: `Dropdown header navigation` (node 204:4566) — 80px.
- * bg-primary, border-b border-primary, px-8xl. Left: a round arrow-left back
+ * bg-primary, border-b border-primary, px-4 lg:px-8xl. Left: a round arrow-left back
  * button and the course title (Display xs). Right: a "Tiến độ hoàn thành"
  * label (Text sm/Semibold) beside a 320px progress bar with a trailing "X%"
  * (Text sm/Medium). Lesson navigation lives in the info area, not here.
