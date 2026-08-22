@@ -4,6 +4,7 @@ import TopNav from './TopNav';
 import Footer from './Footer';
 import MobileNavDrawer from './MobileNavDrawer';
 import ReadingProgress from './ReadingProgress';
+import { RouteTransition } from './RouteTransition';
 
 /**
  * Những trang không có footer trong thiết kế. Trang báo cáo kết thúc ngay sau thẻ cuối,
@@ -21,7 +22,9 @@ export default function PageShell() {
       <TopNav onOpenMenu={() => setMenuOpen(true)} />
       <ReadingProgress />
       <main className="flex-1">
-        <Outlet />
+        <RouteTransition>
+          <Outlet />
+        </RouteTransition>
       </main>
       {showFooter ? <Footer /> : null}
       <MobileNavDrawer open={menuOpen} onClose={() => setMenuOpen(false)} />

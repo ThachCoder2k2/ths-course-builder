@@ -533,6 +533,39 @@ body {
   animation-play-state: running;
 }
 
+/* ---- Chuyển trang -------------------------------------------------------------
+   Đi tới: trang mới mờ lên và dịch vào từ bên phải. Quay lại: chỉ mờ lên, không dịch —
+   quay lại là về chỗ cũ nên nó không nên đọc ra như đi tới một chỗ mới, và lúc đó vị trí
+   cuộn đã được trả về chỗ cũ nên thanh dính của trang báo cáo đang dính; dịch ngang cả
+   trang lúc đó là thấy thanh dính trượt theo.
+
+   280ms nằm trong hạn 400ms cho chuyển cảnh. Lượt quay lại ngắn hơn (180ms) theo luật
+   "ra nhanh hơn vào" — về chỗ cũ thì không cần long trọng. */
+@keyframes ln-route {
+  from {
+    opacity: 0;
+    transform: translate3d(14px, 4px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes ln-route-back {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.ln-route-in {
+  animation: ln-route 280ms var(--ln-ease-out) both;
+}
+.ln-route-back {
+  animation: ln-route-back 180ms var(--ln-ease-out) both;
+}
+
 /* ---- Hàng thẻ cuộn ngang ở khung hẹp (.ln-shelf) -----------------------------
    Bề rộng thẻ TÍNH RA từ chỗ trống, không chốt cứng: chốt cứng thì phần hé của thẻ kế
    tiếp là số dư ngẫu nhiên, có khổ hé 5px trông như lỗi render. Công thức giữ phần hé
@@ -619,7 +652,9 @@ body {
   .ln-wash-drift,
   .ln-search-icon,
   .ln-pop,
-  .ln-swap {
+  .ln-swap,
+  .ln-route-in,
+  .ln-route-back {
     animation: none !important;
     transform: none !important;
     opacity: 1 !important;
@@ -751,7 +786,9 @@ body {
     transition: none !important;
   }
   .ln-pop,
-  .ln-swap {
+  .ln-swap,
+  .ln-route-in,
+  .ln-route-back {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
