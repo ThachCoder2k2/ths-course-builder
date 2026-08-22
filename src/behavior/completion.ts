@@ -35,8 +35,10 @@ export interface CanhSoDo {
 
 export interface TrucRadar {
   truc: string;
-  /** 0..1 */
+  /** 0..1 — mức nắm trung bình các bài trong chương */
   nam: number;
+  /** 0..1 — phần nội dung của chương đã đi qua, tính theo độ dài video */
+  tienDo: number;
   soBai: number;
 }
 
@@ -71,9 +73,13 @@ export interface BaoCaoKhoa {
 
 /** Khung vẽ sơ đồ, đơn vị của viewBox. */
 const KHUNG_RONG = 960;
-const KHUNG_CAO = 320;
+const KHUNG_CAO = 340;
 const R_MIN = 18;
-const R_MAX = 34;
+const R_MAX = 32;
+/** Nửa bề rộng nhãn bài, tính theo tên dài nhất trong catalog ở cỡ chữ 11px. */
+const NHAN_LE = 55;
+/** Khe hở tối thiểu giữa mép hai nút, đơn vị viewBox. */
+const KHE = 6;
 
 /** Băm ổn định từ chuỗi ra 0..1 — để bố cục xê dịch một chút mà vẫn không đổi giữa hai lần vẽ. */
 function bam01(s: string): number {
@@ -125,8 +131,12 @@ function xepNut(
       const xGoc = buocX * (i + 1);
 
       // Chỗ trống an toàn quanh nút: nửa bước trừ bán kính và trừ khe hở tối thiểu.
-      const duX = Math.max(0, buocX / 2 - r - 6);
-      const duY = Math.max(0, buocY / 2 - r - 6);
+      //
+      // Chiều ngang trừ thêm NHAN_LE vì thiết kế ghi NHÃN của bài ngay giữa nút, và nhãn
+      // rộng hơn nút nhiều. Để nút xê dịch hết chỗ trống thì hai nút cạnh nhau có thể
+      // dạt về phía nhau và hai nhãn dính vào nhau — đúng lỗi che chữ đang gặp.
+      const duX = Math.max(0, buocX / 2 - r - KHE - NHAN_LE);
+      const duY = Math.max(0, buocY / 2 - r - KHE);
       const lechX = (bam01(c.id + ':x') * 2 - 1) * duX;
       const lechY = (bam01(c.id + ':y') * 2 - 1) * duY;
 
@@ -142,6 +152,50 @@ function xepNut(
       });
     });
   });
+  return nhoiRa(nut);
+}
+
+/**
+ * Đẩy những cặp nút còn dính nhau ra xa, lặp cho tới khi không còn cặp nào.
+ *
+ * Chặn xê dịch theo từng ô lưới chỉ bảo đảm được các nút TRONG CÙNG một chương không đè
+ * nhau, vì mỗi chương có số bài khác nhau nên lưới ngang cũng khác nhau — hai nút ở hai
+ * chương liền kề vẫn có thể rơi gần nhau. Trước đây việc đó không xảy ra là do xê dịch
+ * ngang lớn tình cờ đẩy chúng ra; đến khi tôi bớt xê dịch cho nhãn khỏi dính là lộ ra
+ * ngay (test "hai nút không đè lên nhau" bắt được).
+ *
+ * Nên không trông vào may nữa: đẩy thẳng, và kẹp trong khung ngay trong từng lượt để lần
+ * kẹp cuối không tạo lại chỗ đè.
+ */
+function nhoiRa(nut: NutSoDo[]): NutSoDo[] {
+  for (let lap = 0; lap < 40; lap += 1) {
+    let dong = false;
+    for (let i = 0; i < nut.length; i += 1) {
+      for (let j = i + 1; j < nut.length; j += 1) {
+        const a = nut[i];
+        const b = nut[j];
+        const can = a.r + b.r + KHE;
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const d = Math.hypot(dx, dy);
+        if (d >= can) continue;
+        // Trùng tâm thì chia cho 0; đẩy theo trục dọc cho có hướng xác định.
+        const ux = d < 0.001 ? 0 : dx / d;
+        const uy = d < 0.001 ? 1 : dy / d;
+        const day = (can - d) / 2 + 0.01;
+        a.x -= ux * day;
+        a.y -= uy * day;
+        b.x += ux * day;
+        b.y += uy * day;
+        dong = true;
+      }
+    }
+    nut.forEach((n) => {
+      n.x = Math.min(KHUNG_RONG - n.r, Math.max(n.r, n.x));
+      n.y = Math.min(KHUNG_CAO - n.r, Math.max(n.r, n.y));
+    });
+    if (!dong) break;
+  }
   return nut;
 }
 
@@ -184,7 +238,16 @@ export function baoCaoKhoa(sts: Statement[], courseId: string): BaoCaoKhoa | nul
   const radar: TrucRadar[] = chuongs.map((ten) => {
     const trong = concepts.filter((c) => c.chuong === ten);
     const tong = trong.reduce((a, c) => a + (mastery.get(c.id) ?? 0), 0);
-    return { truc: ten, nam: trong.length ? tong / trong.length : 0, soBai: trong.length };
+    // Tiến độ chương tính theo ĐỘ DÀI video, không theo số bài: chương có một bài dài và
+    // hai bài ngắn thì xem hết bài dài đã là đi qua phần lớn chương.
+    const giayChuong = trong.reduce((a, c) => a + (giayTheoBai.get(c.id) ?? 0), 0) || 1;
+    const giayXem = trong.reduce((a, c) => a + (daXem.get(c.id) ? (giayTheoBai.get(c.id) ?? 0) : 0), 0);
+    return {
+      truc: ten,
+      nam: trong.length ? tong / trong.length : 0,
+      tienDo: Math.min(1, giayXem / giayChuong),
+      soBai: trong.length,
+    };
   });
 
   const thanh: ThanhBai[] = concepts.map((c) => {

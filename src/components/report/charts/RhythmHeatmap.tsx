@@ -19,7 +19,17 @@ const MAX_CELL = 180; // rộng hơn nữa thì ô thành cái thanh, không cò
  * Ô tự co giãn để lưới lấp khung: ít cột thì ô rộng ra, nhiều cột thì ô nhỏ lại và
  * giữ dạng vuông cho giống thiết kế.
  */
-export function RhythmHeatmap({ matrix }: { matrix: RhythmMatrix }) {
+export function RhythmHeatmap({
+  matrix,
+  nhan = ['Ít', 'Nhiều'],
+}: {
+  matrix: RhythmMatrix;
+  /**
+   * Hai đầu của dải chú thích. Mặc định "Ít – Nhiều" theo Figma 506:4930; màn báo cáo
+   * cuối khoá (432:6863) ghi "Thấp – Cao" nên truyền vào từ đó.
+   */
+  nhan?: readonly [string, string];
+}) {
   const { cells, rowLabels, colLabels, colGroups, cols, grouped, mode } = matrix;
 
   // Ngưỡng màu lấy từ chính phân bố các ô có học, để một buổi học dồn bất thường
@@ -202,13 +212,13 @@ export function RhythmHeatmap({ matrix }: { matrix: RhythmMatrix }) {
       </div>
 
       <div className="flex items-center justify-end gap-md text-xs text-tertiary" style={{ maxWidth: gridWidth ?? undefined }}>
-        <span>Ít</span>
+        <span>{nhan[0]}</span>
         <span className="flex gap-xxs">
           {RAMP.map((c) => (
             <span key={c} className="h-[16px] w-[16px] rounded-[2px]" style={{ background: c }} />
           ))}
         </span>
-        <span>Nhiều</span>
+        <span>{nhan[1]}</span>
       </div>
     </div>
   );

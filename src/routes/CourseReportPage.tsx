@@ -2,19 +2,18 @@ import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Flame } from 'lucide-react';
 import { ReportCard } from '../components/report/ReportCard';
-import { StrategyRadar } from '../components/report/charts/StrategyRadar';
 import { RhythmHeatmap } from '../components/report/charts/RhythmHeatmap';
 import { ConceptNetwork } from '../components/completion/ConceptNetwork';
+import { CompetencyRadar } from '../components/completion/CompetencyRadar';
 import { ProgressRing } from '../components/completion/ProgressRing';
 import { PairedBars } from '../components/completion/PairedBars';
 import { baoCaoKhoa, type NutSoDo } from '../behavior/completion';
 import { scope } from '../behavior/overview';
 import { getBehaviorData } from '../behavior/seed';
-import { COURSES, NOW, SPAN_DAYS, START } from '../behavior/catalog';
+import { COURSES, NOW, SPAN_DAYS } from '../behavior/catalog';
 import { rhythmMatrix } from '../behavior/rhythm';
 import { minutesLabel } from '../behavior/format';
 import { Reveal } from '../components/ui/Reveal';
-import { cn } from '../lib/cn';
 
 /**
  * Báo cáo sau khi hoàn thành khoá học (Figma node 432:6863).
@@ -76,8 +75,28 @@ export default function CourseReportPage() {
 
   const chuoi = bc.chuoi;
 
+  /**
+   * Hai con số và một nhận xét cho dải chi tiết, đúng ba ô mà thiết kế đã chừa.
+   *
+   * Nhận xét chỉ nói lại điều số liệu đã cho thấy — bài tốn thời gian nhất, hoặc bài nắm
+   * thấp nhất, hoặc so thời gian bỏ ra với độ dài bài giảng. Thiết kế còn thêm một câu
+   * khuyên cách học cụ thể ("Đọc kỹ quy tắc phép quay khối đa diện"); câu đó phải do người
+   * soạn nội dung viết cho từng bài, tôi không tự sinh ra ở đây.
+   */
+  const thanhBai = bc.thanh.find((t) => t.conceptId === dangChon.id);
+  const phutBai = thanhBai?.thucTe ?? 0;
+  const tonNhat = bc.thanh.reduce<typeof thanhBai>((a, t) => (!a || t.thucTe > a.thucTe ? t : a), undefined);
+  const nhanXet =
+    tonNhat && tonNhat.conceptId === dangChon.id
+      ? `Đây là phần tốn nhiều thời gian nhất của bạn (${minutesLabel(phutBai)}).`
+      : bc.yeuNhat && bc.yeuNhat.id === dangChon.id
+        ? `Đây là phần bạn nắm thấp nhất khoá (${Math.round(dangChon.mastery * 100)}%).`
+        : `Bạn bỏ ra ${minutesLabel(phutBai)} cho phần này, bài giảng dài ${minutesLabel(thanhBai?.chuan ?? 0)}.`;
+
   return (
-    <div className="flex min-h-dvh flex-col bg-primary">
+    /* Nền trang #FAFAFA, chỉ dải đầu trang và các thẻ mới trắng — đo từ ảnh xuất của
+       frame. Trước đây cả trang trắng nên thẻ chìm hẳn vào nền. */
+    <div className="flex min-h-dvh flex-col bg-secondary">
       {/* Dải đầu trang riêng: mũi tên quay lại và tên khoá, đúng như thiết kế. */}
       <header className="sticky top-0 z-30 flex h-20 shrink-0 items-center gap-xl border-b border-secondary bg-white/90 px-4 backdrop-blur lg:px-6xl">
         <button
@@ -98,88 +117,71 @@ export default function CourseReportPage() {
         </div>
 
         {/* Hàng 1: sơ đồ mạng lưới (rộng) + vòng tiến trình (hẹp) */}
-        <div className="grid w-full grid-cols-1 gap-3xl xl:grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)]">
+        <div className="grid w-full grid-cols-1 gap-3xl xl:grid-cols-[minmax(0,2.75fr)_minmax(0,1fr)]">
           {/* Bọc Reveal không chỉ để có hiệu ứng hiện khi cuộn tới: các ô của bản đồ nhiệt
               mang class `rp-cell` với `opacity: 0` cho tới khi một tổ tiên có `rp-in`, mà
               chính Reveal là thứ gắn class đó. Thiếu nó thì 366 ô vẫn nằm trong DOM nhưng
               vô hình — đúng lỗi đã gặp. */}
           <Reveal className="flex">
           <ReportCard
-            title="Sơ đồ mạng lưới các bài trong khoá"
-            subtitle="Nút to nhỏ theo phần bài đó chiếm trong khoá; màu theo mức bạn đã nắm"
+            title="Sơ đồ mạng lưới chủ đề theo trọng số"
+            subtitle="Kích thước nút biểu diễn trọng số của bài trong khoá học"
           >
             <div className="flex flex-col gap-xl">
-              <ConceptNetwork bc={bc} dangChon={dangChon} onChon={setChon} />
-
               {/*
-                Dải nhãn này là đường chọn BẢO ĐẢM, không phải phần trang trí. Vòng tròn
-                trên sơ đồ nhỏ nhất chỉ 36px và ở khổ hẹp còn co lại nữa, mà 14 nút × 44px
-                là 616px — rộng hơn cả màn hình 390px, nên không có cách xê dịch nào cho
-                đủ ngưỡng chạm trên chính sơ đồ. Ở đây mỗi bài một nhãn cao 44px, cuộn
-                ngang được, đi bằng bàn phím được, và là thứ trình đọc màn hình đọc thấy.
-              */}
-              <ul
-                className="cp-chips flex gap-md overflow-x-auto overscroll-x-contain pb-xs"
-                aria-label="Chọn bài để xem chi tiết"
-              >
-                {bc.nut.map((n) => (
-                  <li key={n.id} className="shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => setChon(n)}
-                      aria-pressed={n.id === dangChon.id}
-                      className={cn(
-                        'ln-press ln-focus-flat flex h-11 items-center gap-sm whitespace-nowrap rounded-pill px-lg text-sm',
-                        n.id === dangChon.id
-                          ? 'bg-brand-500 font-semibold text-white'
-                          : 'bg-secondary text-secondary hover:bg-tertiary',
-                      )}
-                    >
-                      <span
-                        aria-hidden="true"
-                        className="h-2 w-2 shrink-0 rounded-full"
-                        style={{ background: n.mastery >= 0.75 ? '#17B26A' : n.mastery >= 0.5 ? '#F79009' : '#EAAA08' }}
-                      />
-                      {n.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+                Sơ đồ CUỘN NGANG ở khung hẹp thay vì co lại.
 
-              {/* Dải chi tiết của bài đang chọn — đúng chỗ thiết kế đặt nó, và là thứ mà
-                  câu "Nhấp chọn các nút…" ở thẻ bên cạnh hứa. */}
+                Trước đây tôi thêm bên dưới một dải chip "mỗi bài một nhãn" để có đủ ngưỡng
+                chạm 44px. Thiết kế không có dải đó, và ở 1440 nó còn bị mép thẻ cắt mất
+                chữ. Cách của chính thiết kế là bấm thẳng vào nút, nên giữ cách đó: khoá bề
+                rộng tối thiểu của sơ đồ lại, khung hẹp thì kéo ngang. Nút không bị co nữa
+                nên vẫn đủ to để chạm, và mỗi nút là một nút bấm đi được bằng bàn phím.
+              */}
+              <div className="-mx-xs overflow-x-auto overscroll-x-contain px-xs pb-xs">
+                <div className="min-w-[720px]">
+                  <ConceptNetwork bc={bc} dangChon={dangChon} onChon={setChon} />
+                </div>
+              </div>
+
+              {/* Dải chi tiết của bài đang chọn. Thiết kế xếp đúng ba dòng: tên bài (màu
+                  #20447E) kèm chip chuỗi ngày, một dòng hai số liệu, rồi một dòng
+                  "AI khuyến nghị" mở đầu bằng mũi tên màu #FA4C2F. */}
               <div className="flex flex-col gap-md rounded-lg bg-secondary p-xl">
                 <div className="flex flex-wrap items-start justify-between gap-lg">
-                  <p className="text-md font-semibold text-brand-secondary">Bài: {dangChon.label}</p>
+                  <p className="text-md font-semibold text-[#20447E]">Bài: {dangChon.label}</p>
                   {chuoi > 0 ? (
-                    <span className="flex shrink-0 items-center gap-sm rounded-pill bg-utility-success-50 px-md py-xxs text-xs font-semibold text-utility-success-700">
+                    <span className="flex shrink-0 items-center gap-sm rounded-pill bg-success-50 px-md py-xxs text-xs font-semibold text-success-700 ring-1 ring-success-200">
                       <Flame className="h-3 w-3" aria-hidden="true" />
                       Chuỗi {chuoi} ngày
                     </span>
                   ) : null}
                 </div>
-                <p className="text-sm text-tertiary">
-                  Thuộc chương <strong className="font-semibold text-secondary">{dangChon.chuong}</strong> · Chiếm{' '}
-                  <strong className="font-semibold text-secondary">{Math.round(dangChon.phan * 100)}%</strong> khoá · Đã nắm{' '}
-                  <strong className="font-semibold text-secondary">{Math.round(dangChon.mastery * 100)}%</strong>
+                <p className="flex flex-wrap gap-x-3xl gap-y-xs text-sm text-tertiary">
+                  <span>
+                    Trọng số trong khoá:{' '}
+                    <strong className="font-semibold text-secondary">{Math.round(dangChon.phan * 100)}%</strong>
+                  </span>
+                  <span>
+                    Thời gian đã học: <strong className="font-semibold text-secondary">{minutesLabel(phutBai)}</strong>
+                  </span>
                 </p>
-                {/* Ở đây trước có một đoạn khuyên "nên ôn lại bài này, mở bài tập ra tự làm
-                    lại…". Đó là chữ tôi tự viết, không có trong thiết kế — và chính nhóm
-                    thiết kế đã ghi trong bình luận Figma là bỏ mấy khối kiểu AI khuyến
-                    nghị đi cho báo cáo nhìn cho đáng tin. Đã bỏ. */}
+                <p className="text-sm text-tertiary">
+                  <span className="font-semibold text-[#FA4C2F]">→ AI khuyến nghị: </span>
+                  {nhanXet}
+                </p>
               </div>
             </div>
           </ReportCard>
           </Reveal>
 
           <Reveal order={1} className="flex">
-          <ReportCard title="Tiến trình khoá học tổng quan" subtitle="Phần nội dung bạn đã đi qua">
-            <div className="flex flex-1 flex-col items-center justify-center gap-xl">
-              <ProgressRing giaTri={bc.hoanThanh} nhan="Đã hoàn thành" />
+          <ReportCard title="Tiến trình khoá học tổng quan" subtitle="Kết quả tổng quan">
+            <div className="flex flex-1 flex-col items-center justify-center gap-2xl">
+              <ProgressRing giaTri={bc.hoanThanh} nhan="Trọng số hoàn thành" />
+              {/* Câu này là chữ của thiết kế, không phải tôi viết thêm — và nó chính là
+                  thứ giải thích cho việc bấm được vào các nút bên cạnh. */}
               <p className="text-center text-sm text-tertiary">
-                Bấm vào các nút trên sơ đồ bên cạnh để xem chi tiết từng bài. Cả khoá có{' '}
-                <strong className="font-semibold text-secondary">{bc.soBai} bài</strong>, bạn đã học{' '}
-                <strong className="font-semibold text-secondary">{minutesLabel(bc.phut)}</strong>.
+                Nhấp chọn các nút trên sơ đồ mạng lưới bên cạnh để xem chi tiết học tập và cập nhật tiến trình
               </p>
             </div>
           </ReportCard>
@@ -191,28 +193,29 @@ export default function CourseReportPage() {
           <Reveal className="flex">
           <ReportCard
             title="Chân dung năng lực theo chương"
-            subtitle={`Mỗi trục là một chương của khoá; giá trị là mức nắm trung bình các bài trong chương`}
+            subtitle="Viền hồng là phần nội dung đã đi qua, hình xanh là mức bạn nắm được"
           >
-            {/* Tên chương ghi thẳng lên trục, đúng như thiết kế. `StrategyRadar` tự ngắt
-                dòng và nới khung khi nhãn dài, nên không cần bảng chú giải nào ở dưới. */}
-            <StrategyRadar axes={bc.radar.map((r) => ({ key: r.truc, label: r.truc, value: r.nam }))} />
+            {/* Hai lớp như thiết kế, cả hai đều là số thật: lớp ngoài là tiến độ của
+                chương, lớp trong là mức nắm. Tên chương ghi thẳng lên trục kèm giá trị,
+                nên không cần bảng chú giải nào ở dưới. */}
+            <CompetencyRadar truc={bc.radar.map((r) => ({ label: r.truc, nam: r.nam, tienDo: r.tienDo }))} />
           </ReportCard>
           </Reveal>
 
           <Reveal order={1} className="flex">
           <ReportCard
-            title="Bản đồ nhiệt tính đều đặn"
+            title="Bản đồ nhiệt tính đều đặn học tập"
             subtitle="Mỗi ô là một ngày; càng đậm là ngày đó học càng nhiều"
             badge={
               chuoi > 0 ? (
-                <span className="flex items-center gap-sm rounded-pill bg-utility-success-50 px-md py-xxs text-xs font-semibold text-utility-success-700">
+                <span className="flex items-center gap-sm rounded-pill bg-success-50 px-md py-xxs text-xs font-semibold text-success-700 ring-1 ring-success-200">
                   <Flame className="h-3 w-3" aria-hidden="true" />
                   Chuỗi {chuoi} ngày
                 </span>
               ) : undefined
             }
           >
-            {nhiet ? <RhythmHeatmap matrix={nhiet} /> : null}
+            {nhiet ? <RhythmHeatmap matrix={nhiet} nhan={['Thấp', 'Cao']} /> : null}
           </ReportCard>
           </Reveal>
         </div>
@@ -220,8 +223,8 @@ export default function CourseReportPage() {
         {/* Hàng 3: cặp thanh thời gian, chạy hết bề ngang */}
         <Reveal className="flex">
         <ReportCard
-          title="Thời gian học từng bài"
-          subtitle="So thời gian bạn thật sự bỏ ra với độ dài bài giảng — bài nào lệch nhiều là bài phải vật lộn"
+          title="Thời gian nghiên cứu từng chủ đề bài giảng"
+          subtitle="So sánh thời gian học thực tế (phút) của bạn với độ dài bài giảng"
         >
           <PairedBars rows={bc.thanh} />
         </ReportCard>

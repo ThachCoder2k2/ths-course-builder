@@ -102,6 +102,25 @@ describe('baoCaoKhoa', () => {
     }
   });
 
+  /**
+   * Thiết kế ghi nhãn của bài ngay giữa nút, nên nhãn mới là thứ dễ đè nhau chứ không
+   * phải vòng tròn — đúng lỗi che chữ đã gặp. Bề rộng nhãn ước theo số ký tự ở cỡ 11px.
+   */
+  it('nhãn của hai bài không đè lên nhau', () => {
+    const CAO = 14;
+    const rong = (s: string) => s.length * 6.2;
+    const ns = bc!.nut;
+    for (let i = 0; i < ns.length; i += 1) {
+      for (let j = i + 1; j < ns.length; j += 1) {
+        const a = ns[i];
+        const b = ns[j];
+        if (Math.abs(a.y - b.y) >= CAO) continue;
+        const can = (rong(a.label) + rong(b.label)) / 2;
+        expect(Math.abs(a.x - b.x), `nhãn "${a.label}" đè nhãn "${b.label}"`).toBeGreaterThan(can);
+      }
+    }
+  });
+
   it('gọi hai lần cho cùng dữ liệu thì ra cùng một bố cục — không random', () => {
     const lai = baoCaoKhoa(tatCa(), KHOA)!;
     expect(lai.nut.map((n) => [n.id, n.x, n.y, n.r])).toEqual(bc!.nut.map((n) => [n.id, n.x, n.y, n.r]));
