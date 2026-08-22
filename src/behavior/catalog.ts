@@ -28,8 +28,11 @@ export interface Concept {
   id: string;
   label: string;
   courseId: string;
+  /** tên chương chứa bài này; khoá chưa chia chương thì mọi bài cùng một chương */
+  chuong: string;
   /** grid position for the concept map */
   col: number;
+  /** chỉ số chương — dùng làm hàng khi vẽ sơ đồ khái niệm */
   row: number;
   /** concept ids that should be learned first */
   prereq: string[];
@@ -68,6 +71,12 @@ interface CourseSpec {
   page?: boolean;
   /** ordered concept labels; prereqs are the previous one unless branched */
   concepts: string[];
+  /**
+   * Tên chương của từng bài, cùng độ dài với `concepts`. Có chương thì sơ đồ khái niệm vẽ
+   * ra cụm thay vì một đường thẳng, và radar của báo cáo cuối khoá có trục để bám vào.
+   * Khoá không khai thì mọi bài coi như cùng một chương.
+   */
+  chuong?: string[];
 }
 
 const COURSE_SPECS: CourseSpec[] = [
@@ -77,7 +86,42 @@ const COURSE_SPECS: CourseSpec[] = [
     title: 'AI cơ bản đến thực tiễn',
     topic: 'ai',
     page: true,
-    concepts: ['AI là gì', 'Học máy cơ bản', 'Mạng nơ-ron', 'Lan truyền ngược', 'Ứng dụng thực tế'],
+    // Khoá này dày hơn hẳn các khoá khác vì nó là khoá dùng để xem báo cáo cuối khoá.
+    // Phải là khoá ĐẦU danh sách phát của người học: người học đi tuần tự qua các chủ đề
+    // nên chỉ khoá đầu mới chắc chắn được đi hết trong một năm. Làm dày một khoá ở giữa
+    // thì nó thành khoá đang học dở, và màn báo cáo cuối khoá không có gì để mở.
+    concepts: [
+      'AI là gì',
+      'Lịch sử ngắn của AI',
+      'AI quanh ta mỗi ngày',
+      'Học máy cơ bản',
+      'Dữ liệu huấn luyện',
+      'Học có giám sát',
+      'Mạng nơ-ron',
+      'Tầng và trọng số',
+      'Lan truyền ngược',
+      'Nhận diện ảnh',
+      'Xử lý ngôn ngữ',
+      'Mô hình sinh',
+      'Giới hạn và rủi ro',
+      'Ứng dụng thực tế',
+    ],
+    chuong: [
+      'AI là gì và ở đâu',
+      'AI là gì và ở đâu',
+      'AI là gì và ở đâu',
+      'Máy học như thế nào',
+      'Máy học như thế nào',
+      'Máy học như thế nào',
+      'Bên trong mạng nơ-ron',
+      'Bên trong mạng nơ-ron',
+      'Bên trong mạng nơ-ron',
+      'AI làm được gì',
+      'AI làm được gì',
+      'AI làm được gì',
+      'Dùng AI có trách nhiệm',
+      'Dùng AI có trách nhiệm',
+    ],
   },
   {
     id: 'prompting',
@@ -226,22 +270,26 @@ const slugify = (label: string, i: number): string =>
 
 export const COURSES: Course[] = COURSE_SPECS.map(({ id, slug, title, topic, page }) => ({ id, slug, title, topic, page }));
 
-export const CONCEPTS: Concept[] = COURSE_SPECS.flatMap((spec) =>
-  spec.concepts.map((label, i) => {
+export const CONCEPTS: Concept[] = COURSE_SPECS.flatMap((spec) => {
+  // Danh sách chương theo thứ tự xuất hiện, để `row` là một số nhỏ liên tục.
+  const tenChuong = [...new Set(spec.chuong ?? [])];
+  return spec.concepts.map((label, i) => {
     const id = `${spec.id}:${slugify(label, i)}`;
     const difficulty = 0.28 + 0.5 * hash01(id); // 0.28 … 0.78
+    const chuong = spec.chuong?.[i] ?? spec.title;
     return {
       id,
       label,
       courseId: spec.id,
+      chuong,
       col: i,
-      row: 0,
+      row: Math.max(0, tenChuong.indexOf(chuong)),
       prereq: i === 0 ? [] : [`${spec.id}:${slugify(spec.concepts[i - 1], i - 1)}`],
       difficulty,
       halfLifeDays: Math.round(6 + (1 - difficulty) * 20), // harder → forgotten sooner (6…26d)
     };
-  }),
-);
+  });
+});
 
 export const VIDEOS: Video[] = CONCEPTS.map((c, i) => ({
   id: `v:${c.id}`,

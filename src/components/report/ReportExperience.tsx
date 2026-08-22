@@ -15,6 +15,7 @@ import { StrategyRadar } from './charts/StrategyRadar';
 import { getBehaviorData } from '../../behavior/seed';
 import { goldenHours, strategyFingerprint, twinForecast } from '../../behavior/selectors';
 import { courseTable, currentStreak, overviewStats, recurringStumbles, scope, timeSplit, topicStrength } from '../../behavior/overview';
+import { daHocHetBai } from '../../behavior/completion';
 import { COURSES, NOW, SPAN_DAYS, START } from '../../behavior/catalog';
 import { scrollToTop } from '../../lib/motion';
 
@@ -115,6 +116,13 @@ export function ReportExperience() {
   const topics = useMemo(() => topicStrength(scoped), [scoped]);
   const stumbles = useMemo(() => recurringStumbles(scoped), [scoped]);
   const rows = useMemo(() => courseTable(scoped), [scoped]);
+
+  // Khoá nào đã đi hết bài thì có báo cáo cuối khoá để mở. Tính trên TOÀN BỘ dữ liệu, không
+  // theo khoảng lọc đang chọn: học xong từ tháng trước thì lọc "7 ngày" vẫn phải mở được.
+  const slugCoBaoCao = useMemo(() => {
+    const toanBo = scope(sts, { fromDay: 0, toDay: SPAN_DAYS + 1, courseId: null });
+    return new Set(COURSES.filter((c) => daHocHetBai(toanBo, c.id)).map((c) => c.slug));
+  }, [sts]);
   const forecast = useMemo(() => twinForecast(scoped), [scoped]);
 
   const topicRows: BarRow[] = topics.map((t, i) => ({
@@ -221,7 +229,7 @@ export function ReportExperience() {
             được cả bề rộng, không thì lại sinh cuộn ngang. */}
         <div className="grid grid-cols-1 gap-2xl xl:grid-cols-3">
           <Reveal className="flex xl:col-span-2" order={0}>
-            <CourseTableCard rows={rows} />
+            <CourseTableCard rows={rows} slugCoBaoCao={slugCoBaoCao} />
           </Reveal>
           <Reveal className="flex" order={1}>
             <NextActionsCard actions={forecast.actions} />

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowDown, ArrowUp, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ReportCard } from './ReportCard';
 import { cn } from '../../lib/cn';
@@ -61,7 +61,17 @@ function StatusPill({ status }: { status: CourseRow['status'] }) {
  * gần nhất lên đầu. Bấm một dòng sẽ mở trang khoá học đó — dòng nào chưa có trang thật
  * thì để nguyên, không tạo cú bấm chẳng dẫn đi đâu.
  */
-export function CourseTableCard({ rows }: { rows: CourseRow[] }) {
+export function CourseTableCard({
+  rows,
+  slugCoBaoCao,
+}: {
+  rows: CourseRow[];
+  /**
+   * Slug của những khoá đã đi hết bài, tức có báo cáo cuối khoá để mở. Truyền vào thay vì
+   * tự tính, vì thẻ này chỉ nhận `CourseRow` chứ không có tầng sự kiện để hỏi.
+   */
+  slugCoBaoCao?: Set<string>;
+}) {
   const navigate = useNavigate();
   const [sort, setSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'lastActiveDaysAgo', dir: 'asc' });
   const [page, setPage] = useState(0);
@@ -121,6 +131,11 @@ export function CourseTableCard({ rows }: { rows: CourseRow[] }) {
                   </th>
                 );
               })}
+              {/* Cột này không sắp xếp được nên không dùng nút; để trống tên vì nội dung
+                  ô đã tự nói ("Xem báo cáo"), thêm tiêu đề nữa là đọc lên hai lần. */}
+              <th scope="col" className="px-lg py-lg pr-3xl">
+                <span className="sr-only">Báo cáo cuối khoá</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -149,7 +164,20 @@ export function CourseTableCard({ rows }: { rows: CourseRow[] }) {
                   <StatusPill status={r.status} />
                 </td>
                 <td className="whitespace-nowrap px-lg py-xl text-sm text-secondary">{studyTime(r.minutes)}</td>
-                <td className="whitespace-nowrap px-lg py-xl pr-3xl text-sm text-secondary">{lastSeen(r.lastActiveDaysAgo)}</td>
+                <td className="whitespace-nowrap px-lg py-xl text-sm text-secondary">{lastSeen(r.lastActiveDaysAgo)}</td>
+                <td className="whitespace-nowrap px-lg py-xl pr-3xl text-right">
+                  {slugCoBaoCao?.has(r.slug) ? (
+                    // stopPropagation vì cả dòng đã có onClick dẫn sang trang khoá học;
+                    // thiếu nó thì bấm vào link này lại rơi vào trang khoá, không vào báo cáo.
+                    <Link
+                      to={`/courses/${r.slug}/bao-cao`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="ln-press ln-press-flat ln-focus-flat whitespace-nowrap rounded-sm text-sm font-semibold text-brand-secondary"
+                    >
+                      Xem báo cáo
+                    </Link>
+                  ) : null}
+                </td>
               </tr>
             ))}
           </tbody>

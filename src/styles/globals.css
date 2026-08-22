@@ -533,6 +533,15 @@ body {
   animation-play-state: running;
 }
 
+/* Dải nhãn chọn bài ở báo cáo cuối khoá: cuộn ngang, ẩn thanh cuộn. Không dùng lại
+   `.ln-shelf` vì lớp đó ép bề rộng thẻ lên từng con, còn ở đây mỗi nhãn tự rộng theo chữ. */
+.cp-chips {
+  scrollbar-width: none;
+}
+.cp-chips::-webkit-scrollbar {
+  display: none;
+}
+
 /* ---- Chuyển trang -------------------------------------------------------------
    Đi tới: trang mới mờ lên và dịch vào từ bên phải. Quay lại: chỉ mờ lên, không dịch —
    quay lại là về chỗ cũ nên nó không nên đọc ra như đi tới một chỗ mới, và lúc đó vị trí

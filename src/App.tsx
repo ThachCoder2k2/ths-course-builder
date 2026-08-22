@@ -7,6 +7,7 @@ import TopicPage from './routes/TopicPage';
 import CourseDetailPage from './routes/CourseDetailPage';
 import LearnPage from './routes/LearnPage';
 import MyLearningPage from './routes/MyLearningPage';
+import CourseReportPage from './routes/CourseReportPage';
 import NotFound from './routes/NotFound';
 
 export default function App() {
@@ -29,6 +30,19 @@ export default function App() {
           Dùng bản `chiMo` (chỉ đổi độ mờ): trang này có hộp chat `position: fixed`, mà
           `transform` trên tổ tiên sẽ biến tổ tiên thành mốc neo mới và hộp chat rơi sai chỗ.
         */}
+        {/*
+          Báo cáo cuối khoá cũng là bố cục toàn màn hình: thiết kế cho một dải mảnh riêng
+          chỉ có mũi tên quay lại và tên khoá, không dùng thanh đầu trang của site.
+          Dùng bản `chiMo` cho chuyển cảnh vì trang có thanh dải dính ở đỉnh.
+        */}
+        <Route
+          path="/courses/:slug/bao-cao"
+          element={
+            <RouteTransition chiMo>
+              <CourseReportPage />
+            </RouteTransition>
+          }
+        />
         <Route
           path="/learn/:courseSlug/:lessonId"
           element={
