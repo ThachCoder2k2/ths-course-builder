@@ -227,7 +227,9 @@ export function ReportExperience() {
         {/* bảng khoá học + việc nên làm */}
         {/* Chia 2/3 + 1/3 chỉ từ xl: ở 1024px cột 2/3 hẹp hơn bảng sáu cột nên bảng phải
             được cả bề rộng, không thì lại sinh cuộn ngang. */}
-        <div className="grid grid-cols-1 gap-2xl xl:grid-cols-3">
+        {/* items-start: thiết kế để hai thẻ cao khác nhau (bảng 568, việc nên làm 465),
+            không kéo bằng nhau. Kéo bằng thì thẻ việc nên làm chừa hơn 300px trắng ở dưới. */}
+        <div className="grid grid-cols-1 items-start gap-2xl xl:grid-cols-3">
           <Reveal className="flex xl:col-span-2" order={0}>
             <CourseTableCard rows={rows} slugCoBaoCao={slugCoBaoCao} />
           </Reveal>

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Flame, TriangleAlert } from 'lucide-react';
+import { ArrowLeft, Flame } from 'lucide-react';
 import { ReportCard } from '../components/report/ReportCard';
 import { StrategyRadar } from '../components/report/charts/StrategyRadar';
 import { RhythmHeatmap } from '../components/report/charts/RhythmHeatmap';
@@ -163,15 +163,10 @@ export default function CourseReportPage() {
                   <strong className="font-semibold text-secondary">{Math.round(dangChon.phan * 100)}%</strong> khoá · Đã nắm{' '}
                   <strong className="font-semibold text-secondary">{Math.round(dangChon.mastery * 100)}%</strong>
                 </p>
-                {bc.yeuNhat && dangChon.id === bc.yeuNhat.id ? (
-                  <p className="flex items-start gap-sm text-sm text-utility-orange-700">
-                    <TriangleAlert className="mt-[3px] h-4 w-4 shrink-0" aria-hidden="true" />
-                    <span>
-                      Đây là bài bạn nắm thấp nhất khoá. Nếu ôn lại một bài thôi thì nên là bài này — mở lại phần bài tập
-                      rồi tự làm lại một lượt, đừng chỉ xem đáp án.
-                    </span>
-                  </p>
-                ) : null}
+                {/* Ở đây trước có một đoạn khuyên "nên ôn lại bài này, mở bài tập ra tự làm
+                    lại…". Đó là chữ tôi tự viết, không có trong thiết kế — và chính nhóm
+                    thiết kế đã ghi trong bình luận Figma là bỏ mấy khối kiểu AI khuyến
+                    nghị đi cho báo cáo nhìn cho đáng tin. Đã bỏ. */}
               </div>
             </div>
           </ReportCard>
@@ -198,22 +193,9 @@ export default function CourseReportPage() {
             title="Chân dung năng lực theo chương"
             subtitle={`Mỗi trục là một chương của khoá; giá trị là mức nắm trung bình các bài trong chương`}
           >
-            <div className="flex flex-col gap-xl">
-              {/* Tên chương đầy đủ dài tới bốn năm chữ, đặt quanh radar là bị mép thẻ cắt.
-                  Nên trục dùng tên ngắn, còn tên đầy đủ để ở danh sách bên dưới kèm con số —
-                  đọc được cả hai thứ mà không chồng chữ. */}
-              <StrategyRadar axes={bc.radar.map((r, i) => ({ key: r.truc, label: `C${i + 1}`, value: r.nam }))} />
-              <ul className="flex flex-col gap-md">
-                {bc.radar.map((r, i) => (
-                  <li key={r.truc} className="flex items-baseline justify-between gap-lg text-sm">
-                    <span className="min-w-0 text-tertiary">
-                      <strong className="font-semibold text-secondary">C{i + 1}</strong> · {r.truc}
-                    </span>
-                    <span className="shrink-0 tabular-nums font-semibold text-secondary">{Math.round(r.nam * 100)}%</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* Tên chương ghi thẳng lên trục, đúng như thiết kế. `StrategyRadar` tự ngắt
+                dòng và nới khung khi nhãn dài, nên không cần bảng chú giải nào ở dưới. */}
+            <StrategyRadar axes={bc.radar.map((r) => ({ key: r.truc, label: r.truc, value: r.nam }))} />
           </ReportCard>
           </Reveal>
 

@@ -15,23 +15,54 @@ const SERIES = '#0BA5EC';
 const RING_STROKE = '#F5F5F5';
 const LABEL_INK = '#535862';
 
-const VW = 460;
-const VH = 340;
-const CX = VW / 2;
-const CY = VH / 2 + 6;
 const R = 118;
 const LABEL_GAP = 24;
+const LINE_H = 18;
 const RINGS = [0.2, 0.4, 0.6, 0.8, 1] as const;
 /**
- * Chặn bề rộng SVG quanh cỡ viewBox (max-w-[440px] ở dưới). Để `w-full` trơn thì ở khổ
+ * Chặn bề rộng SVG quanh cỡ viewBox (max-w ở dưới). Để `w-full` trơn thì ở khổ
  * 768 hệ số phóng lên 1.5 và nhãn trục thành 21px — to hơn cả tiêu đề thẻ; chiều cao thẻ
  * cũng chạy theo bề rộng chứ không theo nội dung, sinh ra thẻ 537px cho hình 268px.
  */
+
+/** Ngắt nhãn dài thành hai dòng ở khoảng trắng gần giữa nhất; nhãn ngắn để nguyên. */
+function ngatDong(label: string, nguong: number): string[] {
+  if (label.length <= nguong) return [label];
+  const giua = label.length / 2;
+  let cat = -1;
+  for (let i = 0; i < label.length; i += 1) {
+    if (label[i] !== ' ') continue;
+    if (cat === -1 || Math.abs(i - giua) < Math.abs(cat - giua)) cat = i;
+  }
+  return cat === -1 ? [label] : [label.slice(0, cat), label.slice(cat + 1)];
+}
 
 export function StrategyRadar({ axes }: { axes: RadarAxis[] }) {
   const [hover, setHover] = useState<number | null>(null);
   const n = axes.length;
   if (n < 3) return null;
+
+  /**
+   * Nhãn trục là TÊN THẬT (tên chương, tên thói quen), không phải mã C1..C5 — thiết kế
+   * ghi thẳng tên lên trục. Trước đây tôi đổi sang C1..C5 rồi thêm một danh sách chú
+   * giải bên dưới để khỏi bị mép thẻ cắt chữ; cái danh sách đó không có trong thiết kế.
+   *
+   * Nên chỗ hẹp thì giải quyết bằng ngắt dòng và nới khung, không bằng đổi tên trục.
+   * Khung chỉ nới khi thật sự có nhãn dài, để radar thói quen ở trang Học tập của tôi
+   * (nhãn hai ba chữ) giữ đúng tỉ lệ của thiết kế.
+   */
+  const nguong = 12;
+  const dong = axes.map((a) => ngatDong(a.label, nguong));
+  // Chỉ nới khung khi có nhãn THẬT SỰ phải ngắt dòng. Nới theo độ dài thô thì radar
+  // thói quen ở trang Học tập của tôi (nhãn dài nhất 'Chủ động hỏi') cũng bị nới, mà
+  // hình học của radar đó đang khớp thiết kế 506:4930.
+  const nhanDai = dong.some((d) => d.length > 1);
+
+  const VW = nhanDai ? 520 : 460;
+  const VH = nhanDai ? 380 : 340;
+  const CX = VW / 2;
+  const CY = VH / 2 + 6;
+  const MAX_W = nhanDai ? 'max-w-[520px]' : 'max-w-[440px]';
 
   const spokes = axes.map((axis, i) => {
     const deg = -90 + (360 / n) * i;
@@ -53,7 +84,7 @@ export function StrategyRadar({ axes }: { axes: RadarAxis[] }) {
       viewBox={`0 0 ${VW} ${VH}`}
       role="img"
       aria-label={`Chân dung cách học của bạn theo ${n} thói quen`}
-      className="mx-auto block h-auto w-full max-w-[440px]"
+      className={`mx-auto block h-auto w-full ${MAX_W}`}
     >
       {/* lưới: năm vòng 20 / 40 / 60 / 80 / 100% */}
       {RINGS.map((level) => (
@@ -112,7 +143,13 @@ export function StrategyRadar({ axes }: { axes: RadarAxis[] }) {
       {/* nhãn trục, neo hướng ra ngoài để không đè lên hình */}
       {spokes.map((s, i) => {
         const anchor = Math.abs(s.cos) < 0.35 ? 'middle' : s.cos > 0 ? 'start' : 'end';
+        const lines = dong[i];
+        // Cả khối nhãn phải nằm về phía NGOÀI của điểm neo, nên dòng đầu bị dịch lên
+        // theo số dòng: trục trên thì đẩy hết lên, trục ngang thì căn giữa, trục dưới
+        // thì để nguyên rồi chạy xuống.
         const baseline = Math.abs(s.sin) < 0.35 ? 'middle' : s.sin > 0 ? 'hanging' : 'auto';
+        const dy0 =
+          lines.length === 1 ? 0 : Math.abs(s.sin) < 0.35 ? -((lines.length - 1) * LINE_H) / 2 : s.sin > 0 ? 0 : -((lines.length - 1) * LINE_H);
         return (
           <text
             key={`label-${i}`}
@@ -124,7 +161,11 @@ export function StrategyRadar({ axes }: { axes: RadarAxis[] }) {
             fontWeight={hover === i ? 600 : 500}
             fill={LABEL_INK}
           >
-            {s.axis.label}
+            {lines.map((line, j) => (
+              <tspan key={line + j} x={round(s.label.x)} dy={j === 0 ? dy0 : LINE_H}>
+                {line}
+              </tspan>
+            ))}
           </text>
         );
       })}

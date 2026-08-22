@@ -23,53 +23,49 @@ function scoreColor(score: number): string {
 /**
  * Những việc nên làm trước, xếp theo mức giúp ích. Điểm ưu tiên lấy từ chính dự báo
  * bên cạnh, nên hai thẻ luôn nói cùng một câu chuyện.
+ *
+ * Mỗi dòng có ĐÚNG bốn phần như Figma 506:5743: vòng số thứ tự 40px, tên việc, điểm
+ * kèm chữ "Ưu tiên", mũi tên. Trước đây tôi thêm một câu giải thích và một chip "~N phút"
+ * cho mỗi dòng — cả hai đều KHÔNG có trong thiết kế, và cái chip còn là thứ mượn từ thẻ
+ * "Lộ trình gợi ý" ở khối khác. Đã bỏ.
  */
 export function NextActionsCard({ actions }: { actions: NextAction[] }) {
-  // Ít việc thì căn giữa theo chiều dọc; dồn lên đỉnh sẽ chừa cả trăm px trắng ở dưới
-  // vì thẻ bị kéo cao bằng thẻ bảng khoá học bên cạnh.
-  //
-  // Danh sách còn bị chặn bề rộng khi thẻ chưa chia 1/3 cột (dưới xl): để tràn thì cụm
+  // Danh sách bị chặn bề rộng khi thẻ chưa chia 1/3 cột (dưới xl): để tràn thì cụm
   // điểm ưu tiên trôi cách tên việc cả nghìn px, mắt không nối được hai bên với nhau.
-  const few = actions.length < 3;
 
   return (
     <ReportCard
       title="Việc nên làm tiếp"
       subtitle="Duy trì - nắm vững - phát triển"
-      bodyClassName={few ? 'gap-2xl justify-center' : 'gap-2xl'}
+      bodyClassName="gap-3xl"
     >
       {actions.length === 0 ? (
         <EmptyState text="Chưa có việc nào cần làm gấp" />
       ) : (
-        <ol className="flex max-w-[620px] flex-col gap-2xl xl:max-w-none">
+        <ol className="flex max-w-[620px] flex-col gap-3xl xl:max-w-none">
           {actions.map((a, i) => {
             const rank = RANK_STYLE[Math.min(i, RANK_STYLE.length - 1)];
             const score = Math.round(a.impact * 100);
             const body = (
-              <span className="flex w-full items-start gap-md">
-                <span
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg font-semibold"
-                  style={{ background: rank.bg, color: rank.fg }}
-                  aria-hidden="true"
-                >
-                  {i + 1}
-                </span>
-                {/* kèm lý do và thời lượng: một dòng tên việc trần thì người xem vẫn phải đoán vì sao nên làm */}
-                <span className="flex min-w-0 flex-1 flex-col gap-xxs">
-                  <span className="text-sm font-medium leading-snug text-primary">{a.label}</span>
-                  <span className="text-xs leading-relaxed text-quaternary">{a.why}</span>
-                  <span className="mt-xxs inline-flex w-fit items-center rounded-pill bg-secondary px-md py-xxs text-xs font-medium text-tertiary ring-1 ring-secondary">
-                    ~{a.minutes} phút
+              <span className="flex w-full items-center gap-md">
+                <span className="flex min-w-0 flex-1 items-center gap-md">
+                  <span
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg font-semibold"
+                    style={{ background: rank.bg, color: rank.fg }}
+                    aria-hidden="true"
+                  >
+                    {i + 1}
                   </span>
+                  <span className="min-w-0 text-sm font-medium text-primary">{a.label}</span>
                 </span>
-                <span className="flex shrink-0 items-center gap-lg pt-xxs">
+                <span className="flex shrink-0 items-center gap-lg">
                   <span className="flex flex-col items-end">
                     <span className="text-lg font-semibold tabular-nums" style={{ color: scoreColor(score) }}>
                       {score}
                     </span>
                     <span className="text-xs text-fg-quinary">Ưu tiên</span>
                   </span>
-                  <ArrowUpRight className="h-5 w-5 text-fg-quinary transition group-hover:text-brand-secondary" aria-hidden="true" />
+                  <ArrowUpRight className="h-4 w-4 text-fg-quinary transition group-hover:text-brand-secondary" aria-hidden="true" />
                 </span>
               </span>
             );

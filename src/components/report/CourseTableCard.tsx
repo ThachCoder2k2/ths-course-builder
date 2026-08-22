@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowDown, ArrowUp, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ReportCard } from './ReportCard';
 import { cn } from '../../lib/cn';
@@ -39,27 +39,46 @@ function lastSeen(daysAgo: number): string {
   return `${daysAgo} ngày trước`;
 }
 
+/**
+ * Chip trạng thái đúng như Figma 506:5593/5594: NỀN TRẮNG, viền #D5D7DA, bo 6px, chữ
+ * #414651. Chỉ cái dấu đầu dòng mới có màu — chấm xanh cho "Đang học", dấu tích xanh lá
+ * cho "Hoàn thành".
+ *
+ * Trước đây tôi tô cả chip theo màu trạng thái (nền xanh nhạt, viền xanh, chữ xanh) —
+ * sai màu, và còn làm chip trạng thái nhìn nặng hơn cả tên khoá ở cột bên cạnh.
+ */
 function StatusPill({ status }: { status: CourseRow['status'] }) {
-  if (status === 'done') {
-    return (
-      <span className="inline-flex items-center gap-xs whitespace-nowrap rounded-pill bg-success-50 px-md py-xxs text-xs font-medium text-success-700 ring-1 ring-success-200">
-        <Check className="h-3 w-3" aria-hidden="true" />
-        Hoàn thành
-      </span>
-    );
-  }
   return (
-    <span className="inline-flex items-center gap-xs whitespace-nowrap rounded-pill bg-utility-brand-50 px-md py-xxs text-xs font-medium text-brand-600 ring-1 ring-utility-brand-200">
-      <span className="h-1.5 w-1.5 rounded-full bg-brand-500" aria-hidden="true" />
-      Đang học
+    <span className="inline-flex items-center gap-xs whitespace-nowrap rounded-sm bg-primary px-sm py-xxs text-xs font-medium text-secondary ring-1 ring-primary">
+      {status === 'done' ? (
+        <Check className="h-3 w-3 text-success-600" aria-hidden="true" />
+      ) : (
+        // #2D7CFB là màu chấm của bộ component trong Figma, nhạt hơn brand-500 một chút
+        <span className="h-1.5 w-1.5 rounded-full bg-[#2D7CFB]" aria-hidden="true" />
+      )}
+      {status === 'done' ? 'Hoàn thành' : 'Đang học'}
+    </span>
+  );
+}
+
+/** Thanh tiến độ: máng 110×8 như thiết kế, rồi cách 12px tới con số. */
+function ProgressCell({ value }: { value: number }) {
+  const pct = Math.round(value * 100);
+  return (
+    <span className="flex items-center gap-lg">
+      <span className="h-2 w-[110px] max-w-full shrink overflow-hidden rounded-full bg-quaternary">
+        <span className="block h-full rounded-full bg-brand-500" style={{ width: `${pct}%` }} />
+      </span>
+      <span className="shrink-0 text-sm font-medium tabular-nums text-secondary">{pct}%</span>
     </span>
   );
 }
 
 /**
- * Toàn bộ khoá học trong khoảng đang xem. Sáu cột đều xếp được, mặc định là khoá học
- * gần nhất lên đầu. Bấm một dòng sẽ mở trang khoá học đó — dòng nào chưa có trang thật
- * thì để nguyên, không tạo cú bấm chẳng dẫn đi đâu.
+ * Toàn bộ khoá học trong khoảng đang xem. ĐÚNG sáu cột như Figma 506:5561, không có cột
+ * thứ bảy: trước đây tôi thêm một cột "Xem báo cáo" — thiết kế không có cột đó, và ở khổ
+ * 1440 nó còn bị mép thẻ cắt mất chữ. Đường vào báo cáo nằm ở chính cú bấm vào dòng,
+ * đúng như câu phụ của thẻ đã hứa.
  */
 export function CourseTableCard({
   rows,
@@ -68,7 +87,8 @@ export function CourseTableCard({
   rows: CourseRow[];
   /**
    * Slug của những khoá đã đi hết bài, tức có báo cáo cuối khoá để mở. Truyền vào thay vì
-   * tự tính, vì thẻ này chỉ nhận `CourseRow` chứ không có tầng sự kiện để hỏi.
+   * tự tính, vì thẻ này chỉ nhận `CourseRow` chứ không có tầng sự kiện để hỏi. Dùng để
+   * chọn đích của cú bấm: khoá đã xong thì "chi tiết" của nó là báo cáo cuối khoá.
    */
   slugCoBaoCao?: Set<string>;
 }) {
@@ -101,10 +121,14 @@ export function CourseTableCard({
     setPage(0);
   };
 
+  /** Khoá đã đi hết bài thì bấm vào mở báo cáo cuối khoá; còn lại mở trang khoá. */
+  const dich = (r: CourseRow): string | null =>
+    slugCoBaoCao?.has(r.slug) ? `/courses/${r.slug}/bao-cao` : r.page ? `/courses/${r.slug}` : null;
+
   return (
     <ReportCard
       title="Các khoá học của bạn"
-      subtitle="Toàn bộ khoá học bạn đã học trong khoảng này — bấm một khoá học để mở trang khoá đó"
+      subtitle="Toàn bộ khoá học bạn đã học trong khoảng này - bấm một khoá học để mở chi tiết"
       bodyClassName="gap-2xl px-none"
     >
       {/* Bảng sáu cột cần chỗ; khung hẹp hơn thì xếp mỗi khoá thành một thẻ nhỏ thay vì
@@ -115,71 +139,62 @@ export function CourseTableCard({
               {COLUMNS.map((c) => {
                 const active = sort.key === c.key;
                 return (
-                  <th key={c.key} scope="col" className="px-lg py-lg first:pl-3xl last:pr-3xl">
+                  <th
+                    key={c.key}
+                    scope="col"
+                    className="px-lg py-lg first:pl-3xl last:pr-3xl"
+                    aria-sort={active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  >
                     <button
                       type="button"
                       onClick={() => toggle(c.key)}
                       className="inline-flex items-center gap-xs whitespace-nowrap text-xs font-semibold text-quaternary transition hover:text-primary"
                     >
                       {c.label}
-                      {active && sort.dir === 'asc' ? (
-                        <ArrowUp className="h-3 w-3" aria-hidden="true" />
-                      ) : (
-                        <ArrowDown className={cn('h-3 w-3', !active && 'opacity-30')} aria-hidden="true" />
-                      )}
+                      {/* Mũi tên CHỈ hiện ở cột đang sắp xếp. Thiết kế không vẽ mũi tên nào
+                          cả; sáu mũi tên mờ trên sáu tiêu đề là rác thị giác tôi tự thêm.
+                          Giữ một cái ở cột đang xếp thì vừa sạch vừa còn cho biết đang xếp
+                          theo cột nào. */}
+                      {active ? (
+                        sort.dir === 'asc' ? (
+                          <ArrowUp className="h-3 w-3" aria-hidden="true" />
+                        ) : (
+                          <ArrowDown className="h-3 w-3" aria-hidden="true" />
+                        )
+                      ) : null}
                     </button>
                   </th>
                 );
               })}
-              {/* Cột này không sắp xếp được nên không dùng nút; để trống tên vì nội dung
-                  ô đã tự nói ("Xem báo cáo"), thêm tiêu đề nữa là đọc lên hai lần. */}
-              <th scope="col" className="px-lg py-lg pr-3xl">
-                <span className="sr-only">Báo cáo cuối khoá</span>
-              </th>
             </tr>
           </thead>
           <tbody>
-            {slice.map((r) => (
-              <tr
-                key={r.id}
-                onClick={r.page ? () => navigate(`/courses/${r.slug}`) : undefined}
-                className={cn('border-b border-secondary last:border-0', r.page && 'cursor-pointer transition hover:bg-secondary')}
-              >
-                <td className="px-lg py-xl pl-3xl">
-                  <span className="flex flex-col gap-xxs">
-                    <span className="min-w-[140px] text-sm font-medium text-primary">{r.title}</span>
-                    <span className="text-sm text-tertiary">{TOPIC_NAME[r.topic]}</span>
-                  </span>
-                </td>
-                <td className="px-lg py-xl">
-                  <span className="flex items-center gap-md">
-                    <span className="h-2 w-16 overflow-hidden rounded-full bg-quaternary">
-                      <span className="block h-full rounded-full bg-brand-500" style={{ width: `${Math.round(r.progress * 100)}%` }} />
+            {slice.map((r) => {
+              const to = dich(r);
+              return (
+                <tr
+                  key={r.id}
+                  onClick={to ? () => navigate(to) : undefined}
+                  className={cn('border-b border-secondary last:border-0', to && 'cursor-pointer transition hover:bg-secondary')}
+                >
+                  <td className="px-lg py-xl pl-3xl">
+                    <span className="flex flex-col gap-xxs">
+                      <span className="min-w-[140px] text-sm font-medium text-primary">{r.title}</span>
+                      <span className="text-sm text-tertiary">{TOPIC_NAME[r.topic]}</span>
                     </span>
-                    <span className="text-sm tabular-nums text-secondary">{Math.round(r.progress * 100)}%</span>
-                  </span>
-                </td>
-                <td className="px-lg py-xl text-sm tabular-nums text-secondary">{Math.round(r.mastery * 100)}%</td>
-                <td className="px-lg py-xl">
-                  <StatusPill status={r.status} />
-                </td>
-                <td className="whitespace-nowrap px-lg py-xl text-sm text-secondary">{studyTime(r.minutes)}</td>
-                <td className="whitespace-nowrap px-lg py-xl text-sm text-secondary">{lastSeen(r.lastActiveDaysAgo)}</td>
-                <td className="whitespace-nowrap px-lg py-xl pr-3xl text-right">
-                  {slugCoBaoCao?.has(r.slug) ? (
-                    // stopPropagation vì cả dòng đã có onClick dẫn sang trang khoá học;
-                    // thiếu nó thì bấm vào link này lại rơi vào trang khoá, không vào báo cáo.
-                    <Link
-                      to={`/courses/${r.slug}/bao-cao`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="ln-press ln-press-flat ln-focus-flat whitespace-nowrap rounded-sm text-sm font-semibold text-brand-secondary"
-                    >
-                      Xem báo cáo
-                    </Link>
-                  ) : null}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-lg py-xl">
+                    <ProgressCell value={r.progress} />
+                  </td>
+                  <td className="px-lg py-xl text-sm tabular-nums text-tertiary">{Math.round(r.mastery * 100)}%</td>
+                  <td className="px-lg py-xl">
+                    <StatusPill status={r.status} />
+                  </td>
+                  <td className="whitespace-nowrap px-lg py-xl text-sm text-tertiary">{studyTime(r.minutes)}</td>
+                  <td className="whitespace-nowrap px-lg py-xl pr-3xl text-sm text-tertiary">{lastSeen(r.lastActiveDaysAgo)}</td>
+                </tr>
+              );
+            })}
           </tbody>
       </table>
 
@@ -200,30 +215,28 @@ export function CourseTableCard({
               <dl className="grid grid-cols-2 gap-lg sm:grid-cols-4">
                 <div className="flex flex-col gap-xxs">
                   <dt className="text-xs font-semibold text-quaternary">Tiến độ</dt>
-                  <dd className="flex items-center gap-md">
-                    <span className="h-2 w-12 overflow-hidden rounded-full bg-quaternary">
-                      <span className="block h-full rounded-full bg-brand-500" style={{ width: `${Math.round(r.progress * 100)}%` }} />
-                    </span>
-                    <span className="text-sm tabular-nums text-secondary">{Math.round(r.progress * 100)}%</span>
+                  <dd>
+                    <ProgressCell value={r.progress} />
                   </dd>
                 </div>
                 <div className="flex flex-col gap-xxs">
                   <dt className="text-xs font-semibold text-quaternary">Mức nắm</dt>
-                  <dd className="text-sm tabular-nums text-secondary">{Math.round(r.mastery * 100)}%</dd>
+                  <dd className="text-sm tabular-nums text-tertiary">{Math.round(r.mastery * 100)}%</dd>
                 </div>
                 <div className="flex flex-col gap-xxs">
                   <dt className="text-xs font-semibold text-quaternary">Thời gian học</dt>
-                  <dd className="text-sm text-secondary">{studyTime(r.minutes)}</dd>
+                  <dd className="text-sm text-tertiary">{studyTime(r.minutes)}</dd>
                 </div>
                 <div className="flex flex-col gap-xxs">
                   <dt className="text-xs font-semibold text-quaternary">Học gần nhất</dt>
-                  <dd className="text-sm text-secondary">{lastSeen(r.lastActiveDaysAgo)}</dd>
+                  <dd className="text-sm text-tertiary">{lastSeen(r.lastActiveDaysAgo)}</dd>
                 </div>
               </dl>
             </div>
           );
-          return r.page ? (
-            <button key={r.id} type="button" onClick={() => navigate(`/courses/${r.slug}`)} className="text-left transition hover:bg-secondary">
+          const to = dich(r);
+          return to ? (
+            <button key={r.id} type="button" onClick={() => navigate(to)} className="text-left transition hover:bg-secondary">
               {body}
             </button>
           ) : (
