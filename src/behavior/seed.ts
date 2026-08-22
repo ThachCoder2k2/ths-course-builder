@@ -222,10 +222,32 @@ function buildPlaylist(learner: Learner): { video: Video; concept: Concept }[] {
   const courses = learner.focus.flatMap((topic) => VIDEOS_OF_TOPIC(topic));
   return courses.map((v) => ({ video: v, concept: CONCEPT_BY_ID[v.concept] }));
 }
+/**
+ * Số bài CUỐI của một khoá mà người học bỏ dở.
+ *
+ * Trước đây danh sách phát chứa trọn mọi bài của mọi khoá, và một năm thì đủ dài để đi hết
+ * — nên cả 18 khoá đều xong 100%. Hệ quả: màn báo cáo không bao giờ hiện được trạng thái
+ * "đang học dở", và lời chúc mừng hoàn thành bắn ở mọi khoá nên mất hết ý nghĩa.
+ *
+ * Bỏ dở vài bài cuối là chuyện thường của người học thật. Chọn theo băm của id khoá nên cố
+ * định giữa hai lần dựng. Riêng khoá ĐẦU danh sách luôn học trọn: đó là khoá dùng để xem
+ * màn báo cáo cuối khoá, và có test canh việc nó đi hết bài.
+ */
+function boDoCuoi(courseId: string, soBai: number, dauTien: boolean): number {
+  if (dauTien || soBai < 4) return 0;
+  const h = hashStr(courseId + ':bo-do') % 3;
+  return h === 0 ? 0 : h; // 1/3 khoá học trọn, 1/3 bỏ 1 bài, 1/3 bỏ 2 bài
+}
+
 function VIDEOS_OF_TOPIC(topic: TopicSlug): Video[] {
   // courses in this topic, in catalogue order, videos in order
   const out: Video[] = [];
-  for (const c of COURSES_OF_TOPIC(topic)) out.push(...VIDEOS_OF(c));
+  const ds = COURSES_OF_TOPIC(topic);
+  ds.forEach((c, i) => {
+    const bai = VIDEOS_OF(c);
+    const bo = boDoCuoi(c, bai.length, topic === 'ai' && i === 0);
+    out.push(...(bo > 0 ? bai.slice(0, bai.length - bo) : bai));
+  });
   return out;
 }
 function COURSES_OF_TOPIC(topic: TopicSlug): string[] {

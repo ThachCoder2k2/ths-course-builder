@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChartNoAxesColumn } from 'lucide-react';
 import ProgressBar from '../ui/ProgressBar';
 import type { Course } from '../../mock/types';
 
@@ -23,6 +23,16 @@ export default function LearnTopBar({ course, percent }: { course: Course; perce
             <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           </Link>
           <p className="truncate text-display-xs text-primary">{course.title}</p>
+          {/* Đang học giữa khoá mà muốn xem mình đứng đâu thì bấm ngay đây, không phải
+              quay ra trang khoá rồi tìm nút. */}
+          <Link
+            to={'/courses/' + course.slug + '/bao-cao'}
+            aria-label="Xem báo cáo khoá học"
+            title="Xem báo cáo khoá học"
+            className="ln-press ln-focus flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-secondary hover:bg-secondary"
+          >
+            <ChartNoAxesColumn className="h-5 w-5" aria-hidden="true" />
+          </Link>
         </div>
 
         <div className="hidden shrink-0 items-center gap-md sm:flex">

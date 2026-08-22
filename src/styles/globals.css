@@ -941,3 +941,178 @@ html {
     animation: none !important;
   }
 }
+
+/* ============================================================
+   Course AI: mở/đóng bảng, hình trong câu trả lời, và pháo bông
+   ============================================================
+   Vào 260ms ease-out, ra 170ms — ra ngắn hơn vào chừng 2/3 để lúc đóng không thấy chắn.
+   Bảng trượt từ phía phải vào chứ không hiện đột ngột; nội dung trang nới lề cùng lúc nên
+   hai chuyển động đi cùng nhịp. */
+@keyframes ln-ai-vao {
+  from {
+    opacity: 0;
+    transform: translateX(28px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes ln-ai-ra {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(24px) scale(0.99);
+  }
+}
+.ln-ai-vao {
+  animation: ln-ai-vao 260ms var(--ln-ease-out) both;
+}
+.ln-ai-ra {
+  animation: ln-ai-ra 170ms ease-in both;
+  pointer-events: none;
+}
+
+/* Con robot: nảy nhẹ khi hiện lại sau lúc đóng bảng, để mắt bắt được nó đã về chỗ. */
+@keyframes ln-bot-vao {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(6px);
+  }
+  60% {
+    transform: scale(1.04) translateY(0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.ln-bot-vao {
+  animation: ln-bot-vao 300ms var(--ln-ease-out) both;
+}
+
+/* Bong bóng tin nhắn hiện lên từ dưới, mỗi cái lệch một nhịp nhỏ. */
+@keyframes ln-tin-vao {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.ln-tin-vao {
+  animation: ln-tin-vao 220ms var(--ln-ease-out) both;
+}
+
+/* Hình trong câu trả lời: thanh chạy từ 0 ra chiều dài thật, vòng vẽ theo chu vi.
+   Dùng biến --ln-w / --ln-p để mỗi phần tử tự mang số đo của nó. */
+@keyframes ln-hinh-thanh {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--ln-w);
+  }
+}
+.ln-hinh-thanh {
+  animation: ln-hinh-thanh 520ms var(--ln-ease-out) both;
+  animation-delay: var(--ln-delay, 0ms);
+}
+@keyframes ln-hinh-o {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.ln-hinh-o {
+  animation: ln-hinh-o 260ms var(--ln-ease-out) both;
+  animation-delay: var(--ln-delay, 0ms);
+}
+
+/* Pháo bông.
+   Đường bay là VÒNG CUNG, nên phải hai lớp lồng nhau: lớp ngoài phóng ra theo hướng bắn
+   với nhịp chậm dần (ease-out), lớp trong rơi xuống theo nhịp nhanh dần (ease-in) và xoay.
+   Một keyframe duy nhất chỉ ra được đường thẳng — mảnh giấy bay thẳng rồi tắt trông như
+   lỗi vẽ, không ra pháo bông.
+   Toạ độ, màu, độ trễ do component đặt qua biến CSS; CSS chỉ giữ hình dạng chuyển động. */
+@keyframes ln-phao-bay {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(var(--ln-dx), var(--ln-dy), 0);
+  }
+}
+@keyframes ln-phao-roi {
+  from {
+    opacity: 0;
+    transform: translateY(0) rotate(0deg) scale(0.7);
+  }
+  10% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(var(--ln-roi)) rotate(var(--ln-rot)) scale(1);
+  }
+}
+.ln-phao-bay {
+  animation: ln-phao-bay var(--ln-dur) cubic-bezier(0.12, 0.72, 0.28, 1) var(--ln-delay) both;
+}
+.ln-phao-roi {
+  animation: ln-phao-roi var(--ln-dur) cubic-bezier(0.42, 0, 0.9, 0.6) var(--ln-delay) both;
+}
+
+/* Dòng chúc mừng: chữ nhấc lên một nhịp rồi đứng. */
+@keyframes ln-chuc-mung {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.ln-chuc-mung {
+  animation: ln-chuc-mung 420ms var(--ln-ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Tắt hết chuyển động của khối này. Riêng thanh và ô của hình phải hiện SẴN ở kích thước
+     thật, không thì chúng đứng ở trạng thái đầu (rộng 0, mờ hẳn) và biểu đồ trông như trống. */
+  .ln-ai-vao,
+  .ln-ai-ra,
+  .ln-bot-vao,
+  .ln-tin-vao,
+  .ln-chuc-mung {
+    animation: none !important;
+  }
+  /* Pháo bông thì bỏ hẳn, không chỉ tắt animation: một trăm mảnh giấy đứng im giữa màn
+     hình còn tệ hơn là không có. */
+  .ln-phao-bay,
+  .ln-phao-roi {
+    display: none !important;
+  }
+  .ln-hinh-thanh {
+    animation: none !important;
+    width: var(--ln-w);
+  }
+  .ln-hinh-o {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+}

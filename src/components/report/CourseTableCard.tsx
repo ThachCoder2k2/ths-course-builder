@@ -80,17 +80,8 @@ function ProgressCell({ value }: { value: number }) {
  * 1440 nó còn bị mép thẻ cắt mất chữ. Đường vào báo cáo nằm ở chính cú bấm vào dòng,
  * đúng như câu phụ của thẻ đã hứa.
  */
-export function CourseTableCard({
-  rows,
-  slugCoBaoCao,
-}: {
+export function CourseTableCard({ rows }: {
   rows: CourseRow[];
-  /**
-   * Slug của những khoá đã đi hết bài, tức có báo cáo cuối khoá để mở. Truyền vào thay vì
-   * tự tính, vì thẻ này chỉ nhận `CourseRow` chứ không có tầng sự kiện để hỏi. Dùng để
-   * chọn đích của cú bấm: khoá đã xong thì "chi tiết" của nó là báo cáo cuối khoá.
-   */
-  slugCoBaoCao?: Set<string>;
 }) {
   const navigate = useNavigate();
   const [sort, setSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'lastActiveDaysAgo', dir: 'asc' });
@@ -121,9 +112,15 @@ export function CourseTableCard({
     setPage(0);
   };
 
-  /** Khoá đã đi hết bài thì bấm vào mở báo cáo cuối khoá; còn lại mở trang khoá. */
-  const dich = (r: CourseRow): string | null =>
-    slugCoBaoCao?.has(r.slug) ? `/courses/${r.slug}/bao-cao` : r.page ? `/courses/${r.slug}` : null;
+  /**
+   * Bấm một dòng là mở BÁO CÁO của khoá đó.
+   *
+   * Trước đây chỉ khoá đã đi hết bài mới mở được báo cáo, còn lại rơi về trang khoá. Nhưng
+   * báo cáo không phải phần thưởng cuối khoá — đang học nửa đường mà xem được mình đứng đâu
+   * mới là lúc nó có ích nhất. Nên mọi dòng trong bảng này đều mở báo cáo; dòng nào cũng có
+   * dữ liệu vì bảng chỉ liệt kê khoá đã học.
+   */
+  const dich = (r: CourseRow): string => `/courses/${r.slug}/bao-cao`;
 
   return (
     <ReportCard
@@ -174,8 +171,8 @@ export function CourseTableCard({
               return (
                 <tr
                   key={r.id}
-                  onClick={to ? () => navigate(to) : undefined}
-                  className={cn('border-b border-secondary last:border-0', to && 'cursor-pointer transition hover:bg-secondary')}
+                  onClick={() => navigate(to)}
+                  className="cursor-pointer border-b border-secondary transition last:border-0 hover:bg-secondary"
                 >
                   <td className="px-lg py-xl pl-3xl">
                     <span className="flex flex-col gap-xxs">
@@ -234,13 +231,10 @@ export function CourseTableCard({
               </dl>
             </div>
           );
-          const to = dich(r);
-          return to ? (
-            <button key={r.id} type="button" onClick={() => navigate(to)} className="text-left transition hover:bg-secondary">
+          return (
+            <button key={r.id} type="button" onClick={() => navigate(dich(r))} className="text-left transition hover:bg-secondary">
               {body}
             </button>
-          ) : (
-            <div key={r.id}>{body}</div>
           );
         })}
       </div>

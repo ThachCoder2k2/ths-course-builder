@@ -22,6 +22,8 @@ import NotFound from './NotFound';
 import { flattenLessons, getCourseBySlug, getLesson } from '../mock';
 import { useProgress } from '../lib/useProgress';
 import { troLyBaiHoc } from '../ai/noiDung';
+import { useMoDong } from '../lib/useMoDong';
+import { cn } from '../lib/cn';
 
 /**
  * Figma: `Học` (node 204:4565).
@@ -44,6 +46,8 @@ export default function LearnPage() {
   const [aiOpen, setAiOpen] = useState(false);
   // Chỉ trả tiêu điểm về con robot SAU lần mở đầu tiên; lúc mới vào trang thì không.
   const [daMoAi, setDaMoAi] = useState(false);
+  // Giữ bảng trong DOM thêm 170ms để chạy animation đóng.
+  const { hienThi: aiHien, dangDong: aiDangDong } = useMoDong(aiOpen, 170);
   const [tocOpen, setTocOpen] = useState(true);
 
   const currentLessonId = currentLesson?.lesson.id;
@@ -184,10 +188,16 @@ export default function LearnPage() {
         </main>
 
         {/* Figma variant 211:10306 — the Course AI side panel. */}
-        {aiOpen ? <CourseAiPanel troLy={troLy} onClose={() => setAiOpen(false)} /> : null}
+        {aiHien ? (
+          <CourseAiPanel
+            troLy={troLy}
+            onClose={() => setAiOpen(false)}
+            className={aiDangDong ? 'ln-ai-ra' : 'ln-ai-vao'}
+          />
+        ) : null}
       </div>
 
-      {aiOpen ? null : (
+      {aiHien ? null : (
         <FloatingChatbot
           onOpen={() => {
             setAiOpen(true);

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CirclePlay } from 'lucide-react';
+import { ChartNoAxesColumn, CirclePlay } from 'lucide-react';
 import { flattenLessons } from '../../mock';
 import type { Course } from '../../mock/types';
 import { hasStarted, readProgress } from '../../lib/progress';
@@ -58,6 +58,24 @@ export default function CourseHero({ course }: { course: Course }) {
                 />
               </Link>
             ) : null}
+            {/*
+              Nút phụ, LUÔN hiện.
+
+              Ban đầu tôi chặn nó theo `started`, nhưng `started` đọc từ localStorage của
+              chính trình duyệt này, còn số liệu báo cáo thì nằm ở tầng sự kiện — nên trên
+              một máy mới nút biến mất dù báo cáo có đầy dữ liệu. Hai nguồn khác nhau,
+              không dùng cái này chặn cái kia được. Khoá thật sự chưa có buổi học nào thì
+              trang báo cáo đã có lời nhắn riêng.
+
+              Kiểu nút để nhạt hơn nút học để không tranh vai hành động chính.
+            */}
+            <Link
+              to={'/courses/' + course.slug + '/bao-cao'}
+              className="ln-press ln-focus flex shrink-0 items-center gap-md rounded-lg border border-primary bg-primary px-xl py-lg text-md font-semibold text-secondary shadow-xs transition hover:bg-secondary"
+            >
+              <ChartNoAxesColumn className="h-5 w-5 shrink-0" aria-hidden="true" />
+              Xem báo cáo khoá
+            </Link>
             <p className="text-sm text-tertiary">
               <span className="font-semibold">
                 {course.enrolledCount.toLocaleString('vi-VN')}

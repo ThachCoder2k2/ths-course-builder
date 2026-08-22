@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { AlertCircle, ArrowLeft, Flame } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Flame, PartyPopper } from 'lucide-react';
 import { ReportCard } from '../components/report/ReportCard';
 import { RhythmHeatmap } from '../components/report/charts/RhythmHeatmap';
 import { ConceptNetwork } from '../components/completion/ConceptNetwork';
@@ -17,6 +17,9 @@ import { Reveal } from '../components/ui/Reveal';
 import FloatingChatbot from '../components/learn/FloatingChatbot';
 import CourseAiPanel from '../components/learn/CourseAiPanel';
 import { troLyBaoCao } from '../ai/noiDung';
+import { PhaoBong } from '../components/completion/PhaoBong';
+import { useMoDong } from '../lib/useMoDong';
+import { cn } from '../lib/cn';
 
 /**
  * Báo cáo sau khi hoàn thành khoá học (Figma node 432:6863).
@@ -48,7 +51,11 @@ export default function CourseReportPage() {
   const [aiMo, setAiMo] = useState(false);
   // Chỉ trả tiêu điểm về con robot SAU lần mở đầu tiên; lúc mới vào trang thì không.
   const [daMoAi, setDaMoAi] = useState(false);
-  const troLy = useMemo(() => (bc ? troLyBaoCao(bc) : null), [bc]);
+  // Một lượt bắn mỗi lần vào trang: component dựng lại là `lanPhao` mới, `PhaoBong` dựng lại
+  // hình mảnh giấy theo đó.
+  const [lanPhao] = useState(() => Math.floor(Math.random() * 100000));
+  // Bảng chat ra khỏi DOM sau 170ms để chạy được animation đóng, không biến mất đột ngột.
+  const { hienThi: aiHien, dangDong: aiDangDong } = useMoDong(aiMo, 170);
   const dangChon = chon ?? bc?.yeuNhat ?? bc?.nut[0] ?? null;
 
   /**
@@ -70,12 +77,17 @@ export default function CourseReportPage() {
     return { luoi, boDo: dropHint(trongKhoang, luoi.mode) };
   }, [sts, khoa]);
 
+  // Truyền cả lưới nhiệt vào kho câu trả lời: câu về nhịp độ mới vẽ được dải ô, chứ không
+  // chỉ tả bằng chữ. Phải khai báo SAU `nhiet` — trước thì dùng biến chưa có.
+  const troLy = useMemo(() => (bc ? troLyBaoCao(bc, nhiet?.luoi ?? null) : null), [bc, nhiet]);
+
   if (!khoa || !bc || !dangChon) {
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center gap-xl px-4 text-center">
-        <h1 className="text-display-xs text-primary">Chưa có báo cáo cho khoá này</h1>
+        <h1 className="text-display-xs text-primary">Chưa có gì để báo cáo</h1>
         <p className="max-w-[420px] text-md text-tertiary">
-          Báo cáo chỉ mở khi bạn đã đi hết các bài của khoá. Hãy học tiếp rồi quay lại đây.
+          Khoá này bạn chưa có buổi học nào. Học một bài rồi quay lại đây là có báo cáo ngay — không phải
+          học hết khoá mới xem được.
         </p>
         <Link to="/hoc-tap-cua-toi" className="ln-press ln-focus rounded-md bg-brand-500 px-xl py-lg text-md font-semibold text-white">
           Về Học tập của tôi
@@ -85,6 +97,17 @@ export default function CourseReportPage() {
   }
 
   const chuoi = bc.chuoi;
+  /**
+   * Báo cáo mở được BẤT CỨ LÚC NÀO, không đợi học hết khoá. Cờ này chỉ để đổi lời chào và
+   * để bắn pháo bông — nội dung báo cáo thì giống nhau, chỉ khác con số.
+   *
+   * "Hoàn thành khoá" ở đây là ĐÃ ĐI HẾT BÀI, cùng con số với vòng tiến trình ngay bên dưới.
+   * Có thử lấy mốc "mọi bài đạt mức nắm 50%" cho chặt hơn, nhưng thế thì một khoá xem trọn
+   * vẹn lại hiện vòng 100% kèm dòng "chưa xong" — hai câu chỏi nhau ngay cạnh nhau. Hoàn
+   * thành và nắm vững là hai chuyện; chỗ nào chưa vững thì nói riêng ở dòng dưới.
+   */
+  const xongKhoa = bc.hoanThanh >= 0.999;
+  const chuaVung = bc.nut.filter((n) => n.mastery < 0.5).length;
 
   /**
    * Hai con số và một nhận xét cho dải chi tiết, đúng ba ô mà thiết kế đã chừa.
@@ -128,11 +151,45 @@ export default function CourseReportPage() {
         Chỉ đẩy từ xl. Ở 1024 mà cắt 360px thì sơ đồ mạng lưới và cặp thanh không còn bề
         ngang để đọc, nên dưới xl bảng thành tấm phủ (xem class của CourseAiPanel bên dưới).
       */}
-      <div className="mx-auto flex w-full max-w-[1440px] flex-1 items-start gap-3xl px-4 pb-9xl pt-6xl lg:px-6xl">
+      {/*
+        Mở bảng chat thì NỚI LỀ, không bóp nội dung.
+
+        Bình thường khung nội dung chốt 1440px và căn giữa, nên ở 1920 mỗi bên còn 240px lề
+        trắng. Mở bảng thì nới trần lên 1824 (1440 + 24 khe + 360 bảng): phần chỗ cho bảng
+        lấy từ LỀ trước, cột báo cáo giữ nguyên bề rộng. Chỉ khi lề hết mới đến lượt cột
+        báo cáo hẹp lại — ở 1920 thì không bao giờ tới lượt đó.
+
+        `transition-[max-width]`: nới đột ngột thì cả trang giật một nhịp, còn nới có
+        chuyển tiếp thì nó đi cùng nhịp với bảng đang trượt vào.
+      */}
+      <div
+        className={cn(
+          'mx-auto flex w-full flex-1 items-start gap-3xl px-4 pb-9xl pt-6xl transition-[max-width] duration-300 ease-out lg:px-6xl',
+          aiMo ? 'xl:max-w-[1824px]' : 'max-w-[1440px]',
+          !aiMo && 'max-w-[1440px]',
+        )}
+      >
       <main className="flex min-w-0 flex-1 flex-col gap-3xl">
-        <div className="flex flex-col items-center gap-xs text-center">
-          <p className="text-sm font-semibold text-brand-secondary">Bạn đã hoàn thành khoá học</p>
+        <div className="flex flex-col items-center gap-md text-center">
+          {xongKhoa ? (
+            <p className="ln-chuc-mung flex items-center gap-sm rounded-pill bg-success-50 px-xl py-md text-sm font-semibold text-success-700 ring-1 ring-success-200">
+              <PartyPopper className="h-4 w-4" aria-hidden="true" />
+              Chúc mừng, bạn đã hoàn thành khoá học
+            </p>
+          ) : (
+            <p className="text-sm font-semibold text-brand-secondary">
+              Bạn đã đi qua {Math.round(bc.hoanThanh * 100)}% khoá này
+            </p>
+          )}
           <h1 className="text-display-sm text-primary lg:text-display-lg">Báo cáo kết quả toàn khoá</h1>
+          {/* Đi hết bài không có nghĩa là nắm hết. Nói thẳng chỗ chưa vững ngay dưới lời
+              chúc, để bản báo cáo không thành một lời khen suông. */}
+          {chuaVung > 0 ? (
+            <p className="text-sm text-tertiary">
+              Còn <strong className="font-semibold text-secondary">{chuaVung} bài</strong> chưa vững — xem sơ đồ bên dưới,
+              nút nào còn vàng là bài đó.
+            </p>
+          ) : null}
         </div>
 
         {/* Hàng 1: sơ đồ mạng lưới (rộng) + vòng tiến trình (hẹp) */}
@@ -269,26 +326,29 @@ export default function CourseReportPage() {
         Dưới xl: fixed, nên nó ra khỏi luồng và hàng không chừa chỗ.
         Từ xl: static rồi sticky, dính dưới dải đầu trang cao 80px cộng 24px lề trên.
       */}
-      {aiMo && troLy ? (
+      {aiHien && troLy ? (
         <CourseAiPanel
           troLy={troLy}
           onClose={() => setAiMo(false)}
-          className="fixed inset-x-4 bottom-4 top-[104px] z-40 shadow-lg xl:static xl:inset-auto xl:z-auto xl:h-[calc(100dvh-128px)] xl:shadow-none"
+          className={cn(
+            'fixed inset-x-4 bottom-4 top-[104px] z-40 shadow-lg xl:sticky xl:inset-auto xl:top-[104px] xl:z-auto xl:h-[calc(100dvh-128px)] xl:shadow-none',
+            aiDangDong ? 'ln-ai-ra' : 'ln-ai-vao',
+          )}
         />
       ) : null}
       </div>
 
       {/* Khổ hẹp: bảng phủ gần hết màn nên cần một lớp mờ phía sau, bấm ra ngoài là đóng. */}
-      {aiMo ? (
+      {aiHien ? (
         <button
           type="button"
           aria-label="Đóng Course AI"
           onClick={() => setAiMo(false)}
-          className="fixed inset-0 z-30 bg-black/20 xl:hidden"
+          className={cn('fixed inset-0 z-30 bg-black/20 transition-opacity duration-200 xl:hidden', aiDangDong && 'opacity-0')}
         />
       ) : null}
 
-      {aiMo ? null : (
+      {aiHien ? null : (
         <FloatingChatbot
           onOpen={() => {
             setAiMo(true);
@@ -297,6 +357,9 @@ export default function CourseReportPage() {
           traLaiTieuDiem={daMoAi}
         />
       )}
+
+      {/* Pháo bông bắn mỗi lần vào báo cáo của một khoá đã học hết. */}
+      {xongKhoa ? <PhaoBong lan={lanPhao} /> : null}
     </div>
   );
 }

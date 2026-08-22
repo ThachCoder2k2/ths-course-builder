@@ -95,6 +95,19 @@ describe('baoCaoKhoa', () => {
     expect(bc!.yeuNhat?.id).toBe(thap.id);
   });
 
+  /**
+   * Mốc "xong khoá" phải trùng luật của bảng khoá học (bài đạt khi nắm >= 50%), không thì
+   * cùng một khoá mà báo cáo bắn pháo bông trong khi bảng vẫn ghi "Đang học".
+   */
+  it('datChuan đếm đúng số bài có mức nắm từ 50% trở lên', () => {
+    const dat = bc!.nut.filter((n) => n.mastery >= 0.5).length;
+    expect(bc!.datChuan).toBeCloseTo(dat / bc!.nut.length, 6);
+  });
+
+  it('datChuan tách biệt với hoanThanh — xem hết không có nghĩa là nắm hết', () => {
+    expect(bc!.hoanThanh).toBeGreaterThanOrEqual(bc!.datChuan);
+  });
+
   it('tiến độ hoàn thành và mức nắm đều nằm trong 0..1', () => {
     for (const v of [bc!.hoanThanh, bc!.nam]) {
       expect(v).toBeGreaterThanOrEqual(0);

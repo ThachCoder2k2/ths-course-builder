@@ -41,13 +41,29 @@ export default function ContinueLearning() {
                   <ProgressBar value={percent} />
                 </div>
 
-                {resumeId ? (
-                  <Link to={'/learn/' + course.slug + '/' + resumeId} className="mt-auto">
-                    <Button className="w-full">
-                      {percent > 0 ? 'Tiếp tục học' : 'Bắt đầu học'}
-                    </Button>
+                {/*
+                  Link báo cáo nằm NGOÀI điều kiện `resumeId`.
+
+                  `resumeId` và `percent` đều đọc từ localStorage của chính trình duyệt này,
+                  còn số liệu báo cáo thì nằm ở tầng sự kiện. Đặt link bên trong thì trên
+                  một máy mới nó biến mất dù báo cáo có đầy dữ liệu — đúng lỗi vừa gặp ở
+                  nút bên trang khoá học.
+                */}
+                <div className="mt-auto flex flex-col gap-md">
+                  {resumeId ? (
+                    <Link to={'/learn/' + course.slug + '/' + resumeId}>
+                      <Button className="w-full">
+                        {percent > 0 ? 'Tiếp tục học' : 'Bắt đầu học'}
+                      </Button>
+                    </Link>
+                  ) : null}
+                  <Link
+                    to={'/courses/' + course.slug + '/bao-cao'}
+                    className="ln-press ln-focus-flat self-center rounded-sm text-sm font-semibold text-brand-secondary"
+                  >
+                    Xem báo cáo khoá
                   </Link>
-                ) : null}
+                </div>
               </div>
             </article>
           );

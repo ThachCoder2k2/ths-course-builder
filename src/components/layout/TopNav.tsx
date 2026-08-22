@@ -76,7 +76,7 @@ export default function TopNav({ onOpenMenu }: { onOpenMenu?: () => void }) {
             <NavDropdown label="Học tập của tôi">
               <ul className="flex flex-col">
                 <li>
-                  <Link to="/hoc-tap-cua-toi" className="block rounded-md px-lg py-md text-md font-medium text-brand-secondary hover:bg-secondary">
+                  <Link to="/hoc-tap-cua-toi" className="block rounded-md px-lg py-md text-md text-secondary hover:bg-secondary">
                     Phân tích học tập
                   </Link>
                 </li>

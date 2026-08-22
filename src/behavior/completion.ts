@@ -57,6 +57,17 @@ export interface BaoCaoKhoa {
   title: string;
   /** 0..1 — phần nội dung đã đi qua, tính theo độ dài video */
   hoanThanh: number;
+  /**
+   * 0..1 — phần bài ĐÃ ĐẠT, tính theo cùng luật với bảng khoá học ở trang Học tập của tôi:
+   * một bài coi là đạt khi mức nắm từ 50% trở lên.
+   *
+   * Khác `hoanThanh` và cả hai đều cần: `hoanThanh` là đã XEM hết nội dung chưa, còn cái
+   * này là đã NẮM được chưa. Trong dữ liệu mock thì bài nào chạm tới cũng xem trọn, nên
+   * `hoanThanh` gần như luôn bằng 1 — lấy nó làm mốc "xong khoá" thì khoá nào cũng xong.
+   * Mốc "xong khoá" phải là con số này, để báo cáo và cái chip "Hoàn thành" ở bảng khoá
+   * học không nói hai chuyện khác nhau về cùng một khoá.
+   */
+  datChuan: number;
   /** 0..1 — mức nắm trung bình */
   nam: number;
   soBai: number;
@@ -268,6 +279,7 @@ export function baoCaoKhoa(sts: Statement[], courseId: string): BaoCaoKhoa | nul
     slug: course?.slug ?? courseId,
     title: course?.title ?? courseId,
     hoanThanh: Math.min(1, giayDaXem / tongGiay),
+    datChuan: nut.length ? nut.filter((n) => n.mastery >= 0.5).length / nut.length : 0,
     nam,
     soBai: concepts.length,
     phut: thanh.reduce((a, t) => a + t.thucTe, 0),

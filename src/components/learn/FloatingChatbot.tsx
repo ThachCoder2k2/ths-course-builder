@@ -61,7 +61,7 @@ export default function FloatingChatbot({
 
   return (
     <div
-      className={cn('fixed z-20', pos ? '' : 'right-6 top-[104px]')}
+      className={cn('fixed z-20', traLaiTieuDiem && 'ln-bot-vao', pos ? '' : 'right-6 top-[104px]')}
       style={pos ? { left: pos.x, top: pos.y } : undefined}
     >
       <button

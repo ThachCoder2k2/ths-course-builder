@@ -3,7 +3,8 @@ import { Send, X } from 'lucide-react';
 import botGlyph from '../../assets/icons/course-ai.svg';
 import { cn } from '../../lib/cn';
 import { useMediaQuery } from '../../lib/useMediaQuery';
-import { dapChoGoiY, traLoi, type CauGoiY, type TroLy } from '../../ai/troLy';
+import { chipTiep, chipTu, dapChoChip, timLuat, type CauGoiY, type DapAn, type TroLy } from '../../ai/troLy';
+import { AiHinh } from './AiHinh';
 
 /**
  * Bảng Course AI (Figma `Side panel` 211:10427) — 360px, trắng, bo 2xl.
@@ -26,8 +27,10 @@ interface Tin {
   id: number;
   ai: boolean;
   chu: string;
-  /** Tin của máy có kèm chip gợi ý hay không. */
-  keGoiY?: boolean;
+  /** Hình vẽ kèm câu trả lời, nếu luật đó có. */
+  hinh?: DapAn['hinh'];
+  /** Chip mời hỏi tiếp, gắn vào chính tin của máy. */
+  chip?: CauGoiY[];
 }
 
 /** Thời gian hiện ba dấu chấm trước khi trả lời — đủ để thấy là máy đang nghĩ. */
@@ -52,7 +55,11 @@ export default function CourseAiPanel({
   className?: string;
 }) {
   const itMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
-  const [tin, setTin] = useState<Tin[]>(() => [{ id: 0, ai: true, chu: troLy.chao, keGoiY: true }]);
+  const [tin, setTin] = useState<Tin[]>(() => [
+    { id: 0, ai: true, chu: troLy.chao, chip: chipTu(troLy, troLy.moDau, new Set()) },
+  ]);
+  // Những câu đã hỏi, để không mời lại chính câu vừa trả lời.
+  const [daHoi, setDaHoi] = useState<Set<string>>(() => new Set());
   const [dangGo, setDangGo] = useState(false);
   const [nhap, setNhap] = useState('');
   const dem = useRef(1);
@@ -84,32 +91,52 @@ export default function CourseAiPanel({
     cuon.current?.scrollTo({ top: cuon.current.scrollHeight, behavior: itMotion ? 'auto' : 'smooth' });
   }, [tin, dangGo, itMotion]);
 
-  const hoi = (cauHoi: string, dap: string) => {
+  /**
+   * Một lượt hỏi — đáp.
+   *
+   * `idLuat` là id của luật đã dùng: chip đi thẳng theo id, còn câu gõ tay thì khớp từ khoá
+   * ra. Biết luật nào vừa trả lời mới mời được câu hỏi tiếp có liên quan, chứ không mời
+   * bừa ba câu rời rạc.
+   *
+   * Chip của các tin CŨ bị gỡ đi: giữ lại thì cuộn lên trên còn cả một rừng nút cũ, mà
+   * bấm vào thì lại chen một câu trả lời vào giữa cuộc hội thoại.
+   */
+  const hoi = (cauHoi: string, dap: DapAn, idLuat: string | null) => {
     if (hen.current !== null) window.clearTimeout(hen.current);
-    const idNguoi = dem.current++;
-    setTin((t) => [...t.map((x) => ({ ...x, keGoiY: false })), { id: idNguoi, ai: false, chu: cauHoi }]);
+    const daHoiMoi = new Set(daHoi);
+    if (idLuat) daHoiMoi.add(idLuat);
+    setDaHoi(daHoiMoi);
+
+    setTin((t) => [...t.map((x) => ({ ...x, chip: undefined })), { id: dem.current++, ai: false, chu: cauHoi }]);
     setDangGo(true);
     const cho = itMotion ? 0 : NGHI_MS;
     hen.current = window.setTimeout(() => {
       setDangGo(false);
-      // Không hiểu câu hỏi thì mời lại chip gợi ý, để người học không rơi vào ngõ cụt.
-      setTin((t) => [...t, { id: dem.current++, ai: true, chu: dap, keGoiY: dap === troLy.doNhau }]);
+      setTin((t) => [
+        ...t,
+        {
+          id: dem.current++,
+          ai: true,
+          chu: dap.chu,
+          hinh: dap.hinh,
+          // Mời câu hỏi tiếp sau MỌI câu trả lời, không chỉ khi máy không hiểu.
+          chip: chipTiep(troLy, idLuat ? troLy.luat.find((l) => l.id === idLuat) ?? null : null, daHoiMoi),
+        },
+      ]);
       hen.current = null;
     }, cho);
   };
 
-  const guiChip = (g: CauGoiY) => hoi(g.hoi, dapChoGoiY(troLy, g));
+  const guiChip = (g: CauGoiY) => hoi(g.hoi, dapChoChip(troLy, g.id), g.id);
 
   const gui = (e: React.FormEvent) => {
     e.preventDefault();
     const q = nhap.trim();
     if (!q || dangGo) return;
     setNhap('');
-    hoi(q, traLoi(troLy, q));
+    const luat = timLuat(troLy, q);
+    hoi(q, luat?.dap ?? troLy.doNhau, luat?.id ?? null);
   };
-
-  const tinCuoi = tin[tin.length - 1];
-  const hienGoiY = !dangGo && tinCuoi?.ai && tinCuoi.keGoiY;
 
   const bubbleAi = 'w-full rounded-md rounded-tl-none border border-secondary bg-secondary px-[14px] py-[10px] text-md text-primary';
 
@@ -152,17 +179,34 @@ export default function CourseAiPanel({
       >
         {tin.map((t) =>
           t.ai ? (
-            <div key={t.id} className="flex w-full gap-lg">
+            <div key={t.id} className="ln-tin-vao flex w-full gap-lg">
               <BotAvatar />
               <div className="flex min-w-px flex-1 flex-col gap-sm">
                 <div className={bubbleAi}>
                   {/* Câu trả lời dạng danh sách có xuống dòng thật, nên giữ khoảng trắng. */}
                   <span className="whitespace-pre-line">{t.chu}</span>
                 </div>
+                {t.hinh ? <AiHinh hinh={t.hinh} /> : null}
+                {/* Chip nằm NGAY DƯỚI câu trả lời của nó, thẳng lề với bong bóng. */}
+                {t.chip && t.chip.length > 0 ? (
+                  <ul className="mt-xs flex flex-col gap-sm">
+                    {t.chip.map((g) => (
+                      <li key={g.id}>
+                        <button
+                          type="button"
+                          onClick={() => guiChip(g)}
+                          className="ln-press ln-focus flex min-h-11 w-full items-center rounded-md border border-primary bg-primary px-lg py-md text-left text-sm font-medium text-secondary shadow-xs transition hover:border-brand hover:bg-secondary"
+                        >
+                          {g.hoi}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
               </div>
             </div>
           ) : (
-            <div key={t.id} className="flex w-full justify-end">
+            <div key={t.id} className="ln-tin-vao flex w-full justify-end">
               <div className="max-w-[272px] rounded-md rounded-tr-none bg-brand-500 px-[14px] py-[10px] text-md text-white">
                 {t.chu}
               </div>
@@ -181,23 +225,6 @@ export default function CourseAiPanel({
           </div>
         ) : null}
 
-        {/* Chip gợi ý: nút thật, cao 44px, XUỐNG DÒNG chứ không cuộn ngang — dải cuộn ngang
-            trong một bảng 360px thì chữ bị cắt ở mép, đúng lỗi đã gặp ở trang báo cáo. */}
-        {hienGoiY ? (
-          <ul className="flex flex-col gap-md pl-[52px]">
-            {troLy.goiY.map((g) => (
-              <li key={g.id}>
-                <button
-                  type="button"
-                  onClick={() => guiChip(g)}
-                  className="ln-press ln-focus flex min-h-11 w-full items-center rounded-md border border-primary bg-primary px-lg py-md text-left text-sm font-medium text-secondary shadow-xs transition hover:bg-secondary"
-                >
-                  {g.hoi}
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : null}
       </div>
 
       <form onSubmit={gui} className="flex w-full flex-col items-end gap-lg border-t border-secondary px-3xl pb-3xl pt-2xl">
