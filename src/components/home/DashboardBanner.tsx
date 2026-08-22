@@ -88,7 +88,10 @@ export default function DashboardBanner() {
   const [stopped, setStopped] = useState(false);
   const reduced = useReducedMotion();
 
-  const doLai = useCallback(() => {
+  const khung = useRef(0);
+
+  /** Đo ngay, không gộp khung. Dùng cho lúc mới gắn và khi khổ màn đổi. */
+  const doNgay = useCallback(() => {
     const el = rail.current;
     if (!el) return;
     const conCuonDuoc = el.scrollWidth - el.clientWidth;
@@ -104,14 +107,32 @@ export default function DashboardBanner() {
     });
   }, []);
 
+  /**
+   * Bản gộp theo khung hình, dùng cho sự kiện cuộn. Cuộn bắn ra hàng chục sự kiện mỗi
+   * giây; gọi setState thẳng từ đó là React render lại đúng số lần ấy, kéo đường ray một
+   * cái là thấy giật. Gộp về một lần mỗi khung thì chỉ còn ~60 lần/giây và đúng nhịp vẽ.
+   */
+  const doLai = useCallback(() => {
+    if (khung.current) return;
+    khung.current = requestAnimationFrame(() => {
+      khung.current = 0;
+      doNgay();
+    });
+  }, [doNgay]);
+
   useEffect(() => {
-    doLai();
+    doNgay();
     const el = rail.current;
-    if (!el || typeof ResizeObserver === 'undefined') return;
-    const ro = new ResizeObserver(doLai);
+    if (!el || typeof ResizeObserver === 'undefined') return () => {
+      if (khung.current) cancelAnimationFrame(khung.current);
+    };
+    const ro = new ResizeObserver(doNgay);
     ro.observe(el);
-    return () => ro.disconnect();
-  }, [doLai]);
+    return () => {
+      ro.disconnect();
+      if (khung.current) cancelAnimationFrame(khung.current);
+    };
+  }, [doNgay]);
 
   /** Dịch đi một slide. `huong` là −1 hoặc 1. */
   const day = useCallback(

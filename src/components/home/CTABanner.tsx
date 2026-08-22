@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 import ctaIllustration from '../../assets/landing/cta-illustration.png';
+import ctaHover from '../../assets/landing/cta-illustration-hover.png';
 import { useInView } from '../ui/Reveal';
 import { cn } from '../../lib/cn';
 
@@ -97,11 +98,31 @@ export default function CTABanner() {
             </button>
           </div>
 
-          <img
-            src={ctaIllustration}
-            alt=""
-            className="ln-cta-art h-[152px] w-auto shrink-0 self-center sm:h-[188px]"
-          />
+          {/*
+            Hover cậu bé đọc sách — animation thứ hai mà file Figma quy định
+            (node 484:18297 → 484:18299, ON_HOVER, SMART_ANIMATE, EASE_OUT, 150ms).
+
+            Đo hai bản vẽ thì thấy quyển sách cam đúng 120.7 × 109.3 ở bản thường và
+            121.0 × 109.3 ở bản hover — tức CẬU BÉ KHÔNG TO LÊN. Khung phình 220×188 lên
+            240×218.7 là vì các vạch chuyển động quanh người toả rộng ra. Nên đây không
+            phải cú phóng: hai bản vẽ đổi cho nhau, canh theo quyển sách để cậu bé đứng im
+            còn các vạch nở ra. Bản hover lệch (−9, −30.67) so với gốc bản thường, quy ra
+            phần trăm của khung để đúng ở cả hai cỡ 152px và 188px.
+          */}
+          <div className="ln-cta-figure relative aspect-[220/188] h-[152px] shrink-0 self-center sm:h-[188px]">
+            <img
+              src={ctaIllustration}
+              alt=""
+              className="ln-cta-art ln-cta-rest absolute inset-0 h-full w-full object-contain"
+            />
+            <img
+              src={ctaHover}
+              alt=""
+              aria-hidden="true"
+              className="ln-cta-peak absolute max-w-none"
+              style={{ left: '-4.09%', top: '-16.31%', width: '109.09%', height: '116.31%' }}
+            />
+          </div>
         </div>
       </div>
     </section>

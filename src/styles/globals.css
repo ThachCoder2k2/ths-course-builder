@@ -221,6 +221,23 @@ body {
   }
 }
 
+/* Hover cậu bé đọc sách — animation thứ hai file Figma quy định (150ms, EASE_OUT).
+   Cậu bé đứng im, chỉ các vạch chuyển động quanh người toả rộng: hai bản vẽ đổi cho nhau,
+   canh theo quyển sách nên phần người không nhích một pixel. Bản `ln-cta-art` đã có sẵn
+   hiệu ứng hiện-khi-cuộn-tới, nên phần hover chỉ chạm tới độ mờ của lớp thứ hai. */
+.ln-cta-peak {
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+.ln-cta-figure:hover .ln-cta-peak {
+  opacity: 1;
+}
+/* Lớp thường mờ đi cùng nhịp, nếu không hai bộ vạch sẽ hiện đè lên nhau. */
+.ln-cta-figure:hover .ln-cta-rest {
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+
 /* Băng chuyền tin: bề rộng slide TÍNH RA từ chỗ còn trống, không chốt cứng 800px.
    Chốt cứng thì phần hé của slide kế tiếp chỉ là số dư: ở 1712px bề rộng cửa sổ (rất
    nhiều laptop sau khi trừ thanh cuộn) nó ra đúng 32px — một vạch xám dọc sát mép phải,
@@ -263,11 +280,26 @@ body {
    Góc nghiêng đặt thành biến để đổi một chỗ là đổi cả trang. */
 .ln-card-tilt {
   --ln-tilt: -2deg;
-  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+  position: relative;
+  transition: transform 200ms ease-out;
 }
 .group:hover .ln-card-tilt {
   transform: rotate(var(--ln-tilt)) scale(1.03) translateY(-6px);
+}
+/* Bóng đổ nằm ở một lớp giả rồi chỉ đổi độ mờ. Cho box-shadow vào transition thì mỗi cú
+   hover bắt trình duyệt vẽ lại cả cái bóng nhoè — ở 1920 có 12 thẻ trên màn, đủ để tụt khung. */
+.ln-card-tilt::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0;
   box-shadow: 0 18px 32px -12px rgba(10, 13, 18, 0.18);
+  transition: opacity 200ms ease-out;
+}
+.group:hover .ln-card-tilt::after {
+  opacity: 1;
 }
 
 /* Phản hồi khi bấm, dùng chung cho mọi nút. Trước đây 16 nút trên trang bấm không có
@@ -283,24 +315,29 @@ body {
   transition-duration: 90ms;
 }
 
-/* Dot băng chuyền: cao lên khi trỏ vào, để biết nó bấm được. */
-.ln-dot {
-  transition: background-color 200ms ease-out, transform 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-.ln-dot:hover {
-  transform: scaleY(1.5);
-}
-
 @media print {
   .ln-press,
-  .ln-dot,
   .ln-mascot-scale,
   .ln-bubble,
   .ln-card-tilt,
-  .group:hover .ln-card-tilt {
+  .ln-card-tilt::after,
+  .group:hover .ln-card-tilt,
+  .group:hover .ln-card-tilt::after {
     transition: none !important;
     transform: none !important;
     box-shadow: none !important;
+  }
+  /* Mascot vẫn dểnh khi in nếu không tắt keyframes ở đây — bản in bắt đúng một khung
+     giữa nhịp nên con robot lệch vài pixel so với chỗ nó phải đứng. */
+  .ln-mascot,
+  .ln-wash {
+    animation: none !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+  .ln-face-hover,
+  .ln-cta-peak {
+    display: none !important;
   }
   .ln-bubble {
     display: none !important;
@@ -370,13 +407,30 @@ body {
     will-change: auto !important;
   }
   /* Nút vẫn phải cho biết là đã bấm, chỉ bỏ phần dịch chuyển. Đổi màu thì giữ. */
-  .ln-press,
+  /* Giảm chuyển động nghĩa là bớt chuyển động, KHÔNG phải bỏ hết phản hồi. Cú lún khi
+     bấm là cách duy nhất nút cho biết nó đã nhận — giữ lại, chỉ làm nhỏ và nhanh hơn.
+     Bỏ cú nhấc lên khi hover và bỏ nghiêng thẻ, vì hai cái đó thuần trang trí. */
   .ln-press:hover,
-  .ln-press:active,
-  .ln-dot:hover,
   .ln-card-tilt,
   .group:hover .ln-card-tilt {
     transform: none !important;
+  }
+  .ln-press {
+    transition: transform 60ms linear !important;
+  }
+  .ln-press:active {
+    transform: scale(0.985) !important;
+  }
+  .ln-card-tilt,
+  .ln-card-tilt::after,
+  .group:hover .ln-card-tilt::after {
+    transition: none !important;
+  }
+  /* Vẫn cho đổi bản vẽ khi trỏ vào — đó là đổi trạng thái, không phải chuyển động.
+     Chỉ bỏ phần mờ dần. */
+  .ln-cta-peak,
+  .ln-cta-figure:hover .ln-cta-peak,
+  .ln-cta-figure:hover .ln-cta-rest {
     transition: none !important;
   }
 }

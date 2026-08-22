@@ -18,13 +18,15 @@ import mascotHover from '../../assets/landing/mascot-robot-hover.png';
 
 /**
  * Bong bóng trong bản vẽ hover của Figma nằm ở (6.67, 5) trong khung 180, cỡ 96.67 × 33.67,
- * chữ 15px, đệm 12/8, bo 8. Nó nằm BÊN TRONG lớp phóng, nên mọi số ở đây chia 1.5 — lúc
- * hover lớp phóng nhân lại 1.5 là ra đúng số của Figma.
+ * bo 8. Chiều cao chữ đo được 10.67px, chia hệ số 0.84 (cao chữ hoa cộng phần dấu tiếng Việt
+ * tụt xuống dưới) ra cỡ chữ khoảng 12px — không phải 15px như phép chia hệ số 0.72 lúc đầu.
+ * Nó nằm BÊN TRONG lớp phóng, nên mọi số ở đây chia 1.5: chữ 8px, đệm 7.25px.
  *
  * Phải nằm trong lớp phóng chứ không thể để ngoài: bản vẽ hover đã xoá bong bóng đi, chỗ
  * đó là một lỗ khoét vào vòm đầu. Bong bóng phải dính chặt vào lỗ để che nó suốt cú phóng.
  */
-const BUBBLE = 'absolute left-[4.44px] top-[3.33px] w-max rounded-[5.33px] px-[8px] py-[5.33px] text-[10px] leading-none';
+const BUBBLE =
+  'absolute left-[4.44px] top-[3.33px] w-max rounded-[5.33px] px-[7.25px] py-[7.25px] text-[8px] leading-none';
 
 export function Mascot() {
   return (
@@ -33,11 +35,12 @@ export function Mascot() {
         `right-full` neo vào mép cột nội dung, `mr-[60px]` là đúng 60px của Figma.
         `top-[-48px]` đặt đỉnh robot cao hơn đáy mục 2 đúng 48px, nên đáy nó thò 8px vào mục 3.
 
-        Ẩn dưới 1920px: máng lề = (bề rộng cửa sổ − 1440) / 2, cần 240px để chứa con robot
-        120px kèm 60px hở và cú phóng lên 180px. Lỗi cũ là để nó hiện từ 1280px, ở đó nó
-        chồm 78.5px vào trong và dán lên bảng xanh.
+        Ẩn dưới 1800px. Ngưỡng suy ra từ hình học: mép trái robot = mép cột − 180, nên nó
+        chỉ cần máng lề ≥ 180px, tức bề rộng cửa sổ ≥ 1800. Cú phóng thì LUÔN vừa chạm mép
+        cột dù khổ nào, vì gốc phóng ở góc dưới-trái: 180 nở thành 180 + gốc đứng yên.
+        Lỗi cũ là để nó hiện từ 1280px, ở đó nó chồm 78.5px vào trong và dán lên bảng xanh.
       */}
-      <div className="ln-mascot-hit pointer-events-auto absolute right-full top-[-48px] mr-[60px] hidden w-[120px] select-none min-[1920px]:block">
+      <div className="ln-mascot-hit pointer-events-auto absolute right-full top-[-48px] mr-[60px] hidden w-[120px] select-none min-[1800px]:block">
         {/* Ba lớp transform riêng, gộp lại thì chúng ghi đè nhau: lớp ngoài phóng khi hover,
             lớp giữa dểnh theo nhịp thở, trong cùng là hai bản vẽ đổi cho nhau. */}
         <div className="ln-mascot-scale">
