@@ -69,6 +69,16 @@ export default function CourseSection({
 
   const hetHang = daDung >= courses.length;
   const coMuiTen = showNext && courses.length > 4;
+  /**
+   * Mũi tên nào không còn việc thì KHÔNG DỰNG, chứ không dựng rồi làm mờ.
+   *
+   * Lúc mới vào hàng đang ở đầu nên chưa có gì để lùi — một mũi tên trái mờ tịt ở đó chỉ
+   * làm người xem thử bấm rồi thấy không có gì xảy ra. Bấm sang phải một lần là nó hiện.
+   * Mũi tên phải theo cùng luật: tới cuối hàng và hết thẻ để dựng thì nó biến đi. Để một
+   * bên ẩn còn một bên mờ thì hai nút cạnh nhau nói hai thứ tiếng.
+   */
+  const coTrai = coMuiTen && !dauRay;
+  const coPhai = coMuiTen && !(cuoiRay && hetHang);
 
   /**
    * Đo lại hai đầu hàng, và dựng thêm thẻ khi đã trượt tới gần cuối.
@@ -121,7 +131,7 @@ export default function CourseSection({
   };
 
   const nutChung =
-    'ln-focus-flat absolute top-[128px] z-10 hidden items-center justify-center rounded-full bg-button-secondary p-xl shadow-xs-ring-primary disabled:pointer-events-none disabled:opacity-35 xl:flex';
+    'ln-focus-flat absolute top-[128px] z-10 hidden items-center justify-center rounded-full bg-button-secondary p-xl shadow-xs-ring-primary xl:flex';
 
   return (
     <section className="flex w-full flex-col gap-xl">
@@ -155,59 +165,60 @@ export default function CourseSection({
           ) : null}
         </ul>
 
-        {coMuiTen ? (
-          <>
-            <button
-              type="button"
-              onClick={() => day(-1)}
-              disabled={dauRay}
-              aria-label={`Xem các thẻ trước trong ${title}`}
-              className={cn(nutChung, 'left-0 -translate-x-1/2')}
-            >
-              <ArrowLeft className="h-6 w-6 text-black" aria-hidden="true" />
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_0_0_1px_rgba(10,13,18,0.18),inset_0_-2px_0_0_rgba(10,13,18,0.05)]"
-              />
-            </button>
-            <button
-              type="button"
-              onClick={() => day(1)}
-              disabled={cuoiRay && hetHang}
-              aria-label={`Xem các thẻ sau trong ${title}`}
-              className={cn(nutChung, 'right-0 translate-x-1/2')}
-            >
-              <ArrowRight className="h-6 w-6 text-black" aria-hidden="true" />
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_0_0_1px_rgba(10,13,18,0.18),inset_0_-2px_0_0_rgba(10,13,18,0.05)]"
-              />
-            </button>
-          </>
+        {coTrai ? (
+          <button
+            type="button"
+            onClick={() => day(-1)}
+            aria-label={`Xem các thẻ trước trong ${title}`}
+            className={cn(nutChung, 'left-0 -translate-x-1/2')}
+          >
+            <ArrowLeft className="h-6 w-6 text-black" aria-hidden="true" />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_0_0_1px_rgba(10,13,18,0.18),inset_0_-2px_0_0_rgba(10,13,18,0.05)]"
+            />
+          </button>
+        ) : null}
+
+        {coPhai ? (
+          <button
+            type="button"
+            onClick={() => day(1)}
+            aria-label={`Xem các thẻ sau trong ${title}`}
+            className={cn(nutChung, 'right-0 translate-x-1/2')}
+          >
+            <ArrowRight className="h-6 w-6 text-black" aria-hidden="true" />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_0_0_1px_rgba(10,13,18,0.18),inset_0_-2px_0_0_rgba(10,13,18,0.05)]"
+            />
+          </button>
         ) : null}
 
         {/* Hai nút cho khung hẹp: mũi tên tuyệt đối ở trên chỉ hiện từ xl, mà quẹt tay
             không phải đường duy nhất được — luôn phải có nút thấy được. */}
-        {coMuiTen ? (
+        {coTrai || coPhai ? (
           <div className="mt-[-32px] flex items-center justify-end gap-md self-end xl:hidden">
-            <button
-              type="button"
-              onClick={() => day(-1)}
-              disabled={dauRay}
-              aria-label={`Xem các thẻ trước trong ${title}`}
-              className="ln-focus-flat flex h-11 w-11 items-center justify-center rounded-full bg-primary text-secondary shadow-xs-ring-primary disabled:pointer-events-none disabled:opacity-35"
-            >
-              <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              onClick={() => day(1)}
-              disabled={cuoiRay && hetHang}
-              aria-label={`Xem các thẻ sau trong ${title}`}
-              className="ln-focus-flat flex h-11 w-11 items-center justify-center rounded-full bg-primary text-secondary shadow-xs-ring-primary disabled:pointer-events-none disabled:opacity-35"
-            >
-              <ArrowRight className="h-5 w-5" aria-hidden="true" />
-            </button>
+            {coTrai ? (
+              <button
+                type="button"
+                onClick={() => day(-1)}
+                aria-label={`Xem các thẻ trước trong ${title}`}
+                className="ln-focus-flat flex h-11 w-11 items-center justify-center rounded-full bg-primary text-secondary shadow-xs-ring-primary"
+              >
+                <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+              </button>
+            ) : null}
+            {coPhai ? (
+              <button
+                type="button"
+                onClick={() => day(1)}
+                aria-label={`Xem các thẻ sau trong ${title}`}
+                className="ln-focus-flat flex h-11 w-11 items-center justify-center rounded-full bg-primary text-secondary shadow-xs-ring-primary"
+              >
+                <ArrowRight className="h-5 w-5" aria-hidden="true" />
+              </button>
+            ) : null}
           </div>
         ) : null}
       </div>
