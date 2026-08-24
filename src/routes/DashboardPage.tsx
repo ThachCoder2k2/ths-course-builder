@@ -31,8 +31,11 @@ export default function DashboardPage() {
    * "Khoá học nổi bật" lấy theo điểm đánh giá nên không đoán trước được nó rơi vào khoá
    * nào. Các mục sau lấy từ phần CÒN LẠI, nên không bao giờ có khoá xuất hiện ở hai mục
    * cạnh nhau — trước đây "Deep Learning nâng cao" hiện ở cả hàng đầu và khối xanh.
+   *
+   * Lấy 8 chứ không phải 4: mũi tên bên phải hàng thẻ lật trang bốn thẻ, mà chỉ đưa cho nó
+   * đúng bốn khoá thì không có trang thứ hai để lật. Hàng vẫn chỉ hiện bốn thẻ một lúc.
    */
-  const noiBat = getFeaturedCourses(4);
+  const noiBat = getFeaturedCourses(8);
   const conLai = courses.filter((c) => !noiBat.some((n) => n.id === c.id));
   const lay = (batDau: number, n = 4) =>
     Array.from({ length: n }, (_, i) => conLai[(batDau + i) % conLai.length]).filter(Boolean);
@@ -65,7 +68,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-7xl px-4 pb-9xl pt-7xl lg:px-4xl">
-          <CourseSection title="Khoá học đang được học nhiều" courses={lay(8)} showNext />
+          <CourseSection title="Khoá học đang được học nhiều" courses={lay(0, 8)} showNext />
 
           <TopicPillGrid />
         </div>
