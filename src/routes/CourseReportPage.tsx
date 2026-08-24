@@ -113,6 +113,30 @@ export default function CourseReportPage() {
   }
 
   const chuoi = bc.chuoi;
+
+  /**
+   * Trục của radar: theo CHƯƠNG nếu khoá có từ ba chương, còn không thì theo BÀI.
+   *
+   * Radar cần tối thiểu ba trục mới thành hình. Thư viện có 13 trên 14 khoá chỉ chia một
+   * hoặc hai chương, nên thẻ "Chân dung năng lực" trước đây trống trơn ở gần như mọi khoá
+   * — một thẻ có tiêu đề mà bên trong không có gì.
+   *
+   * Bài thì khoá nào cũng có từ bốn bài trở lên, nên lấy bài làm trục là luôn vẽ được.
+   * Nhiều bài quá thì chỉ lấy tám bài NẶNG nhất: radar mười hai trục thì các đỉnh sát nhau,
+   * đọc không ra hình gì.
+   */
+  const theoChuong = bc.radar.length >= 3;
+  const trucRadar = theoChuong
+    ? bc.radar.map((r) => ({ label: r.truc, nam: r.nam, tienDo: r.tienDo }))
+    : [...bc.nut]
+        .sort((a, b) => b.phan - a.phan)
+        .slice(0, 8)
+        .map((n) => ({
+          label: n.label,
+          nam: n.mastery,
+          // Bài đã có mức nắm là bài đã đi qua; bài chưa chạm tới thì mức nắm bằng 0.
+          tienDo: n.mastery > 0 ? 1 : 0,
+        }));
   /**
    * Báo cáo mở được BẤT CỨ LÚC NÀO, không đợi học hết khoá. Cờ này chỉ để đổi lời chào và
    * để bắn pháo bông — nội dung báo cáo thì giống nhau, chỉ khác con số.
@@ -284,13 +308,17 @@ export default function CourseReportPage() {
         <div className="grid w-full grid-cols-1 gap-3xl xl:grid-cols-2">
           <Reveal className="flex">
           <ReportCard
-            title="Chân dung năng lực theo chương"
-            subtitle="Viền hồng là phần nội dung đã đi qua, hình xanh là mức bạn nắm được"
+            title={theoChuong ? 'Chân dung năng lực theo chương' : 'Chân dung năng lực theo bài'}
+            subtitle={
+              theoChuong
+                ? 'Viền hồng là phần nội dung đã đi qua, hình xanh là mức bạn nắm được'
+                : 'Khoá này chưa chia nhiều chương nên mỗi trục là một bài. Viền hồng là phần đã đi qua, hình xanh là mức bạn nắm được'
+            }
           >
             {/* Hai lớp như thiết kế, cả hai đều là số thật: lớp ngoài là tiến độ của
                 chương, lớp trong là mức nắm. Tên chương ghi thẳng lên trục kèm giá trị,
                 nên không cần bảng chú giải nào ở dưới. */}
-            <CompetencyRadar truc={bc.radar.map((r) => ({ label: r.truc, nam: r.nam, tienDo: r.tienDo }))} />
+            <CompetencyRadar truc={trucRadar} />
           </ReportCard>
           </Reveal>
 

@@ -13,10 +13,29 @@ import { courseExp, courseMinutes, getCourses } from '../../mock';
  * mọi ô. Ở đây thay bằng chín khoá thật khác nhau, và bỏ hẳn phần giá — trang này không
  * bán khoá theo đô Úc, để con số đó lại chỉ gây hiểu sai.
  */
+/**
+ * `den` là đích của tiêu đề cột.
+ *
+ * Tiêu đề cột trước đây là `<span>` kèm mũi tên — nhìn đúng như một đường dẫn nhưng bấm vào
+ * không đi đâu. Giờ mỗi cột mở trang tìm kiếm đã lọc sẵn. Cột "Kỹ năng đi làm" gộp hai chủ
+ * đề nên truyền cả hai, cách nhau bằng dấu phẩy — trang tìm nhận được nhiều chủ đề một lúc.
+ */
 const COLUMNS = [
-  { label: 'Trí tuệ nhân tạo', slugs: ['ai-co-ban-den-thuc-tien', 'machine-learning-thuc-chien', 'prompt-engineering-cho-nguoi-moi'] },
-  { label: 'Dữ liệu và lập trình', slugs: ['python-cho-khoa-hoc-du-lieu', 'phan-tich-du-lieu-voi-pandas', 'computer-vision-ung-dung'] },
-  { label: 'Kỹ năng đi làm', slugs: ['tieng-anh-giao-tiep-co-ban', 'ky-nang-thuyet-trinh-hieu-qua', 'co-vua-tuong-tac'] },
+  {
+    label: 'Trí tuệ nhân tạo',
+    den: '/tim-kiem?chu-de=tri-tue-nhan-tao',
+    slugs: ['ai-co-ban-den-thuc-tien', 'machine-learning-thuc-chien', 'prompt-engineering-cho-nguoi-moi'],
+  },
+  {
+    label: 'Dữ liệu và lập trình',
+    den: '/tim-kiem?chu-de=khoa-hoc-du-lieu',
+    slugs: ['python-cho-khoa-hoc-du-lieu', 'phan-tich-du-lieu-voi-pandas', 'computer-vision-ung-dung'],
+  },
+  {
+    label: 'Kỹ năng đi làm',
+    den: '/tim-kiem?chu-de=tieng-anh-giao-tiep,ky-nang-thuyet-trinh',
+    slugs: ['tieng-anh-giao-tiep-co-ban', 'ky-nang-thuyet-trinh-hieu-qua', 'co-vua-tuong-tac'],
+  },
 ];
 
 export default function ListingColumns({
@@ -27,6 +46,7 @@ export default function ListingColumns({
   const all = getCourses();
   const columns = COLUMNS.map((c) => ({
     label: c.label,
+    den: c.den,
     items: c.slugs.map((s) => all.find((x) => x.slug === s)).filter((x): x is NonNullable<typeof x> => !!x),
   })).filter((c) => c.items.length > 0);
 
@@ -40,10 +60,13 @@ export default function ListingColumns({
         {columns.map((column, ci) => (
           <Reveal key={column.label} order={ci} className="flex">
             <div className="flex w-full min-w-0 flex-col items-start gap-md rounded-3xl bg-utility-brand-50 p-xl">
-              <span className="flex items-center justify-center gap-sm text-md font-semibold text-brand-secondary">
+              <Link
+                to={column.den}
+                className="ln-press ln-focus-flat flex min-h-11 items-center gap-sm rounded-sm text-md font-semibold text-brand-secondary"
+              >
                 {column.label}
                 <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />
-              </span>
+              </Link>
 
               {column.items.map((course, ri) => (
                 <Link
