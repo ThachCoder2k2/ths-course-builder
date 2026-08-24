@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
 
 /**
@@ -24,11 +24,23 @@ import { useLocation, useNavigationType } from 'react-router-dom';
 const daLuu = new Map<string, number>();
 
 export function ScrollToTop() {
-  const { key } = useLocation();
+  const { key, pathname } = useLocation();
   const kieu = useNavigationType();
+  const duongCu = useRef<string | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    /**
+     * Chỉ đổi tham số truy vấn thì KHÔNG nhảy cuộn.
+     *
+     * Trang tìm kiếm đổi bộ lọc bằng cách đẩy một mục lịch sử mới, nên chỗ này từng nhảy
+     * về đầu mỗi lần tick một ô — cùng với việc trang bị dựng lại, nó ra thành cú nháy.
+     * Trang nào cần về đầu khi đổi bộ lọc thì tự cuộn, có kiểm soát hơn (xem SearchPage).
+     */
+    const cungDuong = duongCu.current === pathname;
+    duongCu.current = pathname;
+    if (cungDuong && kieu !== 'POP') return;
 
     if (kieu === 'POP') {
       window.scrollTo({ top: daLuu.get(key) ?? 0, behavior: 'auto' });
@@ -40,7 +52,7 @@ export function ScrollToTop() {
     return () => {
       daLuu.set(key, window.scrollY);
     };
-  }, [key, kieu]);
+  }, [key, pathname, kieu]);
 
   return null;
 }

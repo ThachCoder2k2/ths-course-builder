@@ -11,6 +11,8 @@ import { baoCaoKhoa, type NutSoDo } from '../behavior/completion';
 import { scope } from '../behavior/overview';
 import { getBehaviorData } from '../behavior/seed';
 import { COURSES, NOW, SPAN_DAYS } from '../behavior/catalog';
+import { baoCaoTuKhoaMock, luoiNhietMock } from '../behavior/baoCaoMock';
+import { getCourseBySlug } from '../mock';
 import { dropHint, rhythmMatrix } from '../behavior/rhythm';
 import { minutesLabel } from '../behavior/format';
 import { Reveal } from '../components/ui/Reveal';
@@ -43,7 +45,20 @@ export default function CourseReportPage() {
   const khoa = COURSES.find((c) => c.slug === slug);
   const sts = useMemo(() => getBehaviorData('l1').statements, []);
   const tatCa = useMemo(() => scope(sts, { fromDay: 0, toDay: SPAN_DAYS + 1, courseId: null }), [sts]);
-  const bc = useMemo(() => (khoa ? baoCaoKhoa(tatCa, khoa.id) : null), [tatCa, khoa]);
+
+  /**
+   * Báo cáo mở được cho MỌI khoá của thư viện.
+   *
+   * Tầng sự kiện chỉ phủ 18 khoá của `behavior/catalog`, mà thư viện site có 19 khoá khác
+   * và hai bộ chỉ trùng nhau một slug. Nên khoá nào không có sự kiện thì dựng báo cáo từ
+   * chính bài học của nó trong thư viện — xem `behavior/baoCaoMock.ts`.
+   */
+  const bc = useMemo(() => {
+    const thuc = khoa ? baoCaoKhoa(tatCa, khoa.id) : null;
+    if (thuc) return thuc;
+    const trongThuVien = slug ? getCourseBySlug(slug) : undefined;
+    return trongThuVien ? baoCaoTuKhoaMock(trongThuVien) : null;
+  }, [tatCa, khoa, slug]);
 
   // Bài đang chọn trên sơ đồ. Mặc định chọn bài YẾU NHẤT: mở báo cáo ra là thấy ngay chỗ
   // cần xem lại, chứ không phải bài đầu tiên vốn thường đã vững.
@@ -66,7 +81,8 @@ export default function CourseReportPage() {
    * thì nó ra chế độ tuần × thứ: 12 cột, 7 hàng, đúng hình dạng của thiết kế.
    */
   const nhiet = useMemo(() => {
-    if (!khoa) return null;
+    // Khoá không có sự kiện thì lưới nhiệt cũng dựng ra, để thẻ nhịp độ không trống trơn.
+    if (!khoa) return slug ? { luoi: luoiNhietMock(slug), boDo: null } : null;
     const TUAN = 12;
     const tu = new Date(NOW.getTime() - TUAN * 7 * 86400000);
     const tuNgay = Math.max(0, SPAN_DAYS - TUAN * 7);
@@ -81,7 +97,7 @@ export default function CourseReportPage() {
   // chỉ tả bằng chữ. Phải khai báo SAU `nhiet` — trước thì dùng biến chưa có.
   const troLy = useMemo(() => (bc ? troLyBaoCao(bc, nhiet?.luoi ?? null) : null), [bc, nhiet]);
 
-  if (!khoa || !bc || !dangChon) {
+  if (!bc || !dangChon) {
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center gap-xl px-4 text-center">
         <h1 className="text-display-xs text-primary">Chưa có gì để báo cáo</h1>
@@ -141,7 +157,7 @@ export default function CourseReportPage() {
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </button>
-        <p className="min-w-0 truncate text-lg font-semibold text-primary">{khoa.title}</p>
+        <p className="min-w-0 truncate text-lg font-semibold text-primary">{bc.title}</p>
       </header>
 
       {/*

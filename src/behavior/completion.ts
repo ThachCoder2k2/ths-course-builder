@@ -83,8 +83,8 @@ export interface BaoCaoKhoa {
 }
 
 /** Khung vẽ sơ đồ, đơn vị của viewBox. */
-const KHUNG_RONG = 960;
-const KHUNG_CAO = 340;
+export const KHUNG_RONG = 960;
+export const KHUNG_CAO = 340;
 const R_MIN = 18;
 const R_MAX = 32;
 /** Nửa bề rộng nhãn bài, tính theo tên dài nhất trong catalog ở cỡ chữ 11px. */
@@ -93,7 +93,7 @@ const NHAN_LE = 55;
 const KHE = 6;
 
 /** Băm ổn định từ chuỗi ra 0..1 — để bố cục xê dịch một chút mà vẫn không đổi giữa hai lần vẽ. */
-function bam01(s: string): number {
+export function bam01(s: string): number {
   let h = 2166136261;
   for (let i = 0; i < s.length; i += 1) {
     h ^= s.charCodeAt(i);
@@ -121,7 +121,7 @@ export function daHocHetBai(sts: Statement[], courseId: string): boolean {
  * Xê dịch bị chặn theo khoảng trống còn lại quanh mỗi nút, nên không nút nào tràn khỏi
  * khung và không hai nút nào đè nhau — có test canh đúng hai việc đó.
  */
-function xepNut(
+export function xepNut(
   concepts: { id: string; label: string; chuong: string }[],
   mastery: Map<string, number>,
   phan: Map<string, number>,

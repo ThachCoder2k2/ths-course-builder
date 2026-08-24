@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
 import CourseCard from '../components/home/CourseCard';
 import BoLoc, { type TrangThaiLoc } from '../components/search/BoLoc';
 import Drawer from '../components/ui/Drawer';
@@ -136,12 +136,6 @@ export default function SearchPage() {
 
   const xoaHet = () => setSp(q ? new URLSearchParams({ q }) : new URLSearchParams());
 
-  const guiTim = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const o = new FormData(e.currentTarget).get('q');
-    dat({ q: typeof o === 'string' ? o.trim() : '' });
-  };
-
   // Đổi từ khoá, bộ lọc hay cách sắp xếp thì đưa mắt về đầu danh sách.
   const dauVet = `${q}|${sp.get('chu-de') ?? ''}|${sp.get('cap-do') ?? ''}|${sp.get('diem') ?? ''}|${sp.get('gio') ?? ''}|${sap}`;
   const dauTien = useRef(true);
@@ -183,30 +177,20 @@ export default function SearchPage() {
             giữa danh sách vẫn gõ được từ khoá mới và đổi được cách xếp.
           */}
           <div className="sticky top-20 z-20 -mx-4 flex flex-col gap-lg border-b border-secondary bg-primary/95 px-4 pb-lg pt-xl backdrop-blur lg:-mx-2 lg:px-2">
-            <form onSubmit={guiTim} role="search" className="flex items-center gap-md">
-              <label className="ln-search flex h-12 min-w-0 flex-1 items-center gap-md rounded-full border border-primary bg-primary px-xl focus-within:border-brand focus-within:ring-2 focus-within:ring-brand-500/40">
-                <Search className="ln-search-icon h-5 w-5 shrink-0 text-quaternary" aria-hidden="true" />
-                <input
-                  name="q"
-                  type="search"
-                  defaultValue={q}
-                  key={q}
-                  aria-label="Từ khoá tìm khoá học"
-                  placeholder="Tên khoá, kỹ năng, chủ đề…"
-                  className="w-full min-w-0 bg-transparent text-md text-primary outline-none placeholder:text-placeholder"
-                />
-              </label>
-              <button
-                type="submit"
-                className="ln-press ln-focus flex h-12 shrink-0 items-center rounded-full bg-brand-500 px-2xl text-md font-semibold text-white shadow-xs"
-              >
-                Tìm
-              </button>
+            {/*
+              KHÔNG có ô tìm riêng ở đây.
+
+              Thanh đầu trang đã có một ô tìm và nó luôn dính trên, nên đặt thêm một ô nữa
+              là hai ô cùng việc nằm cách nhau 40px — người dùng phải chọn xem gõ vào cái
+              nào. Ô ở thanh đầu trang giờ tự hiện từ khoá đang lọc, nên nó vừa là chỗ gõ
+              vừa là chỗ đọc lại mình đã tìm gì.
+            */}
+            <div className="flex flex-wrap items-center gap-md">
               {/* Khung hẹp không có cột lọc, nên mở bộ lọc trong một tấm trượt. */}
               <button
                 type="button"
                 onClick={() => setMoLoc(true)}
-                className="ln-press ln-focus flex h-12 shrink-0 items-center gap-sm rounded-full bg-primary px-xl text-md font-semibold text-secondary shadow-xs-ring-primary lg:hidden"
+                className="ln-press ln-focus flex min-h-11 shrink-0 items-center gap-sm rounded-pill bg-primary px-xl text-sm font-semibold text-secondary shadow-xs-ring-primary lg:hidden"
               >
                 <SlidersHorizontal className="h-5 w-5" aria-hidden="true" />
                 Lọc
@@ -216,9 +200,6 @@ export default function SearchPage() {
                   </span>
                 ) : null}
               </button>
-            </form>
-
-            <div className="flex flex-wrap items-center gap-md">
               <span className="text-sm text-tertiary">Sắp xếp</span>
               {SAP_NHAN.map((s) => (
                 <button

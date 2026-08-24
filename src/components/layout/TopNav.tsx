@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, Search } from 'lucide-react';
 import IconButton from '../ui/IconButton';
 import Logo from './Logo';
@@ -39,13 +39,30 @@ export default function TopNav({ onOpenMenu }: { onOpenMenu?: () => void }) {
   const user = getUser();
   const topics = getTopics();
   const navigate = useNavigate();
+  const { pathname, search } = useLocation();
 
-  /** Gửi từ khoá sang trang tìm kiếm. Gõ rỗng thì mở trang tìm kiếm không lọc gì. */
+  /**
+   * Ô tìm ở đây là ô tìm DUY NHẤT của cả site — trang tìm kiếm không dựng thêm ô nào nữa.
+   *
+   * Nên khi đang ở trang tìm kiếm, ô này phải hiện đúng từ khoá đang lọc: nó vừa là chỗ gõ
+   * vừa là chỗ đọc lại mình đã tìm gì. `key` đổi theo từ khoá để ô nhận lại giá trị mới khi
+   * từ khoá đổi từ nơi khác (ví dụ bấm "Xoá hết" ở cột lọc).
+   */
+  const dangTim = pathname === '/tim-kiem';
+  const tuKhoa = dangTim ? (new URLSearchParams(search).get('q') ?? '') : '';
+
+  /**
+   * Gửi từ khoá sang trang tìm kiếm.
+   *
+   * Đang ở trang tìm kiếm thì THAY tham số chứ không đẩy thêm mục lịch sử: gõ ba lần là ba
+   * mục lịch sử, bấm Back ba lần mới ra khỏi trang.
+   */
   const timKhoa = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const o = new FormData(e.currentTarget).get('q');
     const q = typeof o === 'string' ? o.trim() : '';
-    navigate(q ? '/tim-kiem?q=' + encodeURIComponent(q) : '/tim-kiem');
+    const den = q ? '/tim-kiem?q=' + encodeURIComponent(q) : '/tim-kiem';
+    navigate(den, { replace: dangTim });
   };
 
   return (
@@ -117,6 +134,8 @@ export default function TopNav({ onOpenMenu }: { onOpenMenu?: () => void }) {
           <input
             name="q"
             type="search"
+            key={tuKhoa}
+            defaultValue={tuKhoa}
             aria-label="Tìm khoá học"
             placeholder="Hôm nay bạn muốn tìm hiểu chủ đề gì?"
             className="w-full min-w-0 bg-transparent text-md text-primary outline-none placeholder:text-placeholder"

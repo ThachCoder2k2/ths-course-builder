@@ -33,11 +33,22 @@ export function RouteTransition({
    */
   chiMo?: boolean;
 }) {
-  const { key } = useLocation();
+  const { pathname } = useLocation();
   const kieu = useNavigationType();
 
+  /**
+   * Khoá theo ĐƯỜNG DẪN, không theo `key` của mục lịch sử.
+   *
+   * `key` đổi mỗi lần đẩy một mục lịch sử mới — kể cả khi chỉ đổi tham số truy vấn. Trên
+   * trang tìm kiếm, mỗi lần tick một ô lọc là `key` mới, là cả cây trang bị dựng lại và
+   * chạy lại animation vào: trang nháy một cái, và mọi trạng thái trong component (nhóm
+   * lọc đang gập, chỗ cuộn của hàng thẻ) mất sạch.
+   *
+   * Khoá theo `pathname` thì đổi bộ lọc chỉ là vẽ lại nội dung, còn đi sang trang khác vẫn
+   * có nhịp chuyển như cũ.
+   */
   return (
-    <div key={key} className={cn(chiMo ? 'ln-route-fade' : kieu === 'POP' ? 'ln-route-back' : 'ln-route-in')}>
+    <div key={pathname} className={cn(chiMo ? 'ln-route-fade' : kieu === 'POP' ? 'ln-route-back' : 'ln-route-in')}>
       {children}
     </div>
   );
