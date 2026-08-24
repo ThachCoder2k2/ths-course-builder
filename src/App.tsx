@@ -7,6 +7,7 @@ import TopicPage from './routes/TopicPage';
 import CourseDetailPage from './routes/CourseDetailPage';
 import LearnPage from './routes/LearnPage';
 import MyLearningPage from './routes/MyLearningPage';
+import SearchPage from './routes/SearchPage';
 import CourseReportPage from './routes/CourseReportPage';
 import NotFound from './routes/NotFound';
 
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/topics/:slug" element={<TopicPage />} />
           <Route path="/hoc-tap-cua-toi" element={<MyLearningPage />} />
+          <Route path="/tim-kiem" element={<SearchPage />} />
           <Route path="/courses/:slug" element={<CourseDetailPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>

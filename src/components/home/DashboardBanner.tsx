@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Pause, Play } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { useReducedMotion } from '../../lib/motion';
@@ -35,6 +36,8 @@ interface Slide {
   headingClass: string;
   cta: string;
   ctaClass: string;
+  /** Đích của nút CTA — mỗi slide dẫn tới đúng nhóm khoá nó đang nói về. */
+  den: string;
 }
 
 const SLIDES: Slide[] = [
@@ -46,6 +49,7 @@ const SLIDES: Slide[] = [
     headingClass: 'bg-[linear-gradient(45deg,#20447E,#175CD3)] bg-clip-text text-transparent',
     cta: 'Bắt đầu',
     ctaClass: 'shadow-xs-ring-brand text-brand-secondary',
+    den: '/tim-kiem',
   },
   {
     id: 'ai-thuc-hanh',
@@ -55,6 +59,7 @@ const SLIDES: Slide[] = [
     headingClass: 'text-orange-dark-900',
     cta: 'Khám phá ngay',
     ctaClass: 'shadow-xs-ring-primary text-button-secondary-fg',
+    den: '/tim-kiem?chu-de=tri-tue-nhan-tao',
   },
   {
     id: 'ky-nang-mem',
@@ -64,6 +69,7 @@ const SLIDES: Slide[] = [
     headingClass: 'text-secondary',
     cta: 'Khám phá ngay',
     ctaClass: 'shadow-xs-ring-primary text-button-secondary-fg',
+    den: '/tim-kiem?chu-de=ky-nang-thuyet-trinh',
   },
 ];
 
@@ -287,10 +293,12 @@ export default function DashboardBanner() {
                   <p className="w-full text-md text-secondary lg:text-xl">{slide.body}</p>
                 </div>
 
-                <button
-                  type="button"
+                {/* CTA là Link: trước đây là `<button>` không có onClick nào, bấm vào
+                    đứng yên. Mỗi slide dẫn tới đúng nhóm khoá nó đang quảng cáo. */}
+                <Link
+                  to={slide.den}
                   className={cn(
-                    'ln-press relative flex shrink-0 items-center justify-center gap-xs overflow-hidden rounded-md bg-button-secondary px-[14px] py-[10px] text-sm font-semibold',
+                    'ln-press ln-focus relative flex shrink-0 items-center justify-center gap-xs overflow-hidden rounded-md bg-button-secondary px-[14px] py-[10px] text-sm font-semibold',
                     slide.ctaClass,
                   )}
                 >
@@ -300,7 +308,7 @@ export default function DashboardBanner() {
                     aria-hidden="true"
                     className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_0_0_1px_rgba(10,13,18,0.18),inset_0_-2px_0_0_rgba(10,13,18,0.05)]"
                   />
-                </button>
+                </Link>
               </div>
             </div>
           </article>

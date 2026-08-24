@@ -67,14 +67,17 @@ export default function CourseHero({ course }: { course: Course }) {
               không dùng cái này chặn cái kia được. Khoá thật sự chưa có buổi học nào thì
               trang báo cáo đã có lời nhắn riêng.
 
-              Kiểu nút để nhạt hơn nút học để không tranh vai hành động chính.
+              Kiểu nút để nhạt hơn nút học để không tranh vai hành động chính, nhưng HỘP
+              phải bằng nhau: cùng `border-2`, cùng `py-xl`, cùng `text-lg`. Trước đây tôi
+              để viền 1px, `py-lg` và `text-md` nên nút này chỉ cao 50px cạnh nút 64px —
+              căn giữa vẫn đúng nhưng mắt đọc ra là lệch.
             */}
             <Link
               to={'/courses/' + course.slug + '/bao-cao'}
-              className="ln-press ln-focus flex shrink-0 items-center gap-md rounded-lg border border-primary bg-primary px-xl py-lg text-md font-semibold text-secondary shadow-xs transition hover:bg-secondary"
+              className="ln-press ln-focus flex shrink-0 items-center gap-md rounded-lg border-2 border-primary bg-primary px-[22px] py-xl text-lg font-semibold text-secondary shadow-xs transition hover:bg-secondary"
             >
-              <ChartNoAxesColumn className="h-5 w-5 shrink-0" aria-hidden="true" />
-              Xem báo cáo khoá
+              <ChartNoAxesColumn className="h-6 w-6 shrink-0" aria-hidden="true" />
+              <span className="flex items-center justify-center px-xxs">Xem báo cáo khoá</span>
             </Link>
             <p className="text-sm text-tertiary">
               <span className="font-semibold">

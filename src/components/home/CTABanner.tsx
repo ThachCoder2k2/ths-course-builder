@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import ctaIllustration from '../../assets/landing/cta-illustration.png';
 import ctaHover from '../../assets/landing/cta-illustration-hover.png';
@@ -119,8 +120,10 @@ export default function CTABanner() {
               </div>
             </div>
 
-            <button
-              type="button"
+            {/* Trước đây là `<button>` không có onClick — bấm vào đứng yên. "Xây dựng
+                chương trình" thì bước đầu là chọn khoá, nên đích là trang tìm kiếm. */}
+            <Link
+              to="/tim-kiem"
               className="ln-press ln-focus-flat relative flex shrink-0 items-center justify-center gap-sm overflow-hidden rounded-md bg-button-secondary px-xl py-[10px] text-md font-semibold text-button-secondary-fg shadow-xs-ring-primary"
             >
               <span className="flex items-center justify-center px-xxs">
@@ -131,7 +134,7 @@ export default function CTABanner() {
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_0_0_1px_rgba(10,13,18,0.18),inset_0_-2px_0_0_rgba(10,13,18,0.05)]"
               />
-            </button>
+            </Link>
           </div>
 
           {/*

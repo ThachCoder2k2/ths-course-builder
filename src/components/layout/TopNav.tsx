@@ -1,4 +1,4 @@
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Menu, Search } from 'lucide-react';
 import IconButton from '../ui/IconButton';
 import Logo from './Logo';
@@ -38,6 +38,15 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
 export default function TopNav({ onOpenMenu }: { onOpenMenu?: () => void }) {
   const user = getUser();
   const topics = getTopics();
+  const navigate = useNavigate();
+
+  /** Gửi từ khoá sang trang tìm kiếm. Gõ rỗng thì mở trang tìm kiếm không lọc gì. */
+  const timKhoa = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const o = new FormData(e.currentTarget).get('q');
+    const q = typeof o === 'string' ? o.trim() : '';
+    navigate(q ? '/tim-kiem?q=' + encodeURIComponent(q) : '/tim-kiem');
+  };
 
   return (
     <header className="sticky top-0 z-40 h-20 bg-white/90 backdrop-blur">
@@ -90,20 +99,36 @@ export default function TopNav({ onOpenMenu }: { onOpenMenu?: () => void }) {
           </nav>
         </div>
 
-        {/* focus-within là bắt buộc: thiết kế Figma không vẽ trạng thái focus, nhưng bỏ hẳn
-            thì Tab vào ô tìm kiếm là mất dấu con trỏ hoàn toàn. */}
-        <label className="ln-search mx-xl hidden h-11 min-w-0 flex-1 items-center gap-md rounded-full border border-primary bg-primary px-xl focus-within:border-brand focus-within:ring-2 focus-within:ring-brand-500/40 sm:flex lg:mx-4xl">
+        {/*
+          Ô tìm kiếm là FORM thật, gửi sang /tim-kiem.
+
+          Trước đây nó là một `<label>` bọc input, không có form và không có đích — gõ rồi
+          Enter thì không có gì xảy ra. Site có đầu vào mà không có đầu ra.
+
+          focus-within là bắt buộc: thiết kế Figma không vẽ trạng thái focus, nhưng bỏ hẳn
+          thì Tab vào ô tìm kiếm là mất dấu con trỏ hoàn toàn.
+        */}
+        <form
+          role="search"
+          onSubmit={timKhoa}
+          className="ln-search mx-xl hidden h-11 min-w-0 flex-1 items-center gap-md rounded-full border border-primary bg-primary px-xl focus-within:border-brand focus-within:ring-2 focus-within:ring-brand-500/40 sm:flex lg:mx-4xl"
+        >
           <Search className="ln-search-icon h-5 w-5 shrink-0 text-quaternary" aria-hidden="true" />
           <input
+            name="q"
             type="search"
             aria-label="Tìm khoá học"
             placeholder="Hôm nay bạn muốn tìm hiểu chủ đề gì?"
             className="w-full min-w-0 bg-transparent text-md text-primary outline-none placeholder:text-placeholder"
           />
-        </label>
+          <button type="submit" className="sr-only">
+            Tìm
+          </button>
+        </form>
 
+        {/* Khổ hẹp không có chỗ cho ô nhập, nên nút này mở thẳng trang tìm kiếm. */}
         <div className="flex flex-1 justify-end sm:hidden">
-          <IconButton aria-label="Tìm khoá học">
+          <IconButton aria-label="Tìm khoá học" onClick={() => navigate('/tim-kiem')}>
             <Search className="h-5 w-5" />
           </IconButton>
         </div>

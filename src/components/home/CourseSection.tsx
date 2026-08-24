@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import CourseCard from './CourseCard';
 import CardRail from '../ui/CardRail';
@@ -14,12 +15,13 @@ import type { Course } from '../../mock/types';
 export default function CourseSection({
   title,
   courses,
-  onNext,
+  den = '/tim-kiem',
   showNext = false,
 }: {
   title: string;
   courses: Course[];
-  onNext?: () => void;
+  /** Đích của mũi tên "Xem thêm khoá học". */
+  den?: string;
   showNext?: boolean;
 }) {
   return (
@@ -37,19 +39,26 @@ export default function CourseSection({
           ))}
         </CardRail>
 
+        {/*
+          Mũi tên này là LINK, không phải nút.
+
+          Trước đây nó là `<button onClick={onNext}>` mà không một chỗ gọi nào truyền
+          `onNext` xuống — nên nó hiện ra và bấm vào không có gì xảy ra. Nhãn của nó là
+          "Xem thêm khoá học", nên đích đúng là trang tìm kiếm; `den` cho phía gọi chỉ định
+          đúng chủ đề của dải thẻ đó.
+        */}
         {showNext ? (
-          <button
-            type="button"
-            onClick={onNext}
+          <Link
+            to={den}
             aria-label="Xem thêm khoá học"
-            className="ln-focus-flat absolute right-0 top-[128px] hidden translate-x-1/2 items-center justify-center rounded-full bg-button-secondary p-xl shadow-xs-ring-primary xl:flex"
+            className="ln-press ln-focus-flat absolute right-0 top-[128px] hidden translate-x-1/2 items-center justify-center rounded-full bg-button-secondary p-xl shadow-xs-ring-primary xl:flex"
           >
             <ArrowRight className="h-6 w-6 text-black" aria-hidden="true" />
             <span
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_0_0_1px_rgba(10,13,18,0.18),inset_0_-2px_0_0_rgba(10,13,18,0.05)]"
             />
-          </button>
+          </Link>
         ) : null}
       </div>
     </section>

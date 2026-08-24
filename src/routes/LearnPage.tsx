@@ -46,6 +46,14 @@ export default function LearnPage() {
   const [aiOpen, setAiOpen] = useState(false);
   // Chỉ trả tiêu điểm về con robot SAU lần mở đầu tiên; lúc mới vào trang thì không.
   const [daMoAi, setDaMoAi] = useState(false);
+  /**
+   * Phản hồi cho bài đang xem: 'thich' | 'khong' | 'baoloi' | null.
+   *
+   * Ba nút này trước đây bấm vào không có gì xảy ra — người dùng không biết đã gửi được
+   * hay chưa. Bản demo không có nơi lưu, nhưng vẫn phải TRẢ LỜI cú bấm: đổi trạng thái nút
+   * và hiện một dòng xác nhận. Đổi bài thì xoá, vì phản hồi gắn với từng bài.
+   */
+  const [phanHoi, setPhanHoi] = useState<'thich' | 'khong' | 'baoloi' | null>(null);
   // Giữ bảng trong DOM thêm 170ms để chạy animation đóng.
   const { hienThi: aiHien, dangDong: aiDangDong } = useMoDong(aiOpen, 170);
   const [tocOpen, setTocOpen] = useState(true);
@@ -54,6 +62,10 @@ export default function LearnPage() {
   useEffect(() => {
     if (currentLessonId) setLast(currentLessonId);
   }, [currentLessonId, setLast]);
+
+  useEffect(() => {
+    setPhanHoi(null);
+  }, [currentLessonId]);
 
   // Kho câu trả lời của Course AI cho bài đang mở. Tính trước lần trả về sớm bên dưới
   // vì hook không được gọi sau một câu return có điều kiện.
@@ -123,24 +135,51 @@ export default function LearnPage() {
               <button
                 type="button"
                 aria-label="Hữu ích"
-                className="flex items-center justify-center rounded-md p-2.5 text-quaternary hover:bg-secondary"
+                aria-pressed={phanHoi === 'thich'}
+                onClick={() => setPhanHoi((v) => (v === 'thich' ? null : 'thich'))}
+                className={cn(
+                  'ln-press ln-focus flex h-11 w-11 items-center justify-center rounded-md transition',
+                  phanHoi === 'thich' ? 'bg-success-50 text-success-700' : 'text-quaternary hover:bg-secondary',
+                )}
               >
                 <ThumbsUp className="h-5 w-5" aria-hidden="true" />
               </button>
               <button
                 type="button"
                 aria-label="Không hữu ích"
-                className="flex items-center justify-center rounded-md p-2.5 text-quaternary hover:bg-secondary"
+                aria-pressed={phanHoi === 'khong'}
+                onClick={() => setPhanHoi((v) => (v === 'khong' ? null : 'khong'))}
+                className={cn(
+                  'ln-press ln-focus flex h-11 w-11 items-center justify-center rounded-md transition',
+                  phanHoi === 'khong' ? 'bg-warning-50 text-warning-700' : 'text-quaternary hover:bg-secondary',
+                )}
               >
                 <ThumbsDown className="h-5 w-5" aria-hidden="true" />
               </button>
               <button
                 type="button"
-                aria-label="Báo cáo"
-                className="flex items-center justify-center rounded-md p-2.5 text-quaternary hover:bg-secondary"
+                aria-label="Báo lỗi nội dung bài học"
+                aria-pressed={phanHoi === 'baoloi'}
+                onClick={() => setPhanHoi((v) => (v === 'baoloi' ? null : 'baoloi'))}
+                className={cn(
+                  'ln-press ln-focus flex h-11 w-11 items-center justify-center rounded-md transition',
+                  phanHoi === 'baoloi' ? 'bg-error-50 text-error-700' : 'text-quaternary hover:bg-secondary',
+                )}
               >
                 <Flag className="h-5 w-5" aria-hidden="true" />
               </button>
+
+              {/* Trả lời cú bấm bằng một dòng xác nhận. `aria-live` để trình đọc màn hình
+                  nghe được — ba nút kia đều là nút biểu tượng, không có chữ nào đổi. */}
+              {phanHoi ? (
+                <p aria-live="polite" className="ln-tin-vao ml-md text-sm text-tertiary">
+                  {phanHoi === 'thich'
+                    ? 'Đã ghi nhận bài này hữu ích với bạn.'
+                    : phanHoi === 'khong'
+                      ? 'Đã ghi nhận bài này chưa giúp được bạn.'
+                      : 'Đã gửi báo lỗi cho người soạn bài.'}
+                </p>
+              ) : null}
 
               <Button variant="ghost" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
                 <ListVideo className="h-4 w-4" />

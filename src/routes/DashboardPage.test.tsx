@@ -78,10 +78,22 @@ describe('DashboardPage', () => {
     expect(screen.getByRole('button', { name: 'Cho băng chuyền chạy lại' })).toBeInTheDocument();
   });
 
-  it('renders the skill pills from node 179:7785', () => {
+  /**
+   * Chip kỹ năng là LINK, không phải nút. Trước đây chúng là `<button>` không có việc gì
+   * nên test cũ chỉ canh sự tồn tại; giờ canh cả ĐÍCH — đó mới là thứ dễ hỏng lại.
+   */
+  it('chip kỹ năng ở node 179:7785 là link và có đích thật', () => {
     renderDashboard();
-    expect(screen.getByRole('button', { name: 'Công nghệ và lập trình' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Tranh biện' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Công nghệ và lập trình' })).toHaveAttribute(
+      'href',
+      '/tim-kiem?chu-de=khoa-hoc-du-lieu',
+    );
+    expect(screen.getByRole('link', { name: 'Tranh biện' })).toHaveAttribute(
+      'href',
+      '/tim-kiem?chu-de=ky-nang-thuyet-trinh',
+    );
+    // Nhóm chưa có khoá nào trong thư viện thì mở cả thư viện, không gửi từ khoá rỗng kết quả.
+    expect(screen.getByRole('link', { name: 'Nhiếp ảnh' })).toHaveAttribute('href', '/tim-kiem');
   });
 
   it('links course cards to the course detail route', () => {

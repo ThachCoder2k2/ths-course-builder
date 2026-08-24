@@ -1,6 +1,7 @@
+import { Link } from 'react-router-dom';
 import { ArrowDown } from 'lucide-react';
 import CourseCard from '../home/CourseCard';
-import { getRelatedCourses } from '../../mock';
+import { getCourseById, getRelatedCourses, getTopics } from '../../mock';
 
 /**
  * Figma: `Section` (node 184:10744) — "Khoá học liên quan".
@@ -9,6 +10,9 @@ import { getRelatedCourses } from '../../mock';
  */
 export default function RelatedCourses({ courseId }: { courseId: string }) {
   const related = getRelatedCourses(courseId, 3);
+  // Chủ đề đầu tiên của khoá đang xem; khoá không gắn chủ đề nào thì mở cả thư viện.
+  const topic = getTopics().find((t) => getCourseById(courseId)?.topicIds.includes(t.id));
+  const den = topic ? `/tim-kiem?chu-de=${topic.slug}` : '/tim-kiem';
   if (related.length === 0) return null;
 
   return (
@@ -23,14 +27,16 @@ export default function RelatedCourses({ courseId }: { courseId: string }) {
         ))}
       </div>
 
+      {/* Nút này trước đây không có việc gì. Giờ nó mở trang tìm kiếm đã lọc sẵn theo chủ
+          đề của chính khoá đang xem — tức "thêm khoá như khoá này", đúng nghĩa cái nhãn. */}
       <div className="flex w-full justify-start">
-        <button
-          type="button"
-          className="flex items-center justify-center gap-sm rounded-full px-xl py-[10px] text-md font-semibold text-brand-900"
+        <Link
+          to={den}
+          className="ln-press ln-focus-flat flex items-center justify-center gap-sm rounded-full px-xl py-[10px] text-md font-semibold text-brand-900"
         >
           Xem thêm khoá học
           <ArrowDown className="h-5 w-5 shrink-0" aria-hidden="true" />
-        </button>
+        </Link>
       </div>
     </section>
   );
